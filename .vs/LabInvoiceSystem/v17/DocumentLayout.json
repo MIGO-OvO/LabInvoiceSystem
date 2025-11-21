@@ -1,0 +1,134 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|c:\\users\\akiya\\source\\repos\\labinvoicesystem\\labinvoicesystem\\views\\mainwindow.axaml||{6D5344A2-2FCD-49DE-A09D-6A14FD1B1224}",
+      "RelativeMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|solutionrelative:labinvoicesystem\\views\\mainwindow.axaml||{6D5344A2-2FCD-49DE-A09D-6A14FD1B1224}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|c:\\users\\akiya\\source\\repos\\labinvoicesystem\\labinvoicesystem\\viewmodels\\mainwindowviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|solutionrelative:labinvoicesystem\\viewmodels\\mainwindowviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|c:\\users\\akiya\\source\\repos\\labinvoicesystem\\labinvoicesystem\\styles\\customstyles.axaml||{6D5344A2-2FCD-49DE-A09D-6A14FD1B1224}",
+      "RelativeMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|solutionrelative:labinvoicesystem\\styles\\customstyles.axaml||{6D5344A2-2FCD-49DE-A09D-6A14FD1B1224}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|c:\\users\\akiya\\source\\repos\\labinvoicesystem\\labinvoicesystem\\viewmodels\\invoiceexportviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|solutionrelative:labinvoicesystem\\viewmodels\\invoiceexportviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|c:\\users\\akiya\\source\\repos\\labinvoicesystem\\labinvoicesystem\\converters\\datetimetodatetimeoffsetconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|solutionrelative:labinvoicesystem\\converters\\datetimetodatetimeoffsetconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|c:\\users\\akiya\\source\\repos\\labinvoicesystem\\labinvoicesystem\\services\\ocrservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|solutionrelative:labinvoicesystem\\services\\ocrservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|c:\\users\\akiya\\source\\repos\\labinvoicesystem\\labinvoicesystem\\services\\pdfservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{29020A49-D6E5-44D9-8707-0D8C125F6875}|LabInvoiceSystem\\LabInvoiceSystem.csproj|solutionrelative:labinvoicesystem\\services\\pdfservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CustomStyles.axaml",
+              "DocumentMoniker": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\Styles\\CustomStyles.axaml",
+              "RelativeDocumentMoniker": "LabInvoiceSystem\\Styles\\CustomStyles.axaml",
+              "ToolTip": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\Styles\\CustomStyles.axaml",
+              "RelativeToolTip": "LabInvoiceSystem\\Styles\\CustomStyles.axaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-21T12:46:01.852Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "InvoiceExportViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\ViewModels\\InvoiceExportViewModel.cs",
+              "RelativeDocumentMoniker": "LabInvoiceSystem\\ViewModels\\InvoiceExportViewModel.cs",
+              "ToolTip": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\ViewModels\\InvoiceExportViewModel.cs",
+              "RelativeToolTip": "LabInvoiceSystem\\ViewModels\\InvoiceExportViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-21T08:13:52.765Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "OcrService.cs",
+              "DocumentMoniker": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\Services\\OcrService.cs",
+              "RelativeDocumentMoniker": "LabInvoiceSystem\\Services\\OcrService.cs",
+              "ToolTip": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\Services\\OcrService.cs",
+              "RelativeToolTip": "LabInvoiceSystem\\Services\\OcrService.cs",
+              "ViewState": "AgIAAD8AAAAAAAAAAADwv1QAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-21T06:43:27.339Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "PdfService.cs",
+              "DocumentMoniker": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\Services\\PdfService.cs",
+              "RelativeDocumentMoniker": "LabInvoiceSystem\\Services\\PdfService.cs",
+              "ToolTip": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\Services\\PdfService.cs",
+              "RelativeToolTip": "LabInvoiceSystem\\Services\\PdfService.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAiwAYAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-20T15:38:17.603Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "DateTimeToDateTimeOffsetConverter.cs",
+              "DocumentMoniker": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\Converters\\DateTimeToDateTimeOffsetConverter.cs",
+              "RelativeDocumentMoniker": "LabInvoiceSystem\\Converters\\DateTimeToDateTimeOffsetConverter.cs",
+              "ToolTip": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\Converters\\DateTimeToDateTimeOffsetConverter.cs",
+              "RelativeToolTip": "LabInvoiceSystem\\Converters\\DateTimeToDateTimeOffsetConverter.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAgwBQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-20T15:35:36.169Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainWindow.axaml",
+              "DocumentMoniker": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\Views\\MainWindow.axaml",
+              "RelativeDocumentMoniker": "LabInvoiceSystem\\Views\\MainWindow.axaml",
+              "ToolTip": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\Views\\MainWindow.axaml",
+              "RelativeToolTip": "LabInvoiceSystem\\Views\\MainWindow.axaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-19T18:07:12.122Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindowViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\ViewModels\\MainWindowViewModel.cs",
+              "RelativeDocumentMoniker": "LabInvoiceSystem\\ViewModels\\MainWindowViewModel.cs",
+              "ToolTip": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\ViewModels\\MainWindowViewModel.cs",
+              "RelativeToolTip": "LabInvoiceSystem\\ViewModels\\MainWindowViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-19T18:07:09.069Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:LabInvoiceSystem.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="LabInvoiceSystem.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="LabInvoiceSystem"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Panel>
+        <!-- Background Gradient/Tint -->
+        <!-- Background Gradient/Tint -->
+        <Border IsHitTestVisible="False" Background="{DynamicResource AppBackgroundBrush}" />
+
+        <!-- Main Layout -->
+        <SplitView IsPaneOpen="{Binding IsPaneOpen}"
+                   DisplayMode="CompactInline"
+                   OpenPaneLength="260"
+                   CompactPaneLength="0"
+                   PaneBackground="{DynamicResource CardBackgroundBrush}"
+                   Background="Transparent">
+
+            <SplitView.Pane>
+                <Grid RowDefinitions="Auto,*,Auto" Margin="0,30,0,0">
+                    <!-- Logo Area -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="24,20,24,40">
+                        <Border Width="36" Height="36" CornerRadius="10">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                    <GradientStop Offset="0" Color="{DynamicResource Indigo500}"/>
+                                    <GradientStop Offset="1" Color="#c084fc"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <PathIcon Data="M13 10V3L4 14h7v7l9-11h-7z" 
+                                      Foreground="White" 
+                                      Width="20" Height="20"/>
+                        </Border>
+                        <TextBlock Text="发票助手" 
+                                   FontSize="20" 
+                                   FontWeight="Bold" 
+                                   VerticalAlignment="Center">
+                            <TextBlock.Foreground>
+                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                                    <GradientStop Offset="0" Color="{DynamicResource Indigo500}"/>
+                                    <GradientStop Offset="1" Color="#c084fc"/>
+                                </LinearGradientBrush>
+                            </TextBlock.Foreground>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Navigation -->
+                    <StackPanel Grid.Row="1" Spacing="4" Margin="12,0">
+                        <Button Classes="NavButton" 
+                                Command="{Binding NavigateCommand}" 
+                                CommandParameter="Import"
+                                Classes.Active="{Binding CurrentViewName, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Import}">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Data="{StaticResource IconImport}"/>
+                                <TextBlock Text="发票录入"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Classes="NavButton" 
+                                Command="{Binding NavigateCommand}" 
+                                CommandParameter="Export"
+                                Classes.Active="{Binding CurrentViewName, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Export}">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Data="{StaticResource IconExport}"/>
+                                <TextBlock Text="数据导出"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Classes="NavButton" 
+                                Command="{Binding NavigateCommand}" 
+                                CommandParameter="Statistics"
+                                Classes.Active="{Binding CurrentViewName, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Statistics}">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Data="{StaticResource IconStatistics}"/>
+                                <TextBlock Text="统计分析"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Bottom Actions -->
+                    <Border Grid.Row="2" 
+                            BorderBrush="{DynamicResource BorderBrush}" 
+                            BorderThickness="0,1,0,0" 
+                            Padding="24" 
+                            Margin="0,0,0,20">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="Version 2.2.0" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <TextBlock Text="Powered by Baidu OCR" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" Opacity="0.7"/>
+                            </StackPanel>
+                            
+                            <Button Grid.Column="1" 
+                                    Command="{Binding ToggleThemeCommand}"
+                                    Theme="{DynamicResource TransparentButton}"
+                                    Padding="8">
+                                <PathIcon Data="{StaticResource IconTheme}" 
+                                          Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </SplitView.Pane>
+
+            <SplitView.Content>
+                <Grid RowDefinitions="Auto,*">
+                    <!-- Top Bar (Hamburger) -->
+                    <Grid Grid.Row="0" Height="50" Background="Transparent" Margin="16,8" PointerPressed="TitleBar_OnPointerPressed">
+                        <Button Command="{Binding TriggerPaneCommand}"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Theme="{DynamicResource TransparentButton}"
+                                IsVisible="{Binding !IsPaneOpen}">
+                            <PathIcon Data="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" 
+                                      Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- View Content -->
+                    <TransitioningContentControl Grid.Row="1" 
+                                                 Content="{Binding CurrentView}"
+                                                 Padding="24,0,24,24">
+                        <TransitioningContentControl.PageTransition>
+                            <CrossFade Duration="0:0:0.3" />
+                        </TransitioningContentControl.PageTransition>
+                    </TransitioningContentControl>
+                </Grid>
+            </SplitView.Content>
+        </SplitView>
+    </Panel>
+</Window>

@@ -1,0 +1,140 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+             xmlns:vm="using:LabInvoiceSystem.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             x:Class="LabInvoiceSystem.Views.StatisticsView"
+             x:DataType="vm:StatisticsViewModel">
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Top Bar -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,24">
+            <StackPanel Spacing="4">
+                <TextBlock Text="统计分析" FontSize="24" FontWeight="Bold"/>
+                <TextBlock Text="财务数据概览" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+            </StackPanel>
+            
+            <Button Grid.Column="1" 
+                    Command="{Binding RefreshCommand}"
+                    Classes="Primary">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                    <TextBlock Text="刷新数据"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="24">
+                <!-- KPI Cards -->
+                <Grid ColumnDefinitions="*,24,*,24,*">
+                    <!-- Total Amount -->
+                    <Border Grid.Column="0" Classes="Card">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="累计报销金额" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding TotalAmount, StringFormat='{}{0:C}'}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                            </StackPanel>
+                            <Border Grid.Column="1" Width="48" Height="48" CornerRadius="12" Background="{DynamicResource Indigo400}" Opacity="0.1">
+                                <PathIcon Data="M7,15H9C9,16.08 10.37,17 12,17C13.63,17 15,16.08 15,15C15,13.9 13.96,13.5 11.76,12.97C9.64,12.44 7,11.78 7,9C7,7.21 8.47,5.69 10.5,5.18V3H13.5V5.18C15.53,5.69 17,7.21 17,9H15C15,7.92 13.63,7 12,7C10.37,7 9,7.92 9,9C9,10.1 10.04,10.5 12.24,11.03C14.36,11.56 17,12.22 17,15C17,16.79 15.53,18.31 13.5,18.82V21H10.5V18.82C8.47,18.31 7,16.79 7,15Z" 
+                                          Width="24" Height="24" Foreground="{DynamicResource Indigo600}"/>
+                            </Border>
+                            <PathIcon Grid.Column="1" Data="M7,15H9C9,16.08 10.37,17 12,17C13.63,17 15,16.08 15,15C15,13.9 13.96,13.5 11.76,12.97C9.64,12.44 7,11.78 7,9C7,7.21 8.47,5.69 10.5,5.18V3H13.5V5.18C15.53,5.69 17,7.21 17,9H15C15,7.92 13.63,7 12,7C10.37,7 9,7.92 9,9C9,10.1 10.04,10.5 12.24,11.03C14.36,11.56 17,12.22 17,15C17,16.79 15.53,18.31 13.5,18.82V21H10.5V18.82C8.47,18.31 7,16.79 7,15Z" 
+                                      Width="24" Height="24" Foreground="{DynamicResource Indigo600}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Invoice Count -->
+                    <Border Grid.Column="2" Classes="Card">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="累计发票数量" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding TotalCount}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource Emerald500}"/>
+                            </StackPanel>
+                            <Border Grid.Column="1" Width="48" Height="48" CornerRadius="12" Background="{DynamicResource Emerald400}" Opacity="0.1"/>
+                            <PathIcon Grid.Column="1" Data="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z" 
+                                      Width="24" Height="24" Foreground="{DynamicResource Emerald500}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Average Amount -->
+                    <Border Grid.Column="4" Classes="Card">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="平均单张金额" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding AverageAmount, StringFormat='{}{0:C}'}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource Red500}"/>
+                            </StackPanel>
+                            <Border Grid.Column="1" Width="48" Height="48" CornerRadius="12" Background="{DynamicResource Red400}" Opacity="0.1"/>
+                            <PathIcon Grid.Column="1" Data="M16,6L18.29,8.29L13.41,13.17L9.41,9.17L2,16.59L3.41,18L9.41,12L13.41,16L19.71,9.71L22,12V6H16Z" 
+                                      Width="24" Height="24" Foreground="{DynamicResource Red500}"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Charts -->
+                <Grid ColumnDefinitions="2*,24,*">
+                    <!-- Monthly Trend -->
+                    <Border Grid.Column="0" Classes="Card" Height="400">
+                        <Grid RowDefinitions="Auto,*">
+                            <TextBlock Text="月度报销趋势" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,24"/>
+                            <lvc:CartesianChart Grid.Row="1" 
+                                                Series="{Binding MonthlyTrendSeries}"
+                                                XAxes="{Binding XAxes}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Payment Method Distribution -->
+                    <Border Grid.Column="2" Classes="Card" Height="400">
+                        <Grid ColumnDefinitions="*,180" RowDefinitions="Auto,*" ColumnSpacing="16">
+                            <TextBlock Text="支付方式分布" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,24" Grid.ColumnSpan="2"/>
+                            <lvc:PieChart Grid.Row="1" Grid.Column="0"
+                                          Series="{Binding PaymentMethodSeries}"/>
+                            <ItemsControl Grid.Row="1" Grid.Column="1" ItemsSource="{Binding PaymentLegends}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,0,0,8" Padding="12" Background="{DynamicResource Slate50}" CornerRadius="8">
+                                            <TextBlock Text="{Binding}" FontSize="14"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- History Log -->
+                <Border Classes="Card" Margin="0,0,0,24">
+                    <StackPanel Spacing="16">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="操作日志" FontSize="18" FontWeight="SemiBold"/>
+                            <Button Grid.Column="1" 
+                                    Command="{Binding ClearHistoryCommand}"
+                                    Classes="Danger"
+                                    HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="{StaticResource IconDelete}"/>
+                                    <TextBlock Text="清空日志"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                        
+                        <DataGrid ItemsSource="{Binding HistoryLogs}"
+                                  Height="300"
+                                  IsReadOnly="True"
+                                  CanUserResizeColumns="True"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="{DynamicResource BorderBrush}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="时间" Binding="{Binding Timestamp, StringFormat='yyyy-MM-dd HH:mm:ss'}" Width="180"/>
+                                <DataGridTextColumn Header="操作" Binding="{Binding Action}" Width="150"/>
+                                <DataGridTextColumn Header="详情" Binding="{Binding Details}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
