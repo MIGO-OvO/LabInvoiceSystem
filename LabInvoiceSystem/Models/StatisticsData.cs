@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace LabInvoiceSystem.Models
@@ -6,9 +7,8 @@ namespace LabInvoiceSystem.Models
     {
         public decimal TotalAmount { get; set; }
         public int InvoiceCount { get; set; }
-        public decimal AverageAmount => InvoiceCount > 0 ? TotalAmount / InvoiceCount : 0;
         
-        public Dictionary<string, decimal> MonthlyExpenses { get; set; } = new();
-        public Dictionary<string, int> PaymentMethodStats { get; set; } = new();
+        public decimal Last30DaysAmount { get; set; }
+        public Dictionary<DateTime, decimal> DailyExpenses { get; set; } = new();
     }
 }

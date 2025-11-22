@@ -75,7 +75,7 @@
                                 Classes.Active="{Binding CurrentViewName, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Export}">
                             <StackPanel Orientation="Horizontal">
                                 <PathIcon Data="{StaticResource IconExport}"/>
-                                <TextBlock Text="数据导出"/>
+                                <TextBlock Text="发票导出"/>
                             </StackPanel>
                         </Button>
                         
@@ -85,7 +85,7 @@
                                 Classes.Active="{Binding CurrentViewName, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Statistics}">
                             <StackPanel Orientation="Horizontal">
                                 <PathIcon Data="{StaticResource IconStatistics}"/>
-                                <TextBlock Text="统计分析"/>
+                                <TextBlock Text="统计面板"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -98,7 +98,7 @@
                             Margin="0,0,0,20">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Spacing="2">
-                                <TextBlock Text="Version 2.2.0" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <TextBlock Text="Version 1.0.0" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 <TextBlock Text="Powered by Baidu OCR" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" Opacity="0.7"/>
                             </StackPanel>
                             
@@ -115,7 +115,7 @@
             </SplitView.Pane>
 
             <SplitView.Content>
-                <Grid RowDefinitions="Auto,*">
+                <Grid RowDefinitions="Auto,*" ClipToBounds="False">
                     <!-- Top Bar (Hamburger) -->
                     <Grid Grid.Row="0" Height="50" Background="Transparent" Margin="16,8" PointerPressed="TitleBar_OnPointerPressed">
                         <Button Command="{Binding TriggerPaneCommand}"
@@ -131,7 +131,8 @@
                     <!-- View Content -->
                     <TransitioningContentControl Grid.Row="1" 
                                                  Content="{Binding CurrentView}"
-                                                 Padding="24,0,24,24">
+                                                 Padding="24,0,24,24"
+                                                 ClipToBounds="False">
                         <TransitioningContentControl.PageTransition>
                             <CrossFade Duration="0:0:0.3" />
                         </TransitioningContentControl.PageTransition>

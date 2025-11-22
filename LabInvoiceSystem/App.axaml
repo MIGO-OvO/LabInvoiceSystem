@@ -18,6 +18,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://LabInvoiceSystem/Styles/Icons.axaml"/>
+                <ResourceInclude Source="avares://LabInvoiceSystem/Styles/ThemeColors.axaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

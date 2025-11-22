@@ -30,6 +30,9 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 [C:/Users/AKiya/source/repos/LabInvoiceSystem/LabInvoiceSystem/Styles/Icons.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[C:/Users/AKiya/source/repos/LabInvoiceSystem/LabInvoiceSystem/Styles/ThemeColors.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [C:/Users/AKiya/source/repos/LabInvoiceSystem/LabInvoiceSystem/Views/InvoiceExportView.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 

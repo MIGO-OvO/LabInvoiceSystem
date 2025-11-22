@@ -2,7 +2,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
              xmlns:vm="using:LabInvoiceSystem.ViewModels"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
              x:Class="LabInvoiceSystem.Views.StatisticsView"
@@ -37,10 +36,7 @@
                                 <TextBlock Text="累计报销金额" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 <TextBlock Text="{Binding TotalAmount, StringFormat='{}{0:C}'}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
                             </StackPanel>
-                            <Border Grid.Column="1" Width="48" Height="48" CornerRadius="12" Background="{DynamicResource Indigo400}" Opacity="0.1">
-                                <PathIcon Data="M7,15H9C9,16.08 10.37,17 12,17C13.63,17 15,16.08 15,15C15,13.9 13.96,13.5 11.76,12.97C9.64,12.44 7,11.78 7,9C7,7.21 8.47,5.69 10.5,5.18V3H13.5V5.18C15.53,5.69 17,7.21 17,9H15C15,7.92 13.63,7 12,7C10.37,7 9,7.92 9,9C9,10.1 10.04,10.5 12.24,11.03C14.36,11.56 17,12.22 17,15C17,16.79 15.53,18.31 13.5,18.82V21H10.5V18.82C8.47,18.31 7,16.79 7,15Z" 
-                                          Width="24" Height="24" Foreground="{DynamicResource Indigo600}"/>
-                            </Border>
+                            <Border Grid.Column="1" Width="48" Height="48" CornerRadius="12" Background="{DynamicResource Indigo400}" Opacity="0.1"></Border>
                             <PathIcon Grid.Column="1" Data="M7,15H9C9,16.08 10.37,17 12,17C13.63,17 15,16.08 15,15C15,13.9 13.96,13.5 11.76,12.97C9.64,12.44 7,11.78 7,9C7,7.21 8.47,5.69 10.5,5.18V3H13.5V5.18C15.53,5.69 17,7.21 17,9H15C15,7.92 13.63,7 12,7C10.37,7 9,7.92 9,9C9,10.1 10.04,10.5 12.24,11.03C14.36,11.56 17,12.22 17,15C17,16.79 15.53,18.31 13.5,18.82V21H10.5V18.82C8.47,18.31 7,16.79 7,15Z" 
                                       Width="24" Height="24" Foreground="{DynamicResource Indigo600}"/>
                         </Grid>
@@ -59,79 +55,64 @@
                         </Grid>
                     </Border>
 
-                    <!-- Average Amount -->
+                    <!-- Last 30 Days Amount -->
                     <Border Grid.Column="4" Classes="Card">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Spacing="8">
-                                <TextBlock Text="平均单张金额" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding AverageAmount, StringFormat='{}{0:C}'}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource Red500}"/>
+                                <TextBlock Text="近30天报账金额" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding Last30DaysAmount, StringFormat='{}{0:C}'}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource Red500}"/>
                             </StackPanel>
                             <Border Grid.Column="1" Width="48" Height="48" CornerRadius="12" Background="{DynamicResource Red400}" Opacity="0.1"/>
-                            <PathIcon Grid.Column="1" Data="M16,6L18.29,8.29L13.41,13.17L9.41,9.17L2,16.59L3.41,18L9.41,12L13.41,16L19.71,9.71L22,12V6H16Z" 
+                            <PathIcon Grid.Column="1" Data="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z" 
                                       Width="24" Height="24" Foreground="{DynamicResource Red500}"/>
                         </Grid>
                     </Border>
                 </Grid>
 
-                <!-- Charts -->
-                <Grid ColumnDefinitions="2*,24,*">
-                    <!-- Monthly Trend -->
-                    <Border Grid.Column="0" Classes="Card" Height="400">
-                        <Grid RowDefinitions="Auto,*">
-                            <TextBlock Text="月度报销趋势" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,24"/>
-                            <lvc:CartesianChart Grid.Row="1" 
-                                                Series="{Binding MonthlyTrendSeries}"
-                                                XAxes="{Binding XAxes}"/>
+                <!-- Heatmap -->
+                <Border Classes="Card">
+                    <StackPanel Spacing="16">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="报账热力图" FontSize="18" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="1" Text="过去一年的报账活动" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                         </Grid>
-                    </Border>
-
-                    <!-- Payment Method Distribution -->
-                    <Border Grid.Column="2" Classes="Card" Height="400">
-                        <Grid ColumnDefinitions="*,180" RowDefinitions="Auto,*" ColumnSpacing="16">
-                            <TextBlock Text="支付方式分布" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,24" Grid.ColumnSpan="2"/>
-                            <lvc:PieChart Grid.Row="1" Grid.Column="0"
-                                          Series="{Binding PaymentMethodSeries}"/>
-                            <ItemsControl Grid.Row="1" Grid.Column="1" ItemsSource="{Binding PaymentLegends}">
+                        
+                        <!-- Heatmap Grid -->
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding HeatmapData}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="7" Columns="53"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Margin="0,0,0,8" Padding="12" Background="{DynamicResource Slate50}" CornerRadius="8">
-                                            <TextBlock Text="{Binding}" FontSize="14"/>
+                                        <Border Width="14" Height="14" 
+                                                Margin="2"
+                                                CornerRadius="2"
+                                                Background="{Binding ColorHex}">
+                                            <ToolTip.Tip>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Date, StringFormat='yyyy-MM-dd'}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding Amount, StringFormat='金额: ¥{0:N2}'}"/>
+                                                </StackPanel>
+                                            </ToolTip.Tip>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </Grid>
-                    </Border>
-                </Grid>
-
-                <!-- History Log -->
-                <Border Classes="Card" Margin="0,0,0,24">
-                    <StackPanel Spacing="16">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="操作日志" FontSize="18" FontWeight="SemiBold"/>
-                            <Button Grid.Column="1" 
-                                    Command="{Binding ClearHistoryCommand}"
-                                    Classes="Danger"
-                                    HorizontalAlignment="Right">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <PathIcon Data="{StaticResource IconDelete}"/>
-                                    <TextBlock Text="清空日志"/>
-                                </StackPanel>
-                            </Button>
-                        </Grid>
+                        </ScrollViewer>
                         
-                        <DataGrid ItemsSource="{Binding HistoryLogs}"
-                                  Height="300"
-                                  IsReadOnly="True"
-                                  CanUserResizeColumns="True"
-                                  GridLinesVisibility="Horizontal"
-                                  HorizontalGridLinesBrush="{DynamicResource BorderBrush}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="时间" Binding="{Binding Timestamp, StringFormat='yyyy-MM-dd HH:mm:ss'}" Width="180"/>
-                                <DataGridTextColumn Header="操作" Binding="{Binding Action}" Width="150"/>
-                                <DataGridTextColumn Header="详情" Binding="{Binding Details}" Width="*"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <!-- Legend -->
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                            <TextBlock Text="少" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                            <Border Width="14" Height="14" CornerRadius="2" Background="#F1F5F9"/>
+                            <Border Width="14" Height="14" CornerRadius="2" Background="#C7D2FE"/>
+                            <Border Width="14" Height="14" CornerRadius="2" Background="#818CF8"/>
+                            <Border Width="14" Height="14" CornerRadius="2" Background="#4F46E5"/>
+                            <Border Width="14" Height="14" CornerRadius="2" Background="#3730A3"/>
+                            <TextBlock Text="多" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>

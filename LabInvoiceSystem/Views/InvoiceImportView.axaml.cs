@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using LabInvoiceSystem.ViewModels;
@@ -35,6 +36,26 @@ namespace LabInvoiceSystem.Views
             if (files != null && files.Count > 0 && DataContext is InvoiceImportViewModel viewModel)
             {
                 await viewModel.UploadFilesCommand.ExecuteAsync(files);
+            }
+        }
+
+        private async void OnDrop(object? sender, DragEventArgs e)
+        {
+            var files = e.Data.GetFiles();
+            if (files == null) return;
+
+            var validFiles = files
+                .OfType<IStorageFile>()
+                .Where(f =>
+                {
+                    var ext = System.IO.Path.GetExtension(f.Name).ToLower();
+                    return ext == ".pdf" || ext == ".jpg" || ext == ".jpeg" || ext == ".png";
+                })
+                .ToList();
+
+            if (validFiles.Count > 0 && DataContext is InvoiceImportViewModel viewModel)
+            {
+                await viewModel.UploadFilesCommand.ExecuteAsync(validFiles);
             }
         }
     }

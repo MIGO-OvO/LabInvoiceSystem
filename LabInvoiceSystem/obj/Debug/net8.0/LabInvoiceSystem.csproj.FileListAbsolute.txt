@@ -92,3 +92,4 @@ C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\obj\Debug\net8.0\L
 C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\obj\Debug\net8.0\ref\LabInvoiceSystem.dll
 C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\bin\Debug\net8.0\Avalonia.Controls.DataGrid.dll
 C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\bin\Debug\net8.0\MiniExcel.dll
+C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\obj\Debug\net8.0\LabInvoiceSystem.sourcelink.json

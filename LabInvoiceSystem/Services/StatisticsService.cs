@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using LabInvoiceSystem.Models;
@@ -19,34 +20,31 @@ namespace LabInvoiceSystem.Services
             stats.TotalAmount = archives.Sum(a => a.InvoiceInfo.Amount);
             stats.InvoiceCount = archives.Count;
 
-            // 计算月度支出
-            stats.MonthlyExpenses = GetMonthlyExpenses(archives);
+            // 计算每日支出
+            stats.DailyExpenses = GetDailyExpenses(archives);
 
-            // 计算支付方式统计
-            stats.PaymentMethodStats = GetPaymentMethodDistribution(archives);
+            // 计算近30天报账金额
+            stats.Last30DaysAmount = CalculateLast30DaysAmount(archives);
 
             return stats;
         }
 
-        public Dictionary<string, decimal> GetMonthlyExpenses(List<ArchiveItem> archives)
+        public Dictionary<DateTime, decimal> GetDailyExpenses(List<ArchiveItem> archives)
         {
             return archives
-                .GroupBy(a => a.YearMonth)
-                .OrderBy(g => g.Key)
+                .GroupBy(a => a.InvoiceInfo.InvoiceDate.Date)
                 .ToDictionary(
                     g => g.Key,
                     g => g.Sum(a => a.InvoiceInfo.Amount)
                 );
         }
 
-        public Dictionary<string, int> GetPaymentMethodDistribution(List<ArchiveItem> archives)
+        public decimal CalculateLast30DaysAmount(List<ArchiveItem> archives)
         {
+            var thirtyDaysAgo = DateTime.Now.Date.AddDays(-30);
             return archives
-                .GroupBy(a => a.InvoiceInfo.PaymentMethod)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Count()
-                );
+                .Where(a => a.InvoiceInfo.InvoiceDate.Date >= thirtyDaysAgo)
+                .Sum(a => a.InvoiceInfo.Amount);
         }
     }
 }

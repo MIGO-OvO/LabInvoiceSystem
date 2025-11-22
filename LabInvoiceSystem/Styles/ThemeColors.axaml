@@ -1,0 +1,92 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <!-- Color Palette (Slate / Indigo Theme) -->
+            <Color x:Key="Slate50">#f8fafc</Color>
+            <Color x:Key="Slate100">#f1f5f9</Color>
+            <Color x:Key="Slate200">#e2e8f0</Color>
+            <Color x:Key="Slate300">#cbd5e1</Color>
+            <Color x:Key="Slate400">#94a3b8</Color>
+            <Color x:Key="Slate500">#64748b</Color>
+            <Color x:Key="Slate600">#475569</Color>
+            <Color x:Key="Slate700">#334155</Color>
+            <Color x:Key="Slate800">#1e293b</Color>
+            <Color x:Key="Slate900">#0f172a</Color>
+
+            <Color x:Key="Indigo50">#eef2ff</Color>
+            <Color x:Key="Indigo400">#818cf8</Color>
+            <Color x:Key="Indigo500">#6366f1</Color>
+            <Color x:Key="Indigo600">#4f46e5</Color>
+            <Color x:Key="Indigo900">#312e81</Color>
+
+            <Color x:Key="Emerald400">#34d399</Color>
+            <Color x:Key="Emerald500">#10b981</Color>
+
+            <Color x:Key="Red400">#f87171</Color>
+            <Color x:Key="Red500">#ef4444</Color>
+
+            <!-- Brushes -->
+            <Color x:Key="AppBackgroundColor">#f8fafc</Color>
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="{DynamicResource AppBackgroundColor}" />
+            <SolidColorBrush x:Key="CardBackgroundBrush" Color="#ffffff" />
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="{DynamicResource Slate900}" />
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="{DynamicResource Slate500}" />
+            <SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource Slate200}" />
+            <SolidColorBrush x:Key="PrimaryBrush" Color="{DynamicResource Indigo500}" />
+            <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{DynamicResource Indigo600}" />
+            <SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource Emerald400}" />
+            <SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource Red400}" />
+            
+            <!-- Glass Effect -->
+            <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#B3FFFFFF" /> <!-- 70% White -->
+            <SolidColorBrush x:Key="GlassBorderBrush" Color="#80FFFFFF" /> <!-- 50% White -->
+            <SolidColorBrush x:Key="GridHeaderBackgroundBrush" Color="{DynamicResource Slate100}" />
+            <SolidColorBrush x:Key="NavHoverBackgroundBrush" Color="{DynamicResource Indigo50}" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Dark">
+            <!-- Color Palette (Slate / Indigo Theme) -->
+            <Color x:Key="Slate50">#f8fafc</Color>
+            <Color x:Key="Slate100">#f1f5f9</Color>
+            <Color x:Key="Slate200">#e2e8f0</Color>
+            <Color x:Key="Slate300">#cbd5e1</Color>
+            <Color x:Key="Slate400">#94a3b8</Color>
+            <Color x:Key="Slate500">#64748b</Color>
+            <Color x:Key="Slate600">#475569</Color>
+            <Color x:Key="Slate700">#334155</Color>
+            <Color x:Key="Slate800">#1e293b</Color>
+            <Color x:Key="Slate900">#0f172a</Color>
+
+            <Color x:Key="Indigo50">#eef2ff</Color>
+            <Color x:Key="Indigo400">#818cf8</Color>
+            <Color x:Key="Indigo500">#6366f1</Color>
+            <Color x:Key="Indigo600">#4f46e5</Color>
+            <Color x:Key="Indigo900">#312e81</Color>
+
+            <Color x:Key="Emerald400">#34d399</Color>
+            <Color x:Key="Emerald500">#10b981</Color>
+
+            <Color x:Key="Red400">#f87171</Color>
+            <Color x:Key="Red500">#ef4444</Color>
+
+            <!-- Brushes -->
+            <Color x:Key="AppBackgroundColor">#0f172a</Color>
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="{DynamicResource AppBackgroundColor}" />
+            <SolidColorBrush x:Key="CardBackgroundBrush" Color="{DynamicResource Slate800}" />
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="{DynamicResource Slate50}" />
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="{DynamicResource Slate400}" />
+            <SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource Slate700}" />
+            <SolidColorBrush x:Key="PrimaryBrush" Color="{DynamicResource Indigo400}" />
+            <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{DynamicResource Indigo500}" />
+            <SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource Emerald400}" />
+            <SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource Red400}" />
+            
+            <!-- Glass Effect -->
+            <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#B31E293B" /> <!-- 70% Slate800 -->
+            <SolidColorBrush x:Key="GlassBorderBrush" Color="#1AFFFFFF" /> <!-- 10% White -->
+            <SolidColorBrush x:Key="GridHeaderBackgroundBrush" Color="{DynamicResource Indigo900}" />
+            <SolidColorBrush x:Key="NavHoverBackgroundBrush" Color="{DynamicResource Indigo900}" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

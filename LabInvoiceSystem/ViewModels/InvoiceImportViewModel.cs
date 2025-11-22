@@ -38,7 +38,7 @@ namespace LabInvoiceSystem.ViewModels
         private string _statusMessage = "准备就绪";
 
         [ObservableProperty]
-        private DateTime? _uniformUploadDate;
+        private DateTimeOffset _uniformUploadDate = DateTimeOffset.Now;
 
         public InvoiceImportViewModel()
         {
@@ -372,25 +372,21 @@ namespace LabInvoiceSystem.ViewModels
         [RelayCommand]
         private void SetUniformDate()
         {
-            // Use current date if not set, or maybe show a dialog? 
-            // For now, let's use Today if UniformUploadDate is null, or just toggle a picker.
-            // The requirement was "Set Uniform Date", usually implies setting all to a specific date.
-            // Let's assume we set all to Today for now, or if we had a date picker bound to UniformUploadDate.
-            
-            // Actually, the View has a button "一键设日期". 
-            // Let's set all to the date of the first invoice, or Today.
-            var date = DateTime.Now;
-            if (UploadedInvoices.Any())
+            if (UploadedInvoices.Count == 0)
             {
-                date = UploadedInvoices.First().InvoiceDate;
+                StatusMessage = "没有可设置日期的发票";
+                return;
             }
+
+            // 使用选择器中的日期
+            var selectedDate = UniformUploadDate.DateTime;
 
             foreach (var invoice in UploadedInvoices)
             {
-                invoice.InvoiceDate = date;
+                invoice.InvoiceDate = selectedDate;
             }
 
-            StatusMessage = $"已统一日期为: {date:yyyy-MM-dd}";
+            StatusMessage = $"已将 {UploadedInvoices.Count} 个发票的日期统一设置为: {selectedDate:yyyy-MM-dd}";
         }
     }
 }

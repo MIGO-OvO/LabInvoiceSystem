@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,12 +7,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LabInvoiceSystem.Models;
 using LabInvoiceSystem.Services;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.SkiaSharpView.Painting;
-using SkiaSharp;
-using LiveChartsCore.Drawing;
-using LiveChartsCore.SkiaSharpView.Drawing;
 
 namespace LabInvoiceSystem.ViewModels
 {
@@ -19,25 +14,12 @@ namespace LabInvoiceSystem.ViewModels
     {
         private readonly FileManagerService _fileManager;
         private readonly StatisticsService _statisticsService;
-        private readonly LoggerService _logger;
 
         [ObservableProperty]
         private StatisticsData _statistics = new();
 
         [ObservableProperty]
-        private ISeries[] _monthlyTrendSeries = Array.Empty<ISeries>();
-
-        [ObservableProperty]
-        private ISeries[] _paymentMethodSeries = Array.Empty<ISeries>();
-        
-        [ObservableProperty]
-        private Axis[] _xAxes = Array.Empty<Axis>();
-
-        [ObservableProperty]
-        private ObservableCollection<string> _paymentLegends = new();
-
-        [ObservableProperty]
-        private ObservableCollection<LogEntry> _historyLogs = new();
+        private ObservableCollection<HeatmapDayData> _heatmapData = new();
 
         [ObservableProperty]
         private string _statusMessage = "准备就绪";
@@ -50,13 +32,12 @@ namespace LabInvoiceSystem.ViewModels
         private int _totalCount;
         
         [ObservableProperty]
-        private decimal _averageAmount;
+        private decimal _last30DaysAmount;
 
         public StatisticsViewModel()
         {
             _fileManager = new FileManagerService();
             _statisticsService = new StatisticsService();
-            _logger = new LoggerService();
         }
 
         public async Task OnNavigatedTo()
@@ -80,21 +61,10 @@ namespace LabInvoiceSystem.ViewModels
                 // Update KPI properties
                 TotalAmount = Statistics.TotalAmount;
                 TotalCount = Statistics.InvoiceCount;
-                AverageAmount = Statistics.AverageAmount;
+                Last30DaysAmount = Statistics.Last30DaysAmount;
 
-                // 生成月度支出图表
-                GenerateMonthlyChart();
-
-                // 生成支付方式饼图
-                GeneratePaymentPieChart();
-
-                // 加载日志
-                var logs = _logger.GetLogs();
-                HistoryLogs.Clear();
-                foreach (var log in logs.Take(50)) // 只显示最新 50 条
-                {
-                    HistoryLogs.Add(log);
-                }
+                // 生成热力图数据
+                GenerateHeatmapData();
 
                 StatusMessage = $"已加载 {archives.Count} 个发票的统计数据";
             }
@@ -106,75 +76,66 @@ namespace LabInvoiceSystem.ViewModels
             await Task.CompletedTask;
         }
 
-        private void GenerateMonthlyChart()
+        private void GenerateHeatmapData()
         {
-            var orderedStats = Statistics.MonthlyExpenses.OrderBy(kv => kv.Key).ToList();
-            var values = orderedStats.Select(kv => (double)kv.Value).ToArray();
-            var labels = orderedStats.Select(kv => kv.Key).ToArray();
+            HeatmapData.Clear();
 
-            MonthlyTrendSeries = new ISeries[]
+            // 生成过去365天的数据
+            var today = DateTime.Now.Date;
+            var startDate = today.AddDays(-364); // 包含今天共365天
+
+            // 计算颜色级别的阈值
+            var amounts = Statistics.DailyExpenses.Values.Where(v => v > 0).ToList();
+            var maxAmount = amounts.Any() ? amounts.Max() : 0;
+            
+            // 使用分位数或简单的等分方法
+            var threshold1 = maxAmount * 0.25m;
+            var threshold2 = maxAmount * 0.5m;
+            var threshold3 = maxAmount * 0.75m;
+
+            for (int i = 0; i < 365; i++)
             {
-                new ColumnSeries<double>
+                var date = startDate.AddDays(i);
+                var amount = Statistics.DailyExpenses.ContainsKey(date) ? Statistics.DailyExpenses[date] : 0;
+                
+                // 确定颜色级别 (0-4)
+                int level;
+                string colorHex;
+                
+                if (amount == 0)
                 {
-                    Name = "月度支出",
-                    Values = values,
-                    Fill = new SolidColorPaint(SKColors.DeepSkyBlue),
-                    Stroke = new SolidColorPaint(SKColors.Blue) { StrokeThickness = 2 }
+                    level = 0;
+                    colorHex = "#F1F5F9"; // Slate100
                 }
-            };
-
-            XAxes = new Axis[]
-            {
-                new Axis
+                else if (amount < threshold1)
                 {
-                    Labels = labels,
-                    LabelsRotation = 0,
-                    SeparatorsPaint = new SolidColorPaint(new SKColor(200, 200, 200)),
-                    SeparatorsAtCenter = false,
-                    TicksPaint = new SolidColorPaint(new SKColor(35, 35, 35)),
-                    TicksAtCenter = true
+                    level = 1;
+                    colorHex = "#C7D2FE"; // Indigo200
                 }
-            };
-        }
-
-        private void GeneratePaymentPieChart()
-        {
-            if (Statistics.PaymentMethodStats.Count == 0)
-            {
-                PaymentMethodSeries = Array.Empty<ISeries>();
-                return;
-            }
-
-            var labelPaint = new SolidColorPaint(SKColors.White)
-            {
-                SKTypeface = SKTypeface.FromFamilyName("Microsoft YaHei", SKFontStyle.Normal)
-            };
-
-            PaymentMethodSeries = Statistics.PaymentMethodStats
-                .Select(kv => new PieSeries<int>
+                else if (amount < threshold2)
                 {
-                    Name = kv.Key,
-                    Values = new[] { kv.Value },
-                    DataLabelsFormatter = point => $"{point.Context.Series.Name}: {point.Coordinate.PrimaryValue}张",
-                    DataLabelsPaint = labelPaint,
-                    DataLabelsSize = 14,
-                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle
-                })
-                .ToArray();
+                    level = 2;
+                    colorHex = "#818CF8"; // Indigo400
+                }
+                else if (amount < threshold3)
+                {
+                    level = 3;
+                    colorHex = "#4F46E5"; // Indigo600
+                }
+                else
+                {
+                    level = 4;
+                    colorHex = "#3730A3"; // Indigo800
+                }
 
-            PaymentLegends.Clear();
-            foreach (var kv in Statistics.PaymentMethodStats)
-            {
-                PaymentLegends.Add($"{kv.Key}: {kv.Value} 张");
+                HeatmapData.Add(new HeatmapDayData
+                {
+                    Date = date,
+                    Amount = amount,
+                    Level = level,
+                    ColorHex = colorHex
+                });
             }
-        }
-
-        [RelayCommand]
-        private void ClearHistory()
-        {
-            _logger.ClearLogs();
-            HistoryLogs.Clear();
-            StatusMessage = "日志已清空";
         }
     }
 }

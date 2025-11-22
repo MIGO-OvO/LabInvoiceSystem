@@ -18,10 +18,30 @@
 
     <Grid RowDefinitions="Auto,*">
         <!-- Top Bar -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,24">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="20,0,20,20">
             <TextBlock Text="发票录入" FontSize="24" FontWeight="Bold" VerticalAlignment="Center"/>
             
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
+                <!-- 统一日期选择器 -->
+                <StackPanel Spacing="4" VerticalAlignment="Center" IsVisible="{Binding UploadedInvoices.Count}">
+                    <DatePicker SelectedDate="{Binding UniformUploadDate}" Width="300">
+                        <DatePicker.Styles>
+                            <Style Selector="DatePicker /template/ Button">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            </Style>
+                            <Style Selector="DatePickerPresenter">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                            <Style Selector="DatePickerPresenter TextBlock">
+                                <Setter Property="TextAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DatePicker.Styles>
+                    </DatePicker>
+                </StackPanel>
+                
                 <Button Command="{Binding SetUniformDateCommand}"
                         Classes="Primary"
                         IsVisible="{Binding UploadedInvoices.Count}">
@@ -40,7 +60,6 @@
                 <Button Command="{Binding UploadFilesCommand}"
                         Classes="Primary">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="M12 4v16m8-8H4"/>
                         <TextBlock Text="上传文件"/>
                     </StackPanel>
                 </Button>
@@ -48,10 +67,12 @@
         </Grid>
 
         <!-- Main Split Layout -->
-        <Grid Grid.Row="1" ColumnDefinitions="*,24,*">
+        <Grid Grid.Row="1" ColumnDefinitions="4*,24,6*">
             
             <!-- Left Pane: File List & Drop Zone -->
-            <Grid Grid.Column="0" RowDefinitions="Auto,*">
+            <Grid Grid.Column="0" RowDefinitions="Auto,*"
+                  DragDrop.AllowDrop="True"
+                  DragDrop.Drop="OnDrop">
                 <!-- Drop Zone (Visible when empty) -->
                 <Button Grid.Row="0" Grid.RowSpan="2"
                         Command="{Binding UploadFilesCommand}"
@@ -64,7 +85,7 @@
                         Classes="Card">
                     <Button.Styles>
                         <Style Selector="Button:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="{DynamicResource Slate100}"/>
+                            <Setter Property="Background" Value="{DynamicResource NavHoverBackgroundBrush}"/>
                             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                         </Style>
                     </Button.Styles>
@@ -88,16 +109,23 @@
                                         BorderThickness="0"
                                         Padding="0"
                                         Margin="0,0,0,12"
+                                        CornerRadius="16"
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Stretch">
-                                    <Border Classes="Card" Padding="16" Cursor="Hand">
-                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <Border CornerRadius="16" ClipToBounds="True">
+                                        <Border Classes="Card" Padding="16" Cursor="Hand">
+                                            <Grid ColumnDefinitions="Auto,*,Auto">
                                             <!-- Status Icon -->
                                             <Border Grid.Column="0" Width="40" Height="40" CornerRadius="10" Margin="0,0,16,0"
-                                                    Background="{Binding Status, Converter={StaticResource StatusToColor}, ConverterParameter=Background}">
-                                                <PathIcon Data="{Binding Status, Converter={StaticResource StatusToIcon}}"
-                                                          Foreground="{Binding Status, Converter={StaticResource StatusToColor}, ConverterParameter=Foreground}"
-                                                          Width="20" Height="20"/>
+                                                    Background="{DynamicResource NavHoverBackgroundBrush}">
+                                                <Path Data="{Binding Status, Converter={StaticResource StatusToIcon}}"
+                                                      Fill="{DynamicResource PrimaryBrush}"
+                                                      Width="20"
+                                                      Height="20"
+                                                      Margin="5,0,0,0"
+                                                      Stretch="Uniform"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
                                             </Border>
                                             
                                             <!-- Info -->
@@ -119,6 +147,7 @@
                                             </Button>
                                         </Grid>
                                     </Border>
+                                </Border>
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -156,7 +185,22 @@
                         <Grid ColumnDefinitions="*,16,*">
                             <StackPanel Grid.Column="0" Spacing="8">
                                 <TextBlock Text="日期" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                <DatePicker SelectedDate="{Binding SelectedInvoice.InvoiceDate, Converter={StaticResource DateTimeToDateTimeOffset}}" HorizontalAlignment="Stretch"/>
+                                <DatePicker SelectedDate="{Binding SelectedInvoice.InvoiceDate, Converter={StaticResource DateTimeToDateTimeOffset}}" HorizontalAlignment="Stretch">
+                                    <DatePicker.Styles>
+                                        <Style Selector="DatePicker /template/ Button">
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                        </Style>
+                                        <Style Selector="DatePickerPresenter">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                        <Style Selector="DatePickerPresenter TextBlock">
+                                            <Setter Property="TextAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DatePicker.Styles>
+                                </DatePicker>
                             </StackPanel>
                             <StackPanel Grid.Column="2" Spacing="8">
                                 <TextBlock Text="金额 (¥)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>

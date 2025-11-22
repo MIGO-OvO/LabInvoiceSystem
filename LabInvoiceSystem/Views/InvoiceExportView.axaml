@@ -9,7 +9,7 @@
 
     <Grid RowDefinitions="Auto,*">
         <!-- Top Bar -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,24">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="20,0,20,20">
             <StackPanel Spacing="4">
                 <TextBlock Text="数据导出" FontSize="24" FontWeight="Bold"/>
                 <TextBlock Text="按日期归档的发票数据" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
@@ -40,11 +40,10 @@
                                         </Border>
                                         <StackPanel>
                                             <TextBlock Text="{Binding Date}" FontSize="18" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding Invoices.Count, StringFormat='{}共 {0} 张发票 | 总金额: ¥{1:F2}', FallbackValue='加载中...'}"
-                                                       FontSize="12" 
+                                            <TextBlock FontSize="12" 
                                                        Foreground="{DynamicResource TextSecondaryBrush}">
                                                 <TextBlock.Text>
-                                                    <MultiBinding StringFormat="{}共 {0} 张发票 | 总金额: ¥{1:F2}">
+                                                    <MultiBinding StringFormat='共 {0} 张发票 | 总金额: ¥{1:F2}'>
                                                         <Binding Path="TotalCount" />
                                                         <Binding Path="TotalAmount" />
                                                     </MultiBinding>
@@ -53,7 +52,7 @@
                                         </StackPanel>
                                     </StackPanel>
                                     
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" ClipToBounds="False">
                                         <Button Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).ExportDateCommand}"
                                                 CommandParameter="{Binding Date}"
                                                 Classes="Primary">
@@ -68,7 +67,7 @@
                                                 Classes="Danger">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <PathIcon Data="{StaticResource IconDelete}"/>
-                                                <TextBlock Text="删除整天"/>
+                                                <TextBlock Text="删除"/>
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>
@@ -79,14 +78,14 @@
                                 <!-- Invoices Table -->
                                 <Grid RowDefinitions="Auto,*">
                                     <!-- Table Header -->
-                                    <Border Background="{DynamicResource Slate50}" CornerRadius="8,8,0,0" Padding="12,10">
-                                        <Grid ColumnDefinitions="*,120,120,150,120,Auto">
-                                            <TextBlock Text="文件名" FontWeight="SemiBold"/>
-                                            <TextBlock Grid.Column="1" Text="日期" FontWeight="SemiBold"/>
-                                            <TextBlock Grid.Column="2" Text="金额" FontWeight="SemiBold" TextAlignment="Right"/>
-                                            <TextBlock Grid.Column="3" Text="项目" FontWeight="SemiBold"/>
-                                            <TextBlock Grid.Column="4" Text="支付方式" FontWeight="SemiBold"/>
-                                            <TextBlock Grid.Column="5" Text="操作" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                    <Border Background="{DynamicResource GridHeaderBackgroundBrush}" CornerRadius="8,8,0,0" Padding="12,10">
+                                        <Grid ColumnDefinitions="3*,1.5*,1.5*,2*,1.5*,1*" ColumnSpacing="8">
+                                            <TextBlock Text="文件名" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="日期" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="2" Text="金额" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="3" Text="项目" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="4" Text="支付方式" FontWeight="SemiBold" TextAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="5" Text="操作" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Grid>
                                     </Border>
 
@@ -103,29 +102,33 @@
                                                     <DataTemplate>
                                                         <Border BorderBrush="{DynamicResource BorderBrush}"
                                                                 BorderThickness="0,0,0,1"
-                                                                Padding="12">
-                                                            <Grid ColumnDefinitions="*,120,120,150,120,Auto"
+                                                                Padding="12"
+                                                                ClipToBounds="False">
+                                                            <Grid ColumnDefinitions="3*,1.5*,1.5*,2*,1.5*,1*"
                                                                   VerticalAlignment="Center"
-                                                                  ColumnSpacing="8">
-                                                                <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis"/>
-                                                                <TextBlock Grid.Column="1" Text="{Binding InvoiceInfo.InvoiceDate, StringFormat='yyyy-MM-dd'}"/>
-                                                                <TextBlock Grid.Column="2" Text="{Binding InvoiceInfo.Amount, StringFormat='{}{0:C}'}" TextAlignment="Right"/>
-                                                                <TextBlock Grid.Column="3" Text="{Binding InvoiceInfo.ItemName}" TextTrimming="CharacterEllipsis"/>
-                                                                <TextBlock Grid.Column="4" Text="{Binding InvoiceInfo.PaymentMethod}"/>
-                                                                <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
+                                                                  ColumnSpacing="8"
+                                                                  ClipToBounds="False">
+                                                                <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" TextAlignment="Center" VerticalAlignment="Center"/>
+                                                                <TextBlock Grid.Column="1" Text="{Binding InvoiceInfo.InvoiceDate, StringFormat='yyyy-MM-dd'}" TextAlignment="Center" VerticalAlignment="Center"/>
+                                                                <TextBlock Grid.Column="2" Text="{Binding InvoiceInfo.Amount, StringFormat='{}{0:C}'}" TextAlignment="Center" VerticalAlignment="Center"/>
+                                                                <TextBlock Grid.Column="3" Text="{Binding InvoiceInfo.ItemName}" TextTrimming="CharacterEllipsis" TextAlignment="Center" VerticalAlignment="Center"/>
+                                                                <TextBlock Grid.Column="4" Text="{Binding InvoiceInfo.PaymentMethod}" TextAlignment="Center" VerticalAlignment="Center"/>
+                                                                <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" ClipToBounds="False">
                                                                     <Button Classes="NavButton"
-                                                                            Padding="8,4"
+                                                                            Padding="10,6"
+                                                                            ClipToBounds="False"
                                                                             Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).DownloadInvoiceCommand}"
                                                                             CommandParameter="{Binding}"
                                                                             ToolTip.Tip="下载">
-                                                                        <PathIcon Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" Width="16" Height="16"/>
+                                                                        <PathIcon Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" Width="16" Height="16" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                                                     </Button>
                                                                     <Button Classes="NavButton"
-                                                                            Padding="8,4"
+                                                                            Padding="10,6"
+                                                                            ClipToBounds="False"
                                                                             Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).DeleteInvoiceCommand}"
                                                                             CommandParameter="{Binding}"
                                                                             ToolTip.Tip="删除">
-                                                                        <PathIcon Data="{StaticResource IconDelete}" Width="16" Height="16" Foreground="{DynamicResource Red500}"/>
+                                                                        <PathIcon Data="{StaticResource IconDelete}" Width="16" Height="16" Margin="0" Foreground="{DynamicResource Red500}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                                                     </Button>
                                                                 </StackPanel>
                                                             </Grid>

@@ -33,30 +33,50 @@ namespace LabInvoiceSystem.Converters
 
     public class InvoiceStatusToIconConverter : IValueConverter
     {
+        private const string DefaultGeometryData = "M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2H6ZM13 3.5L18.5 9H13V3.5Z";
+
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is InvoiceStatus status && Application.Current != null)
+            if (value is not InvoiceStatus status)
             {
-                string iconKey = status switch
-                {
-                    InvoiceStatus.Pending => "IconFile",
-                    InvoiceStatus.Processing => "IconImport",
-                    InvoiceStatus.Review => "IconFile", // Or maybe add an alert icon later
-                    InvoiceStatus.Archived => "IconArchive",
-                    _ => "IconFile"
-                };
-
-                if (Application.Current.TryGetResource(iconKey, null, out var resource) && resource is Geometry geometry)
-                {
-                    return geometry;
-                }
+                return GetFallbackGeometry();
             }
-            return null;
+
+            var iconKey = status switch
+            {
+                InvoiceStatus.Pending => "IconFile",
+                InvoiceStatus.Processing => "IconImport",
+                InvoiceStatus.Review => "IconFile",
+                InvoiceStatus.Archived => "IconArchive",
+                _ => "IconFile"
+            };
+
+            return GetGeometry(iconKey) ?? GetGeometry("IconFile") ?? GetFallbackGeometry();
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+
+        private static Geometry? GetGeometry(string resourceKey)
+        {
+            if (Application.Current == null)
+            {
+                return null;
+            }
+
+            if (Application.Current.TryGetResource(resourceKey, null, out var resource) && resource is Geometry geometry)
+            {
+                return geometry;
+            }
+
+            return null;
+        }
+
+        private static Geometry GetFallbackGeometry()
+        {
+            return Geometry.Parse(DefaultGeometryData);
         }
     }
 
