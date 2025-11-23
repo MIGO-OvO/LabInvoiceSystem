@@ -1,4 +1,4 @@
-# LabInvoiceSystem
+# Lab Invoice System
 
 > LabInvoiceSystem is a desktop tool for managing reimbursement invoices in laboratories, with OCR-based importing, archiving, exporting and statistics.
 GitHub: https://github.com/MIGO-OvO/LabInvoiceSystem
