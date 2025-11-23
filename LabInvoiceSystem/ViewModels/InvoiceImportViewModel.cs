@@ -196,6 +196,9 @@ namespace LabInvoiceSystem.ViewModels
                     invoice.InvoiceDate = recognizedInvoice.InvoiceDate;
                     invoice.Amount = recognizedInvoice.Amount;
                     invoice.ItemName = recognizedInvoice.ItemName;
+                    invoice.InvoiceNumber = recognizedInvoice.InvoiceNumber;
+                    invoice.SellerName = recognizedInvoice.SellerName;
+                    invoice.SellerTaxId = recognizedInvoice.SellerTaxId;
                     invoice.RawOcrData = recognizedInvoice.RawOcrData;
                     invoice.Status = InvoiceStatus.Review;
 

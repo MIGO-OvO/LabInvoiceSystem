@@ -7,12 +7,12 @@
              x:Class="LabInvoiceSystem.Views.StatisticsView"
              x:DataType="vm:StatisticsViewModel">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
         <!-- Top Bar -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,24">
             <StackPanel Spacing="4">
-                <TextBlock Text="统计分析" FontSize="24" FontWeight="Bold"/>
-                <TextBlock Text="财务数据概览" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <TextBlock Text="仪表盘" FontSize="24" FontWeight="Bold"/>
+                <TextBlock Text="API设置与数据概览" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
             </StackPanel>
             
             <Button Grid.Column="1" 
@@ -25,7 +25,39 @@
             </Button>
         </Grid>
 
-        <ScrollViewer Grid.Row="1">
+        <Border Grid.Row="1" Classes="Card" Margin="0,0,0,24">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Baidu OCR API" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Width="10" Height="10" CornerRadius="5"
+                                Background="{DynamicResource SuccessBrush}"/>
+                        <TextBlock Text="{Binding ApiStatusText}" FontSize="16" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding MonthlyApiUsageText}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Command="{Binding OpenApiSettingsCommand}"
+                        Theme="{DynamicResource TransparentButton}">
+                    <Border CornerRadius="12"
+                            Padding="12,8"
+                            Background="{DynamicResource NavHoverBackgroundBrush}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="M3 3H21V21H3Z"
+                                      Width="18"
+                                      Height="18"
+                                      Foreground="{DynamicResource PrimaryBrush}"/>
+                            <TextBlock Text="配置百度 API"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+                </Button>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="2">
             <StackPanel Spacing="24">
                 <!-- KPI Cards -->
                 <Grid ColumnDefinitions="*,24,*,24,*">
@@ -117,5 +149,59 @@
                 </Border>
             </StackPanel>
         </ScrollViewer>
+
+        <Border Grid.RowSpan="3"
+                Background="#80000000"
+                IsVisible="{Binding IsApiSettingsOpen}">
+            <Grid HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Width="420">
+                <Border Classes="Card">
+                    <StackPanel Spacing="16">
+                        <TextBlock Text="配置 Baidu OCR API"
+                                   FontSize="18"
+                                   FontWeight="Bold"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="API Key"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBox Text="{Binding ApiKeyInput}"/>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Secret Key"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBox Text="{Binding SecretKeyInput}"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding TestResultMessage}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Spacing="12">
+                            <Button Command="{Binding TestApiCommand}">
+                                <TextBlock Text="测试连接"/>
+                            </Button>
+
+                            <Button Classes="Primary"
+                                    Command="{Binding SaveApiConfigCommand}">
+                                <TextBlock Text="保存配置"/>
+                            </Button>
+
+                            <Button Theme="{DynamicResource TransparentButton}"
+                                    Command="{Binding CloseApiSettingsCommand}">
+                                <TextBlock Text="取消"/>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

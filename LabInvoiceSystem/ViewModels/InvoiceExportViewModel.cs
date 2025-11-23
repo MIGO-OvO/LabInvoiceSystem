@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
@@ -31,12 +32,18 @@ namespace LabInvoiceSystem.ViewModels
         private string _statusMessage = "准备就绪";
 
         [ObservableProperty]
+        private string _exportDirectory = string.Empty;
+
+        [ObservableProperty]
         private bool _isProcessing;
 
         public InvoiceExportViewModel()
         {
             _fileManager = new FileManagerService();
             _logger = new LoggerService();
+
+            var settings = SettingsService.Instance.Settings;
+            _exportDirectory = settings.ExportDirectory;
         }
         
         [RelayCommand]
@@ -141,11 +148,15 @@ namespace LabInvoiceSystem.ViewModels
                     return;
                 }
 
-                var filePaths = group.Invoices.Select(i => i.FilePath).ToList();
-                
                 // 智能生成ZIP文件名
                 var zipFileName = GenerateZipFileName(group);
-                var zipPath = await _fileManager.ExportInvoicesToZipAsync(filePaths, zipFileName);
+
+                // 生成 Excel 文件名: YYYYMMDD_报账发票明细.xlsx
+                var dateStr = group.Date.Replace("-", "");
+                var excelFileName = $"{dateStr}_报账发票明细.xlsx";
+
+                var archives = group.Invoices.ToList();
+                var zipPath = await _fileManager.ExportInvoicesToZipWithExcelAsync(archives, zipFileName, excelFileName);
                 _logger.LogExport($"导出 {date} 共 {group.Invoices.Count} 张发票 => {zipFileName}");
 
                 // 打开文件夹
@@ -160,6 +171,78 @@ namespace LabInvoiceSystem.ViewModels
             finally
             {
                 IsProcessing = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task SetExportDirectoryAsync()
+        {
+            try
+            {
+                var topLevel = App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+                    ? desktop.MainWindow
+                    : null;
+
+                if (topLevel == null)
+                {
+                    return;
+                }
+
+                var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+                {
+                    Title = "选择导出文件夹",
+                    AllowMultiple = false
+                });
+
+                var folder = folders?.FirstOrDefault();
+                if (folder == null)
+                {
+                    return;
+                }
+
+                var path = folder.Path?.LocalPath;
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    StatusMessage = "无法获取所选文件夹路径";
+                    return;
+                }
+
+                var settings = SettingsService.Instance.Settings;
+                settings.ExportDirectory = path;
+                SettingsService.Instance.SaveSettings();
+
+                ExportDirectory = path;
+                StatusMessage = $"导出路径已设置为: {path}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"设置导出路径失败: {ex.Message}";
+            }
+        }
+
+        [RelayCommand]
+        private void OpenExportFolder()
+        {
+            try
+            {
+                var settings = SettingsService.Instance.Settings;
+                var exportDir = settings.ExportDirectory;
+
+                if (string.IsNullOrWhiteSpace(exportDir))
+                {
+                    exportDir = Path.Combine(Path.GetTempPath(), "LabInvoiceExport");
+                }
+
+                if (!Directory.Exists(exportDir))
+                {
+                    Directory.CreateDirectory(exportDir);
+                }
+
+                System.Diagnostics.Process.Start("explorer.exe", exportDir);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"打开导出文件夹失败: {ex.Message}";
             }
         }
 

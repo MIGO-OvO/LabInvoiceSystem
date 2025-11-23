@@ -3,11 +3,15 @@
         xmlns:vm="using:LabInvoiceSystem.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Svg.Controls.Skia.Avalonia"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="LabInvoiceSystem.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/genshin_impact.ico"
         Title="LabInvoiceSystem"
+        Width="1280" Height="960"
+        MinWidth="1280" MinHeight="960"
+        WindowStartupLocation="CenterScreen"
         TransparencyLevelHint="AcrylicBlur"
         Background="Transparent"
         ExtendClientAreaToDecorationsHint="True">
@@ -18,13 +22,12 @@
 
     <Panel>
         <!-- Background Gradient/Tint -->
-        <!-- Background Gradient/Tint -->
         <Border IsHitTestVisible="False" Background="{DynamicResource AppBackgroundBrush}" />
 
         <!-- Main Layout -->
         <SplitView IsPaneOpen="{Binding IsPaneOpen}"
                    DisplayMode="CompactInline"
-                   OpenPaneLength="260"
+                   OpenPaneLength="200"
                    CompactPaneLength="0"
                    PaneBackground="{DynamicResource CardBackgroundBrush}"
                    Background="Transparent">
@@ -34,15 +37,9 @@
                     <!-- Logo Area -->
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="24,20,24,40">
                         <Border Width="36" Height="36" CornerRadius="10">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-                                    <GradientStop Offset="0" Color="{DynamicResource Indigo500}"/>
-                                    <GradientStop Offset="1" Color="#c084fc"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <PathIcon Data="M13 10V3L4 14h7v7l9-11h-7z" 
-                                      Foreground="White" 
-                                      Width="20" Height="20"/>
+                            <svg:Svg Path="/Assets/genshin_impact.svg"
+                                     Stretch="Uniform"
+                                     Width="45" Height="45"/>
                         </Border>
                         <TextBlock Text="发票助手" 
                                    FontSize="20" 
@@ -85,7 +82,7 @@
                                 Classes.Active="{Binding CurrentViewName, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Statistics}">
                             <StackPanel Orientation="Horizontal">
                                 <PathIcon Data="{StaticResource IconStatistics}"/>
-                                <TextBlock Text="统计面板"/>
+                                <TextBlock Text="仪表盘"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LabInvoiceSystem.Models;
@@ -14,6 +16,7 @@ namespace LabInvoiceSystem.ViewModels
     {
         private readonly FileManagerService _fileManager;
         private readonly StatisticsService _statisticsService;
+        private readonly HttpClient _httpClient;
 
         [ObservableProperty]
         private StatisticsData _statistics = new();
@@ -34,14 +37,46 @@ namespace LabInvoiceSystem.ViewModels
         [ObservableProperty]
         private decimal _last30DaysAmount;
 
+        [ObservableProperty]
+        private string _apiStatusText = string.Empty;
+
+        [ObservableProperty]
+        private string _monthlyApiUsageText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isApiConfigured;
+
+        [ObservableProperty]
+        private bool _isApiSettingsOpen;
+
+        [ObservableProperty]
+        private string _apiKeyInput = string.Empty;
+
+        [ObservableProperty]
+        private string _secretKeyInput = string.Empty;
+
+        [ObservableProperty]
+        private bool _isTestingConnection;
+
+        [ObservableProperty]
+        private string _testResultMessage = string.Empty;
+
+        [ObservableProperty]
+        private bool _isTestSuccess;
+
         public StatisticsViewModel()
         {
             _fileManager = new FileManagerService();
             _statisticsService = new StatisticsService();
+            _httpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(30)
+            };
         }
 
         public async Task OnNavigatedTo()
         {
+            LoadApiStatusFromSettings();
             await RefreshAsync();
         }
 
@@ -136,6 +171,120 @@ namespace LabInvoiceSystem.ViewModels
                     ColorHex = colorHex
                 });
             }
+        }
+
+        private void LoadApiStatusFromSettings()
+        {
+            var settings = SettingsService.Instance.Settings;
+
+            IsApiConfigured = !string.IsNullOrWhiteSpace(settings.BaiduApiKey) &&
+                              !string.IsNullOrWhiteSpace(settings.BaiduSecretKey);
+
+            ApiStatusText = IsApiConfigured ? "API 就绪" : "未配置";
+
+            var currentMonth = DateTime.Now.ToString("yyyy-MM");
+            var usage = settings.BaiduMonthlyUsage;
+
+            if (!string.IsNullOrWhiteSpace(settings.BaiduUsageMonth) && settings.BaiduUsageMonth != currentMonth)
+            {
+                usage = 0;
+            }
+
+            var quota = settings.BaiduMonthlyQuota > 0 ? settings.BaiduMonthlyQuota : 1000;
+
+            MonthlyApiUsageText = $"本月调用: {usage}/{quota}";
+        }
+
+        [RelayCommand]
+        private void OpenApiSettings()
+        {
+            var settings = SettingsService.Instance.Settings;
+
+            ApiKeyInput = settings.BaiduApiKey ?? string.Empty;
+            SecretKeyInput = settings.BaiduSecretKey ?? string.Empty;
+            TestResultMessage = string.Empty;
+            IsTestSuccess = false;
+            IsTestingConnection = false;
+
+            IsApiSettingsOpen = true;
+        }
+
+        [RelayCommand]
+        private void CloseApiSettings()
+        {
+            IsApiSettingsOpen = false;
+        }
+
+        [RelayCommand]
+        private async Task TestApiAsync()
+        {
+            if (string.IsNullOrWhiteSpace(ApiKeyInput) || string.IsNullOrWhiteSpace(SecretKeyInput))
+            {
+                TestResultMessage = "请填写完整的 API Key 与 Secret Key";
+                IsTestSuccess = false;
+                return;
+            }
+
+            IsTestingConnection = true;
+            TestResultMessage = string.Empty;
+            IsTestSuccess = false;
+
+            try
+            {
+                var url = $"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={ApiKeyInput}&client_secret={SecretKeyInput}";
+
+                var response = await _httpClient.GetAsync(url);
+                var body = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    TestResultMessage = $"连接失败: {body}";
+                    IsTestSuccess = false;
+                    return;
+                }
+
+                using var jsonDoc = JsonDocument.Parse(body);
+
+                if (jsonDoc.RootElement.TryGetProperty("access_token", out _))
+                {
+                    TestResultMessage = "连接成功，API Key 有效";
+                    IsTestSuccess = true;
+                }
+                else if (jsonDoc.RootElement.TryGetProperty("error_description", out var errorDesc))
+                {
+                    TestResultMessage = $"连接失败: {errorDesc.GetString()}";
+                    IsTestSuccess = false;
+                }
+                else
+                {
+                    TestResultMessage = "连接结果未知，请检查配置或稍后重试";
+                    IsTestSuccess = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                TestResultMessage = $"连接失败: {ex.Message}";
+                IsTestSuccess = false;
+            }
+            finally
+            {
+                IsTestingConnection = false;
+            }
+        }
+
+        [RelayCommand]
+        private void SaveApiConfig()
+        {
+            var settings = SettingsService.Instance.Settings;
+
+            settings.BaiduApiKey = ApiKeyInput?.Trim() ?? string.Empty;
+            settings.BaiduSecretKey = SecretKeyInput?.Trim() ?? string.Empty;
+
+            SettingsService.Instance.SaveSettings();
+
+            LoadApiStatusFromSettings();
+
+            IsApiSettingsOpen = false;
         }
     }
 }

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using LabInvoiceSystem.Models;
+using MiniExcelLibs;
 
 namespace LabInvoiceSystem.Services
 {
@@ -12,12 +14,14 @@ namespace LabInvoiceSystem.Services
     {
         private readonly string _archiveDir;
         private readonly string _tempUploadDir;
+        private readonly string _exportDir;
 
         public FileManagerService()
         {
             var settings = SettingsService.Instance.Settings;
             _archiveDir = settings.ArchiveDirectory;
             _tempUploadDir = settings.TempUploadDirectory;
+            _exportDir = settings.ExportDirectory;
 
             SettingsService.Instance.EnsureDirectoriesExist();
         }
@@ -37,6 +41,45 @@ namespace LabInvoiceSystem.Services
             catch (Exception ex)
             {
                 throw new Exception($"保存文件失败: {ex.Message}");
+            }
+        }
+
+        public void CleanupTempUploadDirectory()
+        {
+            try
+            {
+                if (!Directory.Exists(_tempUploadDir))
+                {
+                    return;
+                }
+
+                foreach (var file in Directory.GetFiles(_tempUploadDir))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"清理临时上传文件失败: {ex.Message}");
+                    }
+                }
+
+                foreach (var directory in Directory.GetDirectories(_tempUploadDir))
+                {
+                    try
+                    {
+                        Directory.Delete(directory, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"清理临时上传子目录失败: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"清理临时上传目录失败: {ex.Message}");
             }
         }
 
@@ -80,6 +123,29 @@ namespace LabInvoiceSystem.Services
                 // 更新状态
                 invoice.Status = InvoiceStatus.Archived;
                 invoice.FilePath = targetPath;
+
+                // 写入元数据 JSON
+                try
+                {
+                    var metadata = new InvoiceMetadata
+                    {
+                        InvoiceDate = invoice.InvoiceDate,
+                        Amount = invoice.Amount,
+                        ItemName = invoice.ItemName ?? string.Empty,
+                        PaymentMethod = invoice.PaymentMethod ?? string.Empty,
+                        InvoiceNumber = invoice.InvoiceNumber ?? string.Empty,
+                        SellerName = invoice.SellerName ?? string.Empty,
+                        SellerTaxId = invoice.SellerTaxId ?? string.Empty
+                    };
+
+                    var metadataPath = Path.ChangeExtension(targetPath, ".json");
+                    var json = JsonSerializer.Serialize(metadata);
+                    File.WriteAllText(metadataPath, json);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"保存发票元数据失败: {ex.Message}");
+                }
             }
             catch (Exception ex)
             {
@@ -107,8 +173,54 @@ namespace LabInvoiceSystem.Services
 
                     foreach (var file in files)
                     {
+                        // 跳过元数据文件
+                        if (string.Equals(Path.GetExtension(file), ".json", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
                         var fileName = Path.GetFileName(file);
-                        var invoiceInfo = ParseFileNameToInvoice(fileName, file);
+                        InvoiceInfo invoiceInfo;
+
+                        var metadataPath = Path.ChangeExtension(file, ".json");
+                        if (File.Exists(metadataPath))
+                        {
+                            try
+                            {
+                                var json = File.ReadAllText(metadataPath);
+                                var metadata = JsonSerializer.Deserialize<InvoiceMetadata>(json);
+
+                                if (metadata != null)
+                                {
+                                    invoiceInfo = new InvoiceInfo
+                                    {
+                                        FileName = fileName,
+                                        FilePath = file,
+                                        Status = InvoiceStatus.Archived,
+                                        InvoiceDate = metadata.InvoiceDate,
+                                        Amount = metadata.Amount,
+                                        ItemName = metadata.ItemName ?? string.Empty,
+                                        PaymentMethod = metadata.PaymentMethod ?? string.Empty,
+                                        InvoiceNumber = metadata.InvoiceNumber ?? string.Empty,
+                                        SellerName = metadata.SellerName ?? string.Empty,
+                                        SellerTaxId = metadata.SellerTaxId ?? string.Empty
+                                    };
+                                }
+                                else
+                                {
+                                    invoiceInfo = ParseFileNameToInvoice(fileName, file);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"读取发票元数据失败: {ex.Message}");
+                                invoiceInfo = ParseFileNameToInvoice(fileName, file);
+                            }
+                        }
+                        else
+                        {
+                            invoiceInfo = ParseFileNameToInvoice(fileName, file);
+                        }
 
                         archives.Add(new ArchiveItem
                         {
@@ -166,6 +278,115 @@ namespace LabInvoiceSystem.Services
             }
         }
 
+        public async Task<string> ExportInvoicesToZipWithExcelAsync(List<ArchiveItem> archives, string outputFileName, string excelFileName)
+        {
+            try
+            {
+                var tempDir = Path.Combine(Path.GetTempPath(), "LabInvoiceExport");
+                if (!Directory.Exists(tempDir))
+                {
+                    Directory.CreateDirectory(tempDir);
+                }
+
+                var targetDir = !string.IsNullOrWhiteSpace(_exportDir) ? _exportDir : tempDir;
+                if (!Directory.Exists(targetDir))
+                {
+                    Directory.CreateDirectory(targetDir);
+                }
+
+                var zipPath = Path.Combine(targetDir, outputFileName);
+                var excelPath = Path.Combine(tempDir, excelFileName);
+
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                }
+
+                if (File.Exists(excelPath))
+                {
+                    File.Delete(excelPath);
+                }
+
+                // 准备 Excel 数据
+                var rows = archives.Select(a =>
+                {
+                    var info = a.InvoiceInfo ?? new InvoiceInfo();
+                    return new Dictionary<string, object?>
+                    {
+                        ["日期"] = info.InvoiceDate,
+                        ["金额"] = info.Amount,
+                        ["项目名称"] = info.ItemName ?? string.Empty,
+                        ["支付方式"] = info.PaymentMethod ?? string.Empty,
+                        ["发票号码"] = info.InvoiceNumber ?? string.Empty,
+                        ["销售方名称"] = info.SellerName ?? string.Empty,
+                        ["销售方税号"] = info.SellerTaxId ?? string.Empty
+                    };
+                }).ToList();
+
+                if (rows.Count == 0)
+                {
+                    // 仍然创建一个只有表头的空表，避免后续缺文件
+                    var header = new List<Dictionary<string, object?>>
+                    {
+                        new()
+                        {
+                            ["日期"] = null,
+                            ["金额"] = null,
+                            ["项目名称"] = null,
+                            ["支付方式"] = null,
+                            ["发票号码"] = null,
+                            ["销售方名称"] = null,
+                            ["销售方税号"] = null
+                        }
+                    };
+                    MiniExcel.SaveAs(excelPath, header);
+                }
+                else
+                {
+                    MiniExcel.SaveAs(excelPath, rows);
+                }
+
+                using (var zipArchive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+                {
+                    // 添加发票原文件
+                    foreach (var item in archives)
+                    {
+                        if (!string.IsNullOrEmpty(item.FilePath) && File.Exists(item.FilePath))
+                        {
+                            var entryName = Path.GetFileName(item.FilePath);
+                            zipArchive.CreateEntryFromFile(item.FilePath, entryName);
+                        }
+                    }
+
+                    // 添加 Excel 明细
+                    if (File.Exists(excelPath))
+                    {
+                        zipArchive.CreateEntryFromFile(excelPath, excelFileName);
+                    }
+                }
+
+                // 清理临时 Excel 文件
+                try
+                {
+                    if (File.Exists(excelPath))
+                    {
+                        File.Delete(excelPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"清理临时 Excel 文件失败: {ex.Message}");
+                }
+
+                await Task.CompletedTask;
+                return zipPath;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"导出 ZIP 和 Excel 失败: {ex.Message}");
+            }
+        }
+
         public void DeleteTempFile(string filePath)
         {
             try
@@ -188,6 +409,7 @@ namespace LabInvoiceSystem.Services
                 if (File.Exists(filePath))
                 {
                     File.Delete(filePath);
+                    DeleteMetadataIfExists(filePath);
                 }
             }
             catch (Exception ex)
@@ -210,6 +432,7 @@ namespace LabInvoiceSystem.Services
                     if (File.Exists(filePath))
                     {
                         File.Delete(filePath);
+                        DeleteMetadataIfExists(filePath);
                         successCount++;
                     }
                 }
@@ -225,6 +448,33 @@ namespace LabInvoiceSystem.Services
             }
 
             await Task.CompletedTask;
+        }
+
+        private void DeleteMetadataIfExists(string filePath)
+        {
+            try
+            {
+                var metadataPath = Path.ChangeExtension(filePath, ".json");
+                if (File.Exists(metadataPath))
+                {
+                    File.Delete(metadataPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"删除发票元数据失败: {ex.Message}");
+            }
+        }
+
+        private class InvoiceMetadata
+        {
+            public DateTime InvoiceDate { get; set; }
+            public decimal Amount { get; set; }
+            public string ItemName { get; set; } = string.Empty;
+            public string PaymentMethod { get; set; } = string.Empty;
+            public string InvoiceNumber { get; set; } = string.Empty;
+            public string SellerName { get; set; } = string.Empty;
+            public string SellerTaxId { get; set; } = string.Empty;
         }
 
         private string CleanFileName(string fileName)

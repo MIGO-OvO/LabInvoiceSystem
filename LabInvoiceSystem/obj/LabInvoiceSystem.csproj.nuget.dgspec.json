@@ -94,6 +94,10 @@
             "SkiaSharp": {
               "target": "Package",
               "version": "[2.88.9, )"
+            },
+            "Svg.Controls.Skia.Avalonia": {
+              "target": "Package",
+              "version": "[11.3.6.2, )"
             }
           },
           "imports": [

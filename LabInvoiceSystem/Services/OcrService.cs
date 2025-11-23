@@ -81,7 +81,11 @@ namespace LabInvoiceSystem.Services
                 throw new Exception($"OCR 识别失败: {responseBody}");
             }
 
-            return ParseOcrResult(responseBody, fileName);
+            var invoice = ParseOcrResult(responseBody, fileName);
+
+            IncrementMonthlyUsage();
+
+            return invoice;
         }
 
         private InvoiceInfo ParseOcrResult(string jsonResponse, string fileName)
@@ -141,6 +145,27 @@ namespace LabInvoiceSystem.Services
                 if (mergedItems.Count > 0)
                 {
                     invoice.ItemName = string.Join(", ", mergedItems);
+                }
+
+                // 提取发票号码
+                if (TryGetString(wordsResult, "InvoiceNum", out var invoiceNum) &&
+                    !string.IsNullOrWhiteSpace(invoiceNum))
+                {
+                    invoice.InvoiceNumber = invoiceNum;
+                }
+
+                // 提取销售方名称
+                if (TryGetString(wordsResult, "SellerName", out var sellerName) &&
+                    !string.IsNullOrWhiteSpace(sellerName))
+                {
+                    invoice.SellerName = sellerName;
+                }
+
+                // 提取销售方税号
+                if (TryGetString(wordsResult, "SellerRegisterNum", out var sellerTaxId) &&
+                    !string.IsNullOrWhiteSpace(sellerTaxId))
+                {
+                    invoice.SellerTaxId = sellerTaxId;
                 }
 
                 invoice.RawOcrData = jsonResponse;
@@ -311,6 +336,28 @@ namespace LabInvoiceSystem.Services
                 .Trim();
 
             return normalized;
+        }
+
+        private void IncrementMonthlyUsage()
+        {
+            try
+            {
+                var settings = SettingsService.Instance.Settings;
+                var currentMonth = DateTime.Now.ToString("yyyy-MM");
+
+                if (string.IsNullOrWhiteSpace(settings.BaiduUsageMonth) || settings.BaiduUsageMonth != currentMonth)
+                {
+                    settings.BaiduUsageMonth = currentMonth;
+                    settings.BaiduMonthlyUsage = 0;
+                }
+
+                settings.BaiduMonthlyUsage++;
+                SettingsService.Instance.SaveSettings();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"更新百度 API 月调用计数失败: {ex.Message}");
+            }
         }
     }
 }

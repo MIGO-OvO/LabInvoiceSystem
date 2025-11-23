@@ -215,7 +215,7 @@
 
                         <StackPanel Spacing="8">
                             <TextBlock Text="支付方式" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <Grid ColumnDefinitions="*,16,*">
+                            <Grid ColumnDefinitions="*,16,*,16,*">
                                 <Button Grid.Column="0" 
                                         Classes="Capsule"
                                         Content="公务卡"
@@ -228,6 +228,12 @@
                                         Command="{Binding SetPaymentMethodCommand}"
                                         CommandParameter="现金"
                                         Classes.Active="{Binding SelectedInvoice.PaymentMethod, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=现金}"/>
+                                <Button Grid.Column="4" 
+                                        Classes="Capsule"
+                                        Content="对公转账"
+                                        Command="{Binding SetPaymentMethodCommand}"
+                                        CommandParameter="对公转账"
+                                        Classes.Active="{Binding SelectedInvoice.PaymentMethod, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=对公转账}"/>
                             </Grid>
                         </StackPanel>
 

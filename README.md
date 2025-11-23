@@ -1,8 +1,9 @@
 # LabInvoiceSystem
 
 > LabInvoiceSystem is a desktop tool for managing reimbursement invoices in laboratories, with OCR-based importing, archiving, exporting and statistics.
+GitHub: https://github.com/MIGO-OvO/LabInvoiceSystem
 
-LabInvoiceSystem 是一个面向实验室 / 科研场景的发票管理桌面应用，基于 Avalonia 构建，提供发票录入（OCR 识别）、归档导出和统计分析等功能，帮助简化报销资料整理流程。
+LabInvoiceSystem 是一个面向个人实验室课题组发票报账场景的发票管理桌面应用，基于 Avalonia 构建，提供发票录入（OCR 识别）、归档导出和统计分析等功能，帮助简化报销资料整理流程，适合在实验室和科研场景中自由使用与二次开发。
 
 ---
 
@@ -15,6 +16,7 @@ LabInvoiceSystem 是一个面向实验室 / 科研场景的发票管理桌面应
   - [发票录入](#发票录入)
   - [发票归档与导出](#发票归档与导出)
   - [统计分析](#统计分析)
+  - [OCR API 设置与测试](#ocr-api-设置与测试)
 - [配置说明](#配置说明)
 - [目录结构与架构概览](#目录结构与架构概览)
 - [技术栈与依赖](#技术栈与依赖)
@@ -56,14 +58,16 @@ LabInvoiceSystem 旨在解决这些问题，提供：
   - 批量归档：支持“一键全部归档”，会对所有信息完整的发票进行批量处理。  
   - 归档命名规则： `YYYYMMDD-项目名称-支付方式-金额元.ext`，并按月份分目录存放：`archive_data/YYYY-MM/`。  
   - 支持删除临时文件和删除归档文件。  
-  - 支持将某一日期下的全部归档发票打包为 ZIP 文件导出。
+  - 支持将某一日期下的全部归档发票打包为 ZIP 文件导出，同时自动生成形如 `YYYYMMDD_报账发票明细.xlsx` 的 Excel 明细并一并打包。
 
 - **统计分析**  
   - 基于归档文件的解析结果（`ArchiveItem` + `StatisticsService`），计算：  
     - 累计报销金额。  
     - 累计发票数量。  
     - 近 30 天报销金额。  
-  - 生成过去一年的报销热力图（按日聚合金额，并以不同颜色深浅表示强度）。
+  - 生成过去一年的报销热力图（按日聚合金额，并以不同颜色深浅表示强度）。  
+  - 展示 OCR API 配置状态（例如“API 就绪”或“未配置”），便于快速确认 Baidu OCR 凭据是否已正确填写。  
+  - 展示本月 OCR 调用次数与配额（例如“本月调用: X/Y”），其中 Y 来自 `AppSettings.BaiduMonthlyQuota`。
 
 - **主题与用户体验**  
   - 使用 Fluent 风格的现代 UI，搭配卡片式布局与渐变色。  
@@ -89,8 +93,7 @@ LabInvoiceSystem 旨在解决这些问题，提供：
 
 ```bash
 # 克隆仓库
-# 请将 <repo-url> 替换为实际仓库地址
-git clone <repo-url>
+git clone https://github.com/MIGO-OvO/LabInvoiceSystem.git
 cd LabInvoiceSystem
 ```
 
@@ -126,8 +129,6 @@ start.bat
 
 - 配置文件路径：`%APPDATA%/LabInvoiceSystem/appsettings.json`。  
 - 如果文件不存在，会使用默认配置并在保存时自动创建。  
-
-> 建议：将你自己的 Baidu OCR 凭据写入上述配置文件中，**不要**把真实密钥提交到公共仓库。
 
 ---
 
@@ -188,7 +189,21 @@ start.bat
 3. 在统计界面中你可以看到：  
    - 顶部三个 KPI 卡片展示关键数字。  
    - 中间为按日划分的热力图，鼠标悬停可查看某日的具体金额及日期。  
-   - 右下角的图例展示从“少”到“多”的颜色梯度含义。
+   - 右下角的图例展示从“少”到“多”的颜色梯度含义。  
+   - 顶部状态区域中的 OCR API 配置状态（如“API 就绪”或“未配置”），以及本月调用次数与配额（例如“本月调用: X/Y”）。
+
+### OCR API 设置与测试
+
+1. 在统计面板中点击 **“API 设置”**（或等效入口），打开 OCR 配置对话框。  
+2. 在弹窗中填写：  
+   - `API Key`（对应 `AppSettings.BaiduApiKey`）  
+   - `Secret Key`（对应 `AppSettings.BaiduSecretKey`）  
+3. 点击 **“测试连接”**：  
+   - 程序会调用百度 OAuth 接口校验凭据是否有效；  
+   - 成功时提示“连接成功，API Key 有效”，失败时会显示错误描述。  
+4. 点击 **“保存”**：  
+   - 程序会将凭据写入 `%APPDATA%/LabInvoiceSystem/appsettings.json`；  
+   - 同时刷新统计面板中的 API 状态和“本月调用: X/Y” 显示。  
 
 ---
 
@@ -196,16 +211,21 @@ start.bat
 
 ### AppSettings（`Models/AppSettings.cs`）
 
-`AppSettings` 类型定义了应用运行时的重要配置：
+`AppSettings` 类型定义了应用运行时的重要配置，主要包括：  
 
-- `BaiduAppId`：百度 OCR 应用 ID。  
-- `BaiduApiKey`：百度 OCR API Key。  
-- `BaiduSecretKey`：百度 OCR Secret Key。  
-- `ArchiveDirectory`：发票归档根目录，默认值为 `"archive_data"`。  
-- `TempUploadDirectory`：临时上传目录，默认值为 `"temp_uploads"`。  
-- `ThemeMode`：主题模式，`"Dark"` 或 `"Light"`。
-
-> 运行时请优先通过配置文件覆盖默认 Baidu OCR 凭据，不建议在源码中直接硬编码个人密钥。
+- **OCR 配置**：  
+  - `BaiduAppId`：百度 OCR 应用 ID。  
+  - `BaiduApiKey`：百度 OCR API Key。  
+  - `BaiduSecretKey`：百度 OCR Secret Key。  
+  - `BaiduMonthlyUsage`：当前统计月份内已调用次数，由应用在每次识别后自动递增。  
+  - `BaiduMonthlyQuota`：当前月份允许的最大调用次数，用于在界面中展示“本月调用: X/Y”。  
+  - `BaiduUsageMonth`：当前统计的月份（例如 `"2025-11"`），用于在跨月时自动重置调用计数。  
+- **目录配置**：  
+  - `ArchiveDirectory`：发票归档根目录，默认值为 `"archive_data"`。  
+  - `TempUploadDirectory`：临时上传目录，默认值为 `"temp_uploads"`。  
+  - `ExportDirectory`：发票导出（ZIP + Excel）的默认目录，默认值为 `"export_data"`。  
+- **主题配置**：  
+  - `ThemeMode`：主题模式，`"Dark"` 或 `"Light"`。
 
 ### SettingsService（`Services/SettingsService.cs`）
 
@@ -217,7 +237,7 @@ start.bat
   - 若不存在：使用默认 `AppSettings` 实例。  
 - 在保存配置时会确保：  
   - 配置目录存在；  
-  - `ArchiveDirectory` 与 `TempUploadDirectory` 目录存在，不存在会自动创建。
+  - 结合 `EnsureDirectoriesExist` 方法，保证 `ArchiveDirectory`、`TempUploadDirectory` 以及非空的 `ExportDirectory` 对应的目录存在，不存在会自动创建。
 
 ---
 
@@ -304,7 +324,8 @@ LabInvoiceSystem/
   - `Avalonia` 11.3.9  
   - `Avalonia.Desktop` 11.3.9  
   - `Avalonia.Themes.Fluent` 11.3.9  
-  - `Avalonia.Fonts.Inter` 11.3.9
+  - `Avalonia.Fonts.Inter` 11.3.9  
+  - `Svg.Controls.Skia.Avalonia` 11.3.6.2：用于渲染 SVG 图标与资源。
 
 - **MVVM 支持**  
   - `CommunityToolkit.Mvvm` 8.2.1
@@ -366,11 +387,17 @@ LabInvoiceSystem/
 - 配置文件：`%APPDATA%/LabInvoiceSystem/appsettings.json`。  
 - 操作日志：`%APPDATA%/LabInvoiceSystem/upload_logs.json`。
 
+### 5. 如何查看和控制 Baidu OCR 月调用次数？
+
+- 在统计面板中查看顶部状态区域的“本月调用: X/Y”，其中 `Y` 来自 `AppSettings.BaiduMonthlyQuota`。  
+- 如需调整配额上限，可在 `%APPDATA%/LabInvoiceSystem/appsettings.json` 中修改 `BaiduMonthlyQuota`，使其与你在百度控制台购买的套餐保持一致。  
+- 当实际调用接近或超过百度接口限制时，可能会在 OCR 调用失败提示中看到限流相关错误信息，可结合前述排查步骤处理。  
+
 ---
 
 ## License 与致谢
 
-- **License**：请根据你的实际需求补充开源许可（例如 MIT、Apache-2.0 等），或保留为内部项目。  
+- **License**：本项目以 **MIT License** 开源，你可以在遵守 MIT 许可条款的前提下自由使用、修改和分发本项目。  
 - **致谢**：  
   - [Avalonia UI](https://avaloniaui.net/)  
   - [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/)  

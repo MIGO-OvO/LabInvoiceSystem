@@ -92,6 +92,12 @@ namespace LabInvoiceSystem.Services
                 {
                     Directory.CreateDirectory(Settings.TempUploadDirectory);
                 }
+
+                if (!string.IsNullOrWhiteSpace(Settings.ExportDirectory) &&
+                    !Directory.Exists(Settings.ExportDirectory))
+                {
+                    Directory.CreateDirectory(Settings.ExportDirectory);
+                }
             }
             catch (Exception ex)
             {

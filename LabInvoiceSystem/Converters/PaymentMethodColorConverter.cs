@@ -15,6 +15,7 @@ namespace LabInvoiceSystem.Converters
                 {
                     "公务卡" => new SolidColorBrush(Color.FromRgb(59, 130, 246)), // 蓝色
                     "现金" => new SolidColorBrush(Color.FromRgb(34, 197, 94)),    // 绿色
+                    "对公转账" => new SolidColorBrush(Color.FromRgb(168, 85, 247)), // 紫色
                     _ => new SolidColorBrush(Color.FromRgb(156, 163, 175))        // 灰色
                 };
             }

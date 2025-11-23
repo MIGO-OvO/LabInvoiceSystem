@@ -29,6 +29,15 @@ namespace LabInvoiceSystem.Models
         private string _paymentMethod = "公务卡";
 
         [ObservableProperty]
+        private string _invoiceNumber = string.Empty;
+
+        [ObservableProperty]
+        private string _sellerName = string.Empty;
+
+        [ObservableProperty]
+        private string _sellerTaxId = string.Empty;
+
+        [ObservableProperty]
         private string _filePath = string.Empty;
 
         [ObservableProperty]
