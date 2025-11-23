@@ -100,7 +100,14 @@ cd LabInvoiceSystem
 
 ### 运行应用
 
-#### 方式一：命令行运行
+#### 方式一：使用已发布的可执行文件（win-x64）
+
+1. 确认已安装 **.NET 8 Desktop Runtime**。  
+2. 从Release下载对应电脑架构版本的压缩包后，解压压缩包到独立文件夹内。
+3. 在该目录下找到可执行文件（`LabInvoiceSystem.exe`），直接双击即可启动应用。  
+4. 如启动时系统提示缺少 .NET 运行时，请先从 Microsoft 官方网站安装对应版本的 **.NET 8 Desktop Runtime** 后重试。
+
+#### 方式二：命令行运行
 
 ```bash
 cd LabInvoiceSystem
@@ -108,7 +115,7 @@ cd LabInvoiceSystem
 dotnet run
 ```
 
-#### 方式二：Windows 批处理脚本
+#### 方式三：Windows 批处理脚本
 
 在仓库根目录下执行：
 
@@ -116,15 +123,7 @@ dotnet run
 start.bat
 ```
 
-脚本会自动进入 `LabInvoiceSystem` 子目录并执行 `dotnet run`，同时在启动失败时保留命令行窗口以便查看错误信息。
-
-#### 方式三：使用已发布的可执行文件（win-x64）
-
-1. 确认已在目标机器上安装 **.NET 8 Desktop Runtime**。  
-2. 从源码发布或使用作者提供的压缩包后，在项目发布目录中找到类似路径：  
-   - `LabInvoiceSystem\bin\Release\net8.0\publish\win-x64`  （相对于项目目录）  
-3. 在该目录下找到可执行文件（例如 `LabInvoiceSystem.exe`），直接双击即可启动应用。  
-4. 如启动时系统提示缺少 .NET 运行时，请先从 Microsoft 官方网站安装对应版本的 **.NET 8 Desktop Runtime** 后重试。  
+脚本会自动进入 `LabInvoiceSystem` 子目录并执行 `dotnet run`，同时在启动失败时保留命令行窗口以便查看错误信息。  
 
 ### OCR 凭据配置概览
 
