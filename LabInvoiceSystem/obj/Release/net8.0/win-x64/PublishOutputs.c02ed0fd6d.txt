@@ -1,0 +1,6 @@
+C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\bin\Release\net8.0\publish\win-x64\LabInvoiceSystem.pdb
+C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\bin\Release\net8.0\publish\win-x64\av_libglesv2.dll
+C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\bin\Release\net8.0\publish\win-x64\pdfium.dll
+C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\bin\Release\net8.0\publish\win-x64\libHarfBuzzSharp.dll
+C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\bin\Release\net8.0\publish\win-x64\libSkiaSharp.dll
+C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\bin\Release\net8.0\publish\win-x64\LabInvoiceSystem.exe

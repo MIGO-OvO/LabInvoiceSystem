@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>LabInvoiceSystem</id>
+    <version>1.0.0</version>
+    <authors>LabInvoiceSystem</authors>
+    <description>Package Description</description>
+    <repository type="git" commit="e2a259c7dc41a12fe2b8f1c7953ab8c8690ae31f" />
+    <dependencies>
+      <group targetFramework="net8.0">
+        <dependency id="Avalonia" version="11.3.9" exclude="Build,Analyzers" />
+        <dependency id="Avalonia.Controls.DataGrid" version="11.3.9" exclude="Build,Analyzers" />
+        <dependency id="Avalonia.Desktop" version="11.3.9" exclude="Build,Analyzers" />
+        <dependency id="Avalonia.Diagnostics" version="11.3.9" exclude="Build,Analyzers" />
+        <dependency id="Avalonia.Fonts.Inter" version="11.3.9" exclude="Build,Analyzers" />
+        <dependency id="Avalonia.Themes.Fluent" version="11.3.9" exclude="Build,Analyzers" />
+        <dependency id="CommunityToolkit.Mvvm" version="8.2.1" exclude="Build,Analyzers" />
+        <dependency id="LiveChartsCore.SkiaSharpView.Avalonia" version="2.0.0-rc4" exclude="Build,Analyzers" />
+        <dependency id="MiniExcel" version="1.42.0" exclude="Build,Analyzers" />
+        <dependency id="PDFtoImage" version="4.1.0" exclude="Build,Analyzers" />
+        <dependency id="SkiaSharp" version="2.88.9" exclude="Build,Analyzers" />
+        <dependency id="Svg.Controls.Skia.Avalonia" version="11.3.6.2" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\bin\Debug\net8.0\LabInvoiceSystem.runtimeconfig.json" target="lib\net8.0\LabInvoiceSystem.runtimeconfig.json" />
+    <file src="C:\Users\AKiya\source\repos\LabInvoiceSystem\LabInvoiceSystem\bin\Debug\net8.0\LabInvoiceSystem.dll" target="lib\net8.0\LabInvoiceSystem.dll" />
+  </files>
+</package>

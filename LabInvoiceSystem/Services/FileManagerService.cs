@@ -410,6 +410,7 @@ namespace LabInvoiceSystem.Services
                 {
                     File.Delete(filePath);
                     DeleteMetadataIfExists(filePath);
+                    TryDeleteParentDirectoryIfEmpty(filePath);
                 }
             }
             catch (Exception ex)
@@ -433,6 +434,7 @@ namespace LabInvoiceSystem.Services
                     {
                         File.Delete(filePath);
                         DeleteMetadataIfExists(filePath);
+                        TryDeleteParentDirectoryIfEmpty(filePath);
                         successCount++;
                     }
                 }
@@ -463,6 +465,34 @@ namespace LabInvoiceSystem.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"删除发票元数据失败: {ex.Message}");
+            }
+        }
+
+        private void TryDeleteParentDirectoryIfEmpty(string filePath)
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(filePath);
+                if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
+                {
+                    return;
+                }
+
+                // 只处理归档目录下的子目录，避免误删其他路径
+                if (!directory.StartsWith(_archiveDir, StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                var entries = Directory.GetFileSystemEntries(directory);
+                if (entries.Length == 0)
+                {
+                    Directory.Delete(directory);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"删除空归档目录失败: {ex.Message}");
             }
         }
 

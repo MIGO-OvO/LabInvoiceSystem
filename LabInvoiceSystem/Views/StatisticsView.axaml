@@ -185,7 +185,8 @@
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Right"
                                     Spacing="12">
-                            <Button Command="{Binding TestApiCommand}">
+                            <Button Classes="Primary" 
+                                    Command="{Binding TestApiCommand}">
                                 <TextBlock Text="测试连接"/>
                             </Button>
 
@@ -194,7 +195,7 @@
                                 <TextBlock Text="保存配置"/>
                             </Button>
 
-                            <Button Theme="{DynamicResource TransparentButton}"
+                            <Button Classes="Primary"
                                     Command="{Binding CloseApiSettingsCommand}">
                                 <TextBlock Text="取消"/>
                             </Button>

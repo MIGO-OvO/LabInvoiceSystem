@@ -85,9 +85,10 @@ LabInvoiceSystem 旨在解决这些问题，提供：
 
 ### 环境要求
 
-- 已安装 **.NET 8 SDK**。  
 - 推荐操作系统：**Windows 10 或更高版本**。  
-- 应用基于 Avalonia 理论上具备跨平台能力，但仓库中的启动脚本 `start.bat` 面向 Windows 环境。
+- 对于开发者：建议安装 **.NET 8 SDK** 以便从源码构建与调试。  
+- 对于仅运行已发布可执行文件的普通用户：至少需要安装 **.NET 8 Desktop Runtime**（框架依赖部署，未安装运行时将无法启动程序）。  
+- 应用基于 Avalonia 理论上具备跨平台能力，但仓库中的启动脚本 `start.bat` 以及下文的发布示例主要面向 Windows 环境。
 
 ### 获取代码
 
@@ -116,6 +117,14 @@ start.bat
 ```
 
 脚本会自动进入 `LabInvoiceSystem` 子目录并执行 `dotnet run`，同时在启动失败时保留命令行窗口以便查看错误信息。
+
+#### 方式三：使用已发布的可执行文件（win-x64）
+
+1. 确认已在目标机器上安装 **.NET 8 Desktop Runtime**。  
+2. 从源码发布或使用作者提供的压缩包后，在项目发布目录中找到类似路径：  
+   - `LabInvoiceSystem\bin\Release\net8.0\publish\win-x64`  （相对于项目目录）  
+3. 在该目录下找到可执行文件（例如 `LabInvoiceSystem.exe`），直接双击即可启动应用。  
+4. 如启动时系统提示缺少 .NET 运行时，请先从 Microsoft 官方网站安装对应版本的 **.NET 8 Desktop Runtime** 后重试。  
 
 ### OCR 凭据配置概览
 
