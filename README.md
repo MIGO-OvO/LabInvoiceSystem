@@ -87,7 +87,7 @@ LabInvoiceSystem 旨在解决这些问题，提供：
 
 - 推荐操作系统：**Windows 10 或更高版本**。  
 - 对于开发者：建议安装 **.NET 8 SDK** 以便从源码构建与调试。  
-- 对于仅运行已发布可执行文件的普通用户：至少需要安装 **.NET 8 Desktop Runtime**（框架依赖部署，未安装运行时将无法启动程序）。  
+- 对于仅运行已发布可执行文件的普通用户：下载解压release中的压缩包到文件夹中，点击labinvoicesystem.exe运行即可。  
 - 应用基于 Avalonia 理论上具备跨平台能力，但仓库中的启动脚本 `start.bat` 以及下文的发布示例主要面向 Windows 环境。
 
 ### 获取代码
@@ -102,10 +102,8 @@ cd LabInvoiceSystem
 
 #### 方式一：使用已发布的可执行文件（win-x64）
 
-1. 确认已安装 **.NET 8 Desktop Runtime**。  
-2. 从Release下载对应电脑架构版本的压缩包后，解压压缩包到独立文件夹内。
-3. 在该目录下找到可执行文件（`LabInvoiceSystem.exe`），直接双击即可启动应用。  
-4. 如启动时系统提示缺少 .NET 运行时，请先从 Microsoft 官方网站安装对应版本的 **.NET 8 Desktop Runtime** 后重试。
+1.从Release下载对应电脑架构版本的压缩包后，解压压缩包到独立文件夹内。
+2. 在该目录下找到可执行文件（`LabInvoiceSystem.exe`），直接双击即可启动应用。  
 
 #### 方式二：命令行运行
 
