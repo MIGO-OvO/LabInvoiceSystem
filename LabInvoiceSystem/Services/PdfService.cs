@@ -8,8 +8,30 @@ namespace LabInvoiceSystem.Services
 {
     public class PdfService
     {
+        // 默认基准DPI，用于无法获取屏幕缩放比例时
+        private const int DefaultBaseDpi = 150;
+
+        /// <summary>
+        /// 将PDF转换为图片，使用默认DPI（150）
+        /// </summary>
+        /// <param name="pdfPath">PDF文件路径</param>
+        /// <returns>图片字节数组</returns>
         public async Task<byte[]> ConvertPdfToImageAsync(string pdfPath)
         {
+            return await ConvertPdfToImageAsync(pdfPath, 1.0);
+        }
+
+        /// <summary>
+        /// 将PDF转换为图片，根据屏幕DPI缩放比例动态计算渲染DPI
+        /// </summary>
+        /// <param name="pdfPath">PDF文件路径</param>
+        /// <param name="dpiScale">屏幕DPI缩放比例（1.0 = 100%, 1.25 = 125%等）</param>
+        /// <returns>图片字节数组</returns>
+        public async Task<byte[]> ConvertPdfToImageAsync(string pdfPath, double dpiScale)
+        {
+            // 使用ScreenHelper计算目标渲染DPI
+            var targetDpi = ScreenHelper.CalculatePdfRenderDpi(dpiScale);
+
             return await Task.Run(async () =>
             {
                 var outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
@@ -45,8 +67,8 @@ namespace LabInvoiceSystem.Services
                     var base64Pdf = Convert.ToBase64String(pdfBytes);
 
                     // PDFtoImage.Conversion.SavePng expects (outputPath, base64Pdf, pageIndex, password, options)
-                    // It converts the first page by default.
-                    Conversion.SavePng(outputPath, base64Pdf, 0, null, new RenderOptions { Dpi = 300 });
+                    // 使用动态计算的DPI进行渲染，以获得高清预览效果
+                    Conversion.SavePng(outputPath, base64Pdf, 0, null, new RenderOptions { Dpi = targetDpi });
 
                     if (!File.Exists(outputPath))
                     {

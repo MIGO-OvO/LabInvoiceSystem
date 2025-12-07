@@ -17,6 +17,9 @@ namespace LabInvoiceSystem.ViewModels
         [ObservableProperty]
         private bool _isPaneOpen = true;
 
+        // Track if user manually closed the pane to prevent auto-reopening
+        private bool _userManuallyClosed = false;
+
         private InvoiceImportViewModel? _importViewModel;
         private InvoiceExportViewModel? _exportViewModel;
         private StatisticsViewModel? _statisticsViewModel;
@@ -60,6 +63,25 @@ namespace LabInvoiceSystem.ViewModels
         private void TriggerPane()
         {
             IsPaneOpen = !IsPaneOpen;
+            // Track user's manual action
+            _userManuallyClosed = !IsPaneOpen;
+        }
+
+        /// <summary>
+        /// Set pane open state from window resize without triggering user action tracking.
+        /// Only closes the pane automatically, never opens it (respects user's manual close).
+        /// </summary>
+        public void SetPaneOpenWithoutUserAction(bool isOpen)
+        {
+            // Only auto-close, never auto-open if user manually closed
+            if (!isOpen)
+            {
+                IsPaneOpen = false;
+            }
+            else if (!_userManuallyClosed)
+            {
+                IsPaneOpen = true;
+            }
         }
 
         [RelayCommand]

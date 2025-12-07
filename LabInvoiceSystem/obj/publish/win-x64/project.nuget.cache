@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "hnSoCX3hGhA=",
+  "dgSpecHash": "xbtRdpsxw0w=",
   "success": true,
   "projectFilePath": "C:\\Users\\AKiya\\source\\repos\\LabInvoiceSystem\\LabInvoiceSystem\\LabInvoiceSystem.csproj",
   "expectedPackageFiles": [
@@ -51,7 +51,10 @@
     "C:\\Users\\AKiya\\.nuget\\packages\\svg.model\\3.2.1\\svg.model.3.2.1.nupkg.sha512",
     "C:\\Users\\AKiya\\.nuget\\packages\\svg.skia\\3.2.1\\svg.skia.3.2.1.nupkg.sha512",
     "C:\\Users\\AKiya\\.nuget\\packages\\system.io.pipelines\\8.0.0\\system.io.pipelines.8.0.0.nupkg.sha512",
-    "C:\\Users\\AKiya\\.nuget\\packages\\tmds.dbus.protocol\\0.21.2\\tmds.dbus.protocol.0.21.2.nupkg.sha512"
+    "C:\\Users\\AKiya\\.nuget\\packages\\tmds.dbus.protocol\\0.21.2\\tmds.dbus.protocol.0.21.2.nupkg.sha512",
+    "C:\\Users\\AKiya\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.16\\microsoft.netcore.app.runtime.win-x64.8.0.16.nupkg.sha512",
+    "C:\\Users\\AKiya\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.16\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.16.nupkg.sha512",
+    "C:\\Users\\AKiya\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.16\\microsoft.aspnetcore.app.runtime.win-x64.8.0.16.nupkg.sha512"
   ],
   "logs": []
 }

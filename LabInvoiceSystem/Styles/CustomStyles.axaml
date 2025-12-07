@@ -313,4 +313,40 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <!-- DatePicker Styles - 优化缩放兼容性 -->
+    <Style Selector="DatePicker">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+    
+    <!-- DatePicker 按钮样式 - 确保内容居中 -->
+    <Style Selector="DatePicker /template/ Button#PART_FlyoutButton">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+    
+    <!-- DatePicker 按钮内的文本居中 -->
+    <Style Selector="DatePicker /template/ Button#PART_FlyoutButton TextBlock">
+        <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+    
+    <!-- DatePickerPresenter 整体样式 -->
+    <Style Selector="DatePickerPresenter">
+        <Setter Property="MinWidth" Value="120"/>
+        <Setter Property="MaxWidth" Value="300"/>
+    </Style>
+    
+    <!-- DateTimePickerPanel 内的 ListBoxItem 样式 - 紧凑布局 -->
+    <Style Selector="DateTimePickerPanel ListBoxItem">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="4,6"/>
+        <Setter Property="MinWidth" Value="40"/>
+    </Style>
+    
+    <!-- DateTimePickerPanel 内的文本居中 -->
+    <Style Selector="DateTimePickerPanel ListBoxItem TextBlock">
+        <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
 </Styles>

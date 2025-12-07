@@ -18,57 +18,45 @@
 
     <Grid RowDefinitions="Auto,*">
         <!-- Top Bar -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="20,0,20,20">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
             <TextBlock Text="发票录入" FontSize="24" FontWeight="Bold" VerticalAlignment="Center"/>
             
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
                 <!-- 统一日期选择器 -->
-                <StackPanel Spacing="4" VerticalAlignment="Center" IsVisible="{Binding UploadedInvoices.Count}">
-                    <DatePicker SelectedDate="{Binding UniformUploadDate}" Width="300">
-                        <DatePicker.Styles>
-                            <Style Selector="DatePicker /template/ Button">
-                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                            </Style>
-                            <Style Selector="DatePickerPresenter">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                            <Style Selector="DatePickerPresenter TextBlock">
-                                <Setter Property="TextAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </DatePicker.Styles>
-                    </DatePicker>
-                </StackPanel>
+                <Border VerticalAlignment="Center" 
+                        IsVisible="{Binding UploadedInvoices.Count}">
+                    <DatePicker SelectedDate="{Binding UniformUploadDate}" 
+                                HorizontalAlignment="Stretch"/>
+                </Border>
                 
                 <Button Command="{Binding SetUniformDateCommand}"
                         Classes="Primary"
+                        Padding="14,8"
                         IsVisible="{Binding UploadedInvoices.Count}">
                     <TextBlock Text="一键设日期" FontWeight="SemiBold"/>
                 </Button>
                 
                 <Button Command="{Binding ArchiveAllCommand}"
                         Classes="Success"
+                        Padding="14,8"
                         IsVisible="{Binding UploadedInvoices.Count}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource IconArchive}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="{StaticResource IconArchive}" Width="16" Height="16"/>
                         <TextBlock Text="全部归档"/>
                     </StackPanel>
                 </Button>
                 
                 <Button Command="{Binding UploadFilesCommand}"
-                        Classes="Primary">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="上传文件"/>
-                    </StackPanel>
+                        Classes="Primary"
+                        Padding="14,8">
+                    <TextBlock Text="上传文件"/>
                 </Button>
             </StackPanel>
         </Grid>
 
-        <!-- Main Split Layout -->
-        <Grid Grid.Row="1" ColumnDefinitions="4*,24,6*">
-            
+        <!-- Main Split Layout - 使用比例布局 -->
+        <Grid Grid.Row="1" ColumnDefinitions="2*,16,3*">
+        
             <!-- Left Pane: File List & Drop Zone -->
             <Grid Grid.Column="0" RowDefinitions="Auto,*"
                   DragDrop.AllowDrop="True"
@@ -81,7 +69,7 @@
                         Background="Transparent"
                         BorderThickness="2"
                         BorderBrush="{DynamicResource BorderBrush}"
-                        CornerRadius="16"
+                        CornerRadius="12"
                         Classes="Card">
                     <Button.Styles>
                         <Style Selector="Button:pointerover /template/ ContentPresenter">
@@ -89,12 +77,12 @@
                             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                         </Style>
                     </Button.Styles>
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
-                        <Border Width="80" Height="80" CornerRadius="40" Background="{DynamicResource Slate100}">
-                            <PathIcon Data="{StaticResource IconImport}" Width="40" Height="40" Foreground="{DynamicResource PrimaryBrush}"/>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                        <Border Width="60" Height="60" CornerRadius="30" Background="{DynamicResource Slate100}">
+                            <PathIcon Data="{StaticResource IconImport}" Width="28" Height="28" Foreground="{DynamicResource PrimaryBrush}"/>
                         </Border>
-                        <TextBlock Text="拖拽发票到此处" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                        <TextBlock Text="支持 PDF, JPG, PNG" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="拖拽发票到此处" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="支持 PDF, JPG, PNG" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
@@ -108,46 +96,49 @@
                                         Background="Transparent"
                                         BorderThickness="0"
                                         Padding="0"
-                                        Margin="0,0,0,12"
-                                        CornerRadius="16"
+                                        Margin="0,0,0,8"
+                                        CornerRadius="12"
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Stretch">
-                                    <Border CornerRadius="16" ClipToBounds="True">
-                                        <Border Classes="Card" Padding="16" Cursor="Hand">
+                                    <Border CornerRadius="12" ClipToBounds="True">
+                                        <Border Classes="Card" Padding="12" Cursor="Hand">
                                             <Grid ColumnDefinitions="Auto,*,Auto">
-                                            <!-- Status Icon -->
-                                            <Border Grid.Column="0" Width="40" Height="40" CornerRadius="10" Margin="0,0,16,0"
-                                                    Background="{DynamicResource NavHoverBackgroundBrush}">
-                                                <Path Data="{Binding Status, Converter={StaticResource StatusToIcon}}"
-                                                      Fill="{DynamicResource PrimaryBrush}"
-                                                      Width="20"
-                                                      Height="20"
-                                                      Margin="5,0,0,0"
-                                                      Stretch="Uniform"
-                                                      HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center"/>
-                                            </Border>
-                                            
-                                            <!-- Info -->
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Text="{Binding Status, Converter={StaticResource StatusToText}}" 
-                                                           FontSize="12" 
-                                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                                           Margin="0,4,0,0"/>
-                                            </StackPanel>
-                                            
-                                            <!-- Delete Action -->
-                                            <Button Grid.Column="2"
-                                                    Classes="Danger"
-                                                    Theme="{DynamicResource TransparentButton}"
-                                                    Command="{Binding $parent[UserControl].((vm:InvoiceImportViewModel)DataContext).DeleteInvoiceCommand}"
-                                                    CommandParameter="{Binding}">
-                                                <PathIcon Data="{StaticResource IconDelete}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                            </Button>
-                                        </Grid>
+                                                <!-- Status Icon -->
+                                                <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
+                                                        Background="{DynamicResource NavHoverBackgroundBrush}">
+                                                    <Path Data="{Binding Status, Converter={StaticResource StatusToIcon}}"
+                                                          Fill="{DynamicResource PrimaryBrush}"
+                                                          Width="16" Height="16"
+                                                          Stretch="Uniform"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                                </Border>
+                                                
+                                                <!-- Info -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
+                                                    <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Status, Converter={StaticResource StatusToText}}" 
+                                                               FontSize="11" 
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                                
+                                                <!-- Delete Action -->
+                                                <Button Grid.Column="2"
+                                                        Classes="Danger"
+                                                        Theme="{DynamicResource TransparentButton}"
+                                                        Padding="10"
+                                                        MinWidth="36"
+                                                        MinHeight="36"
+                                                        VerticalAlignment="Center"
+                                                        Command="{Binding $parent[UserControl].((vm:InvoiceImportViewModel)DataContext).DeleteInvoiceCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip.Tip="删除此发票">
+                                                    <PathIcon Data="{StaticResource IconDelete}" Width="18" Height="18" Foreground="{DynamicResource Red500}"/>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
                                     </Border>
-                                </Border>
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -158,106 +149,155 @@
             <!-- Right Pane: Preview & Edit -->
             <Grid Grid.Column="2" RowDefinitions="*,Auto" IsVisible="{Binding SelectedInvoice, Converter={x:Static ObjectConverters.IsNotNull}}">
                 
-                <!-- Preview Area -->
-                <Border Grid.Row="0" Classes="Card" Margin="0,0,0,24" Padding="0" ClipToBounds="True">
-                    <Grid>
-                        <TextBlock Text="暂无预览" 
-                                   HorizontalAlignment="Center" 
-                                   VerticalAlignment="Center" 
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                   IsVisible="{Binding PreviewImageBytes, Converter={x:Static ObjectConverters.IsNull}}"/>
+                <!-- Preview Area with Zoom Controls -->
+                <Border Grid.Row="0" Classes="Card" Margin="0,0,0,16" Padding="0" ClipToBounds="True">
+                    <Grid RowDefinitions="Auto,*">
+                        <!-- Zoom Control Bar -->
+                        <Border Grid.Row="0" 
+                                Background="{DynamicResource CardBackgroundBrush}" 
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="0,0,0,1"
+                                Padding="8,4"
+                                IsVisible="{Binding PreviewImageBytes, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                <Button Theme="{DynamicResource TransparentButton}" 
+                                        Padding="6" 
+                                        ToolTip.Tip="缩小"
+                                        Click="OnZoomOutClick">
+                                    <PathIcon Data="M19,13H5V11H19V13Z" Width="14" Height="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Button>
+                                <Button Theme="{DynamicResource TransparentButton}" 
+                                        Padding="6" 
+                                        ToolTip.Tip="适应窗口 (双击图片)"
+                                        Click="OnFitToWindowClick">
+                                    <PathIcon Data="M5,5H10V7H7V10H5V5M14,5H19V10H17V7H14V5M17,14H19V19H14V17H17V14M10,17V19H5V14H7V17H10Z" Width="14" Height="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Button>
+                                <Button Theme="{DynamicResource TransparentButton}" 
+                                        Padding="6" 
+                                        ToolTip.Tip="放大"
+                                        Click="OnZoomInClick">
+                                    <PathIcon Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Width="14" Height="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Button>
+                                <TextBlock Text="滚轮缩放 | 拖动平移 | 双击重置" 
+                                           FontSize="10" 
+                                           Foreground="{DynamicResource TextSecondaryBrush}" 
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0"
+                                           Opacity="0.7"/>
+                            </StackPanel>
+                        </Border>
                         
-                        <Image Source="{Binding PreviewImageBytes, Converter={StaticResource BytesToImage}}"
-                               Stretch="Uniform"
-                               RenderOptions.BitmapInterpolationMode="HighQuality"
-                               IsVisible="{Binding PreviewImageBytes, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                        <!-- Preview Image Container -->
+                        <Border Grid.Row="1" 
+                                x:Name="PreviewContainer"
+                                Background="Transparent"
+                                ClipToBounds="True"
+                                PointerWheelChanged="OnPreviewPointerWheelChanged"
+                                PointerPressed="OnPreviewPointerPressed"
+                                PointerMoved="OnPreviewPointerMoved"
+                                PointerReleased="OnPreviewPointerReleased"
+                                DoubleTapped="OnPreviewDoubleTapped">
+                            <Grid>
+                                <TextBlock Text="暂无预览" 
+                                           HorizontalAlignment="Center" 
+                                           VerticalAlignment="Center" 
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           IsVisible="{Binding PreviewImageBytes, Converter={x:Static ObjectConverters.IsNull}}"/>
+                                
+                                <!-- Zoomable/Pannable Image -->
+                                <Image x:Name="PreviewImage"
+                                       Source="{Binding PreviewImageBytes, Converter={StaticResource BytesToImage}}"
+                                       Stretch="Uniform"
+                                       RenderOptions.BitmapInterpolationMode="HighQuality"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       RenderTransformOrigin="0.5,0.5"
+                                       IsVisible="{Binding PreviewImageBytes, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <Image.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                            <TranslateTransform X="0" Y="0"/>
+                                        </TransformGroup>
+                                    </Image.RenderTransform>
+                                </Image>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </Border>
 
                 <!-- Edit Form -->
-                <Border Grid.Row="1" Classes="Card">
-                    <StackPanel Spacing="20">
-                        <Grid ColumnDefinitions="Auto,*">
-                            <Border Width="4" Height="24" Background="{DynamicResource PrimaryBrush}" CornerRadius="2" Margin="0,0,12,0"/>
-                            <TextBlock Grid.Column="1" Text="确认信息" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
-                        </Grid>
-
-                        <Grid ColumnDefinitions="*,16,*">
-                            <StackPanel Grid.Column="0" Spacing="8">
-                                <TextBlock Text="日期" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                <DatePicker SelectedDate="{Binding SelectedInvoice.InvoiceDate, Converter={StaticResource DateTimeToDateTimeOffset}}" HorizontalAlignment="Stretch">
-                                    <DatePicker.Styles>
-                                        <Style Selector="DatePicker /template/ Button">
-                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                                        </Style>
-                                        <Style Selector="DatePickerPresenter">
-                                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                                            <Setter Property="VerticalAlignment" Value="Center"/>
-                                        </Style>
-                                        <Style Selector="DatePickerPresenter TextBlock">
-                                            <Setter Property="TextAlignment" Value="Center"/>
-                                            <Setter Property="VerticalAlignment" Value="Center"/>
-                                        </Style>
-                                    </DatePicker.Styles>
-                                </DatePicker>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2" Spacing="8">
-                                <TextBlock Text="金额 (¥)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                <TextBox Text="{Binding SelectedInvoice.Amount}" Classes="RevealPasswordButton"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="项目名称" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBox Text="{Binding SelectedInvoice.ItemName}"/>
-                        </StackPanel>
-
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="支付方式" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <Grid ColumnDefinitions="*,16,*,16,*">
-                                <Button Grid.Column="0" 
-                                        Classes="Capsule"
-                                        Content="公务卡"
-                                        Command="{Binding SetPaymentMethodCommand}"
-                                        CommandParameter="公务卡"
-                                        Classes.Active="{Binding SelectedInvoice.PaymentMethod, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=公务卡}"/>
-                                <Button Grid.Column="2" 
-                                        Classes="Capsule"
-                                        Content="现金"
-                                        Command="{Binding SetPaymentMethodCommand}"
-                                        CommandParameter="现金"
-                                        Classes.Active="{Binding SelectedInvoice.PaymentMethod, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=现金}"/>
-                                <Button Grid.Column="4" 
-                                        Classes="Capsule"
-                                        Content="对公转账"
-                                        Command="{Binding SetPaymentMethodCommand}"
-                                        CommandParameter="对公转账"
-                                        Classes.Active="{Binding SelectedInvoice.PaymentMethod, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=对公转账}"/>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <Border Classes="Card" Padding="16">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Border Width="4" Height="20" Background="{DynamicResource PrimaryBrush}" CornerRadius="2" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Column="1" Text="确认信息" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
                             </Grid>
+
+                            <Grid ColumnDefinitions="*,12,*">
+                                <StackPanel Grid.Column="0" Spacing="6">
+                                    <TextBlock Text="日期" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <DatePicker SelectedDate="{Binding SelectedInvoice.InvoiceDate, Converter={StaticResource DateTimeToDateTimeOffset}}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Spacing="6">
+                                    <TextBlock Text="金额 (¥)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBox Text="{Binding SelectedInvoice.Amount}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="项目名称" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <TextBox Text="{Binding SelectedInvoice.ItemName}"/>
+                            </StackPanel>
+
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="支付方式" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <Grid ColumnDefinitions="*,8,*,8,*">
+                                    <Button Grid.Column="0" 
+                                            Classes="Capsule"
+                                            Content="公务卡"
+                                            Padding="10,6"
+                                            Command="{Binding SetPaymentMethodCommand}"
+                                            CommandParameter="公务卡"
+                                            Classes.Active="{Binding SelectedInvoice.PaymentMethod, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=公务卡}"/>
+                                    <Button Grid.Column="2" 
+                                            Classes="Capsule"
+                                            Content="现金"
+                                            Padding="10,6"
+                                            Command="{Binding SetPaymentMethodCommand}"
+                                            CommandParameter="现金"
+                                            Classes.Active="{Binding SelectedInvoice.PaymentMethod, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=现金}"/>
+                                    <Button Grid.Column="4" 
+                                            Classes="Capsule"
+                                            Content="对公转账"
+                                            Padding="10,6"
+                                            Command="{Binding SetPaymentMethodCommand}"
+                                            CommandParameter="对公转账"
+                                            Classes.Active="{Binding SelectedInvoice.PaymentMethod, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=对公转账}"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <Button Classes="Primary" 
+                                    Command="{Binding ArchiveSingleCommand}"
+                                    CommandParameter="{Binding SelectedInvoice}"
+                                    HorizontalAlignment="Stretch" 
+                                    HorizontalContentAlignment="Center"
+                                    Padding="14,10">
+                                <TextBlock Text="确认并归档" FontWeight="Bold"/>
+                            </Button>
                         </StackPanel>
-
-                        <Button Classes="Primary" 
-                                Command="{Binding ArchiveSingleCommand}"
-                                CommandParameter="{Binding SelectedInvoice}"
-                                HorizontalAlignment="Stretch" 
-                                HorizontalContentAlignment="Center">
-                            <TextBlock Text="确认并归档" FontWeight="Bold"/>
-                        </Button>
-                    </StackPanel>
-                </Border>
-
+                    </Border>
+                </ScrollViewer>
             </Grid>
             
             <!-- Empty State for Right Pane -->
             <Grid Grid.Column="2" IsVisible="{Binding SelectedInvoice, Converter={x:Static ObjectConverters.IsNull}}">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16" Opacity="0.5">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Opacity="0.5">
                     <PathIcon Data="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" 
-                              Width="64" Height="64" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                    <TextBlock Text="选择文件查看详情" FontSize="16" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                              Width="48" Height="48" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <TextBlock Text="选择文件查看详情" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
                 </StackPanel>
             </Grid>
-
         </Grid>
     </Grid>
 </UserControl>

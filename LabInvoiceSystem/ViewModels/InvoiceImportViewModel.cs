@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LabInvoiceSystem.Models;
 using LabInvoiceSystem.Services;
+using Avalonia.Media.Imaging;
 
 namespace LabInvoiceSystem.ViewModels
 {
@@ -229,8 +230,11 @@ namespace LabInvoiceSystem.ViewModels
 
                 if (filePath.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
                 {
-                    // 转换 PDF 第一页为图片进行预览
-                    PreviewImageBytes = await _pdfService.ConvertPdfToImageAsync(filePath);
+                    // 获取当前屏幕的DPI缩放比例
+                    var dpiScale = GetCurrentScreenDpiScale();
+                    
+                    // 转换 PDF 第一页为图片进行预览，使用DPI感知的渲染
+                    PreviewImageBytes = await _pdfService.ConvertPdfToImageAsync(filePath, dpiScale);
                 }
                 else
                 {
@@ -242,6 +246,33 @@ namespace LabInvoiceSystem.ViewModels
                 StatusMessage = $"加载预览失败: {ex.Message}";
                 PreviewImageBytes = null;
             }
+        }
+
+        /// <summary>
+        /// 获取当前屏幕的DPI缩放比例
+        /// </summary>
+        /// <returns>DPI缩放比例（1.0 = 100%, 1.25 = 125%等）</returns>
+        private double GetCurrentScreenDpiScale()
+        {
+            try
+            {
+                var app = Application.Current;
+                if (app?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop &&
+                    desktop.MainWindow is not null)
+                {
+                    var screen = desktop.MainWindow.Screens.Primary;
+                    if (screen != null)
+                    {
+                        return screen.Scaling;
+                    }
+                }
+            }
+            catch
+            {
+                // 如果获取失败，返回默认值
+            }
+            
+            return 1.0;
         }
 
         [RelayCommand]
