@@ -1,6 +1,10 @@
 # LabInvoiceSystem
 
 <p align="center">
+  <img src="./LabInvoiceSystem/Assets/genshin_impact_128.png" alt="LabInvoiceSystem 应用图标" width="96" />
+</p>
+
+<p align="center">
   <a href="./README.en.md">English</a> | 简体中文
 </p>
 
@@ -45,6 +49,7 @@ Avalonia 构建跨平台 UI，用 .NET 8 承载业务逻辑，围绕“上传发
 | 主要工作区 | 发票录入、发票导出、仪表盘 |
 | C# 源文件 | 31 |
 | AXAML 文件 | 8 |
+| 图标资源 | 8 |
 | 默认发布目标 | `win-x64`, self-contained, single file |
 
 ## 快速开始 (Getting Started)
@@ -171,12 +176,12 @@ LabInvoiceSystem/
 `-- LabInvoiceSystem/
     |-- App.axaml                         # Avalonia 应用样式、资源和 ViewLocator
     |-- Program.cs                        # 桌面应用入口
-    |-- Assets/                           # 应用静态资源
+    |-- Assets/                           # ICO、SVG、PNG 图标资源
     |-- Models/                           # InvoiceInfo、ArchiveItem、StatisticsData、AppSettings
     |-- ViewModels/                       # MainWindow、导入、导出、统计页面状态和命令
     |-- Views/                            # AXAML 页面和窗口
     |-- Services/                         # OCR、PDF、文件、设置、统计、日志服务
-    |-- Styles/                           # 主题色和通用控件样式
+    |-- Styles/                           # 图标、主题色和通用控件样式
     |-- Converters/                       # UI 绑定转换器
     `-- Properties/PublishProfiles/        # Windows 发布配置
 ```

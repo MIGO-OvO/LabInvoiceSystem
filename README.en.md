@@ -1,6 +1,10 @@
 # LabInvoiceSystem
 
 <p align="center">
+  <img src="./LabInvoiceSystem/Assets/genshin_impact_128.png" alt="LabInvoiceSystem app icon" width="96" />
+</p>
+
+<p align="center">
   English | <a href="./README.md">简体中文</a>
 </p>
 
@@ -46,6 +50,7 @@ repository's launcher, publish profile, resource paths, and file explorer behavi
 | Main workspaces | Invoice import, invoice export, dashboard |
 | C# source files | 31 |
 | AXAML files | 8 |
+| Icon assets | 8 |
 | Default publish target | `win-x64`, self-contained, single file |
 
 ## Getting Started
@@ -172,12 +177,12 @@ LabInvoiceSystem/
 `-- LabInvoiceSystem/
     |-- App.axaml                         # Avalonia app styles, resources, and ViewLocator
     |-- Program.cs                        # Desktop app entry point
-    |-- Assets/                           # Static application assets
+    |-- Assets/                           # ICO, SVG, and PNG icon assets
     |-- Models/                           # InvoiceInfo, ArchiveItem, StatisticsData, AppSettings
     |-- ViewModels/                       # Main window, import, export, and dashboard state/commands
     |-- Views/                            # AXAML pages and window
     |-- Services/                         # OCR, PDF, file, settings, statistics, and logging services
-    |-- Styles/                           # Theme colors and shared control styles
+    |-- Styles/                           # Icons, theme colors, and shared control styles
     |-- Converters/                       # UI binding converters
     `-- Properties/PublishProfiles/        # Windows publish configuration
 ```
