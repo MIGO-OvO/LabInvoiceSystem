@@ -1,10 +1,6 @@
 # LabInvoiceSystem
 
 <p align="center">
-  <img src="./LabInvoiceSystem/Assets/genshin_impact_128.png" alt="LabInvoiceSystem 应用图标" width="96" />
-</p>
-
-<p align="center">
   <a href="./README.en.md">English</a> | 简体中文
 </p>
 
@@ -13,6 +9,7 @@
 [![MVVM](https://img.shields.io/badge/Pattern-MVVM-0F766E)](https://learn.microsoft.com/dotnet/architecture/maui/mvvm)
 [![Windows](https://img.shields.io/badge/Primary%20Platform-Windows-0078D4?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 [![Baidu OCR](https://img.shields.io/badge/OCR-Baidu%20VAT%20Invoice-2563EB)](https://cloud.baidu.com/product/ocr)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 ## 项目概览 (Overview)
 
@@ -37,23 +34,6 @@ Avalonia 构建跨平台 UI，用 .NET 8 承载业务逻辑，围绕“上传发
 | API 管理 | 在仪表盘中配置、测试并保存 Baidu OCR API Key 和 Secret Key |
 | 操作日志 | 将上传、归档、删除、导出等关键动作写入用户目录下的 JSON 日志 |
 
-## 图标资源
-
-项目图标资源位于 [LabInvoiceSystem/Assets](./LabInvoiceSystem/Assets)。`LabInvoiceSystem.csproj`
-通过 `AvaloniaResource Include="Assets\**"` 将其作为 Avalonia 资源引入，并使用
-`Assets\genshin_impact.ico` 作为应用图标。
-
-| 资源 | 用途 |
-| --- | --- |
-| ![128px 图标](./LabInvoiceSystem/Assets/genshin_impact_128.png) | README 预览图标和中等尺寸展示 |
-| [genshin_impact.ico](./LabInvoiceSystem/Assets/genshin_impact.ico) | Windows 应用图标 |
-| [genshin_impact.svg](./LabInvoiceSystem/Assets/genshin_impact.svg) | 矢量源图 |
-| [16px](./LabInvoiceSystem/Assets/genshin_impact_16.png) | 小尺寸图标 |
-| [32px](./LabInvoiceSystem/Assets/genshin_impact_32.png) | 小尺寸图标 |
-| [48px](./LabInvoiceSystem/Assets/genshin_impact_48.png) | Windows 常见图标尺寸 |
-| [64px](./LabInvoiceSystem/Assets/genshin_impact_64.png) | 中等尺寸图标 |
-| [256px](./LabInvoiceSystem/Assets/genshin_impact_256.png) | 高分辨率图标 |
-
 ## 项目状态
 
 | 指标 | 当前值 |
@@ -65,7 +45,6 @@ Avalonia 构建跨平台 UI，用 .NET 8 承载业务逻辑，围绕“上传发
 | 主要工作区 | 发票录入、发票导出、仪表盘 |
 | C# 源文件 | 31 |
 | AXAML 文件 | 8 |
-| 图标资源 | 8 |
 | 默认发布目标 | `win-x64`, self-contained, single file |
 
 ## 快速开始 (Getting Started)
@@ -192,12 +171,12 @@ LabInvoiceSystem/
 `-- LabInvoiceSystem/
     |-- App.axaml                         # Avalonia 应用样式、资源和 ViewLocator
     |-- Program.cs                        # 桌面应用入口
-    |-- Assets/                           # ICO、SVG、PNG 图标资源
+    |-- Assets/                           # 应用静态资源
     |-- Models/                           # InvoiceInfo、ArchiveItem、StatisticsData、AppSettings
     |-- ViewModels/                       # MainWindow、导入、导出、统计页面状态和命令
     |-- Views/                            # AXAML 页面和窗口
     |-- Services/                         # OCR、PDF、文件、设置、统计、日志服务
-    |-- Styles/                           # 图标、主题色和通用控件样式
+    |-- Styles/                           # 主题色和通用控件样式
     |-- Converters/                       # UI 绑定转换器
     `-- Properties/PublishProfiles/        # Windows 发布配置
 ```
@@ -259,7 +238,8 @@ OCR 密钥、`bin` 或 `obj` 生成物，并至少执行项目构建验证。
 
 ## 许可证 (License)
 
-当前仓库未包含独立的 `LICENSE` 文件。若需要公开分发、二次开发或商业使用，请先补充明确的开源许可证。
+本项目使用 [MIT License](./LICENSE) 开源。你可以在遵守 MIT 许可证条款的前提下自由使用、
+复制、修改、合并、发布、分发、再授权和销售本项目副本。
 
 ## 致谢 (Acknowledgements)
 

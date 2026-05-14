@@ -1,10 +1,6 @@
 # LabInvoiceSystem
 
 <p align="center">
-  <img src="./LabInvoiceSystem/Assets/genshin_impact_128.png" alt="LabInvoiceSystem app icon" width="96" />
-</p>
-
-<p align="center">
   English | <a href="./README.md">简体中文</a>
 </p>
 
@@ -13,6 +9,7 @@
 [![MVVM](https://img.shields.io/badge/Pattern-MVVM-0F766E)](https://learn.microsoft.com/dotnet/architecture/maui/mvvm)
 [![Windows](https://img.shields.io/badge/Primary%20Platform-Windows-0078D4?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 [![Baidu OCR](https://img.shields.io/badge/OCR-Baidu%20VAT%20Invoice-2563EB)](https://cloud.baidu.com/product/ocr)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 ## Overview
 
@@ -38,22 +35,6 @@ repository's launcher, publish profile, resource paths, and file explorer behavi
 | API management | Configure, test, and save Baidu OCR API Key and Secret Key from the dashboard |
 | Operation log | Record upload, archive, delete, and export actions as a JSON log in the user profile |
 
-## Icon Assets
-
-Icon assets live in [LabInvoiceSystem/Assets](./LabInvoiceSystem/Assets). `LabInvoiceSystem.csproj` includes them
-with `AvaloniaResource Include="Assets\**"` and uses `Assets\genshin_impact.ico` as the application icon.
-
-| Asset | Purpose |
-| --- | --- |
-| ![128px icon](./LabInvoiceSystem/Assets/genshin_impact_128.png) | README preview icon and medium-size display |
-| [genshin_impact.ico](./LabInvoiceSystem/Assets/genshin_impact.ico) | Windows application icon |
-| [genshin_impact.svg](./LabInvoiceSystem/Assets/genshin_impact.svg) | Vector source |
-| [16px](./LabInvoiceSystem/Assets/genshin_impact_16.png) | Small icon size |
-| [32px](./LabInvoiceSystem/Assets/genshin_impact_32.png) | Small icon size |
-| [48px](./LabInvoiceSystem/Assets/genshin_impact_48.png) | Common Windows icon size |
-| [64px](./LabInvoiceSystem/Assets/genshin_impact_64.png) | Medium icon size |
-| [256px](./LabInvoiceSystem/Assets/genshin_impact_256.png) | High-resolution icon |
-
 ## Project Status
 
 | Metric | Current Value |
@@ -65,7 +46,6 @@ with `AvaloniaResource Include="Assets\**"` and uses `Assets\genshin_impact.ico`
 | Main workspaces | Invoice import, invoice export, dashboard |
 | C# source files | 31 |
 | AXAML files | 8 |
-| Icon assets | 8 |
 | Default publish target | `win-x64`, self-contained, single file |
 
 ## Getting Started
@@ -192,12 +172,12 @@ LabInvoiceSystem/
 `-- LabInvoiceSystem/
     |-- App.axaml                         # Avalonia app styles, resources, and ViewLocator
     |-- Program.cs                        # Desktop app entry point
-    |-- Assets/                           # ICO, SVG, and PNG icon assets
+    |-- Assets/                           # Static application assets
     |-- Models/                           # InvoiceInfo, ArchiveItem, StatisticsData, AppSettings
     |-- ViewModels/                       # Main window, import, export, and dashboard state/commands
     |-- Views/                            # AXAML pages and window
     |-- Services/                         # OCR, PDF, file, settings, statistics, and logging services
-    |-- Styles/                           # Icons, theme colors, and shared control styles
+    |-- Styles/                           # Theme colors and shared control styles
     |-- Converters/                       # UI binding converters
     `-- Properties/PublishProfiles/        # Windows publish configuration
 ```
@@ -264,8 +244,8 @@ and any relevant screenshots or logs.
 
 ## License
 
-This repository does not currently include a standalone `LICENSE` file. Add an explicit open source license
-before public redistribution, derivative work, or commercial use.
+This project is open source under the [MIT License](./LICENSE). You may use, copy, modify, merge, publish,
+distribute, sublicense, and sell copies of the project under the MIT terms.
 
 ## Acknowledgements
 
