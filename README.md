@@ -1,414 +1,274 @@
-# Lab Invoice System
+# LabInvoiceSystem
 
-> LabInvoiceSystem is a desktop tool for managing reimbursement invoices in laboratories, with OCR-based importing, archiving, exporting and statistics.
-GitHub: https://github.com/MIGO-OvO/LabInvoiceSystem
+<p align="center">
+  <img src="./LabInvoiceSystem/Assets/genshin_impact_128.png" alt="LabInvoiceSystem 应用图标" width="96" />
+</p>
 
-LabInvoiceSystem 是一个面向个人实验室课题组发票报账场景的发票管理桌面应用，基于 Avalonia 构建，提供发票录入（OCR 识别）、归档导出和统计分析等功能，帮助简化报销资料整理流程，适合在实验室和科研场景中自由使用与二次开发。
+<p align="center">
+  <a href="./README.en.md">English</a> | 简体中文
+</p>
 
----
+[![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![Avalonia](https://img.shields.io/badge/Avalonia-11.3.9-8B44AC)](https://avaloniaui.net/)
+[![MVVM](https://img.shields.io/badge/Pattern-MVVM-0F766E)](https://learn.microsoft.com/dotnet/architecture/maui/mvvm)
+[![Windows](https://img.shields.io/badge/Primary%20Platform-Windows-0078D4?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
+[![Baidu OCR](https://img.shields.io/badge/OCR-Baidu%20VAT%20Invoice-2563EB)](https://cloud.baidu.com/product/ocr)
 
-## 目录
+## 项目概览 (Overview)
 
-- [项目简介](#项目简介)
-- [功能特性](#功能特性)
-- [快速开始](#快速开始)
-- [使用指南](#使用指南)
-  - [发票录入](#发票录入)
-  - [发票归档与导出](#发票归档与导出)
-  - [统计分析](#统计分析)
-  - [OCR API 设置与测试](#ocr-api-设置与测试)
-- [配置说明](#配置说明)
-- [目录结构与架构概览](#目录结构与架构概览)
-- [技术栈与依赖](#技术栈与依赖)
-- [常见问题 FAQ](#常见问题-faq)
-- [License 与致谢](#license-与致谢)
+LabInvoiceSystem 是一个面向实验室、课题组和科研报销场景的桌面发票管理工具。它用
+Avalonia 构建跨平台 UI，用 .NET 8 承载业务逻辑，围绕“上传发票、OCR 识别、人工核对、
+归档、按日报账导出、统计分析”这条流程减少手工整理发票的重复工作。
 
----
+当前项目主要面向 Windows 桌面环境使用。Avalonia 本身具备跨平台能力，但仓库中的启动脚本、
+发布配置、资源路径和文件打开行为都优先服务 Windows。
 
-## 项目简介
+## 核心功能
 
-在实验室或科研单位的日常报销流程中，研究人员往往需要管理大量零散的纸质或电子发票，并按照时间、项目、支付方式等维度进行整理与统计。手工处理不仅耗时，还容易出错。
+| 模块 | 能力 |
+| --- | --- |
+| 发票录入 | 支持通过文件选择器或拖拽上传 PDF、JPG、JPEG、PNG 发票文件 |
+| PDF 预览 | 使用 `PDFtoImage` 和 `SkiaSharp` 将 PDF 首页渲染为图片，预览区支持缩放、拖动、双击重置 |
+| OCR 识别 | 调用百度增值税发票 OCR 接口，提取日期、金额、项目、发票号码、销售方名称和税号 |
+| 人工核对 | OCR 后进入待核对状态，可在界面中修正日期、金额、项目名称和支付方式 |
+| 本地归档 | 按 `YYYY-MM` 分目录保存发票原文件，并为每张发票写入同名 JSON 元数据 |
+| 导出报账 | 按日期分组导出 ZIP，同时生成 Excel 明细表并打包到 ZIP 中 |
+| 统计仪表盘 | 展示累计金额、累计发票数量、近 30 天金额和过去一年报账热力图 |
+| API 管理 | 在仪表盘中配置、测试并保存 Baidu OCR API Key 和 Secret Key |
+| 操作日志 | 将上传、归档、删除、导出等关键动作写入用户目录下的 JSON 日志 |
 
-LabInvoiceSystem 旨在解决这些问题，提供：
+## 图标资源
 
-- **发票录入**：支持 PDF / JPG / PNG 文件，集成百度增值税发票 OCR 自动识别关键字段。 
-- **发票归档与导出**：使用统一文件命名规则（日期 + 项目名称 + 支付方式 + 金额）进行归档，支持按日期导出 ZIP。 
-- **统计分析**：提供累计报销金额、发票数量、近 30 天报销金额、年度热力图等数据视图。
+项目图标资源位于 [LabInvoiceSystem/Assets](./LabInvoiceSystem/Assets)。`LabInvoiceSystem.csproj`
+通过 `AvaloniaResource Include="Assets\**"` 将其作为 Avalonia 资源引入，并使用
+`Assets\genshin_impact.ico` 作为应用图标。
 
-应用采用 MVVM 架构，基于 Avalonia 跨平台 UI 框架开发，目前主要以 Windows 桌面环境为运行目标。
+| 资源 | 用途 |
+| --- | --- |
+| ![128px 图标](./LabInvoiceSystem/Assets/genshin_impact_128.png) | README 预览图标和中等尺寸展示 |
+| [genshin_impact.ico](./LabInvoiceSystem/Assets/genshin_impact.ico) | Windows 应用图标 |
+| [genshin_impact.svg](./LabInvoiceSystem/Assets/genshin_impact.svg) | 矢量源图 |
+| [16px](./LabInvoiceSystem/Assets/genshin_impact_16.png) | 小尺寸图标 |
+| [32px](./LabInvoiceSystem/Assets/genshin_impact_32.png) | 小尺寸图标 |
+| [48px](./LabInvoiceSystem/Assets/genshin_impact_48.png) | Windows 常见图标尺寸 |
+| [64px](./LabInvoiceSystem/Assets/genshin_impact_64.png) | 中等尺寸图标 |
+| [256px](./LabInvoiceSystem/Assets/genshin_impact_256.png) | 高分辨率图标 |
 
----
+## 项目状态
 
-## 功能特性
+| 指标 | 当前值 |
+| --- | --- |
+| 应用类型 | 桌面端发票 OCR、归档和导出工具 |
+| 目标框架 | `net8.0` |
+| UI 框架 | Avalonia 11.3.9, Fluent theme |
+| 架构模式 | MVVM, `CommunityToolkit.Mvvm` |
+| 主要工作区 | 发票录入、发票导出、仪表盘 |
+| C# 源文件 | 31 |
+| AXAML 文件 | 8 |
+| 图标资源 | 8 |
+| 默认发布目标 | `win-x64`, self-contained, single file |
 
-- **发票录入与预览**  
-  - 支持拖拽或通过文件选择对话框上传多个发票文件。  
-  - 支持 PDF / JPG / JPEG / PNG。PDF 会通过内部的 PDF 转图片服务转换为首张图片进行预览和 OCR。  
-  - 所有上传文件首先保存到临时目录 `temp_uploads`。  
-  - 右侧提供发票预览区域，方便快速核对内容。
-
-- **OCR 自动识别**  
-  - 集成百度增值税发票 OCR（VAT Invoice OCR）接口，由 `OcrService` 负责调用与结果解析。  
-  - 自动尝试识别：开票日期、价税合计金额、项目名称 / 货物名称等字段。  
-  - 识别结果填充到 `InvoiceInfo` 模型中，用户可以在界面中进一步修改。  
-  - OCR 失败时，会将错误信息写入发票的 `RawOcrData` 字段，并提示用户手动编辑。
-
-- **发票归档与文件管理**  
-  - 单张归档：在录入界面中选择发票后点击“确认并归档”，由 `FileManagerService` 将文件从临时目录移动到归档目录。  
-  - 批量归档：支持“一键全部归档”，会对所有信息完整的发票进行批量处理。  
-  - 归档命名规则： `YYYYMMDD-项目名称-支付方式-金额元.ext`，并按月份分目录存放：`archive_data/YYYY-MM/`。  
-  - 支持删除临时文件和删除归档文件。  
-  - 支持将某一日期下的全部归档发票打包为 ZIP 文件导出，同时自动生成形如 `YYYYMMDD_报账发票明细.xlsx` 的 Excel 明细并一并打包。
-
-- **统计分析**  
-  - 基于归档文件的解析结果（`ArchiveItem` + `StatisticsService`），计算：  
-    - 累计报销金额。  
-    - 累计发票数量。  
-    - 近 30 天报销金额。  
-  - 生成过去一年的报销热力图（按日聚合金额，并以不同颜色深浅表示强度）。  
-  - 展示 OCR API 配置状态（例如“API 就绪”或“未配置”），便于快速确认 Baidu OCR 凭据是否已正确填写。  
-  - 展示本月 OCR 调用次数与配额（例如“本月调用: X/Y”），其中 Y 来自 `AppSettings.BaiduMonthlyQuota`。
-
-- **主题与用户体验**  
-  - 使用 Fluent 风格的现代 UI，搭配卡片式布局与渐变色。  
-  - 支持浅色 / 深色主题切换（ThemeVariant），当前选择会同步写入配置 `AppSettings.ThemeMode`。  
-  - 侧边导航与动画切换增强整体操作体验。
-
-- **日志记录**  
-  - 通过 `LoggerService` 将用户的关键操作（上传、归档、删除、导出）写入 JSON 日志文件：  
-    - 路径：`%APPDATA%/LabInvoiceSystem/upload_logs.json`。  
-  - 便于后续追踪使用记录或排查问题。
-
----
-
-## 快速开始
+## 快速开始 (Getting Started)
 
 ### 环境要求
 
-- 推荐操作系统：**Windows 10 或更高版本**。  
-- 对于开发者：建议安装 **.NET 8 SDK** 以便从源码构建与调试。  
-- 对于仅运行已发布可执行文件的普通用户：下载解压release中的压缩包到文件夹中，点击labinvoicesystem.exe运行即可。  
-- 应用基于 Avalonia 理论上具备跨平台能力，但仓库中的启动脚本 `start.bat` 以及下文的发布示例主要面向 Windows 环境。
+- Windows 10 或更高版本。
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)，用于从源码运行、调试和发布。
+- 百度智能云 OCR 应用的 `API Key` 和 `Secret Key`，用于真实发票识别。
 
-### 获取代码
+### 安装与运行 (Installation)
 
 ```bash
-# 克隆仓库
 git clone https://github.com/MIGO-OvO/LabInvoiceSystem.git
 cd LabInvoiceSystem
 ```
 
-### 运行应用
-
-#### 方式一：使用已发布的可执行文件（win-x64）
-
-1.从Release下载对应电脑架构版本的压缩包后，解压压缩包到独立文件夹内。
-2. 在该目录下找到可执行文件（`LabInvoiceSystem.exe`），直接双击即可启动应用。  
-
-#### 方式二：命令行运行
+### 从源码运行
 
 ```bash
-cd LabInvoiceSystem
-
-dotnet run
+dotnet restore
+dotnet run --project LabInvoiceSystem/LabInvoiceSystem.csproj
 ```
 
-#### 方式三：Windows 批处理脚本
-
-在仓库根目录下执行：
+也可以在 Windows 上直接运行根目录脚本：
 
 ```bat
 start.bat
 ```
 
-脚本会自动进入 `LabInvoiceSystem` 子目录并执行 `dotnet run`，同时在启动失败时保留命令行窗口以便查看错误信息。  
+### 发布 Windows 单文件版本
 
-### OCR 凭据配置概览
+```bash
+dotnet publish LabInvoiceSystem/LabInvoiceSystem.csproj ^
+  -c Release ^
+  -r win-x64 ^
+  --self-contained true ^
+  /p:PublishSingleFile=true
+```
 
-项目内的 `AppSettings` 类型定义了百度 OCR 所需的凭据字段：
+仓库内的发布配置文件位于
+[发布配置](./LabInvoiceSystem/Properties/PublishProfiles/FolderProfile.pubxml)。
 
-- `BaiduAppId`
-- `BaiduApiKey`
-- `BaiduSecretKey`
+## 使用流程 (Usage)
 
-应用实际运行时，会通过 `SettingsService` 从配置文件加载这些值：
+1. 打开应用后进入“发票录入”。
+2. 点击“上传文件”或将发票文件拖入左侧区域。
+3. PDF 会先转换成图片，图片文件会直接进入 OCR 流程。
+4. OCR 完成后，在右侧预览区核对发票图片和识别字段。
+5. 修正日期、金额、项目名称和支付方式。
+6. 点击“确认并归档”，或使用“全部归档”批量处理。
+7. 进入“发票导出”，按日期查看归档记录，导出 ZIP 或删除归档文件。
+8. 进入“仪表盘”，查看累计金额、发票数量、近 30 天金额和年度热力图。
 
-- 配置文件路径：`%APPDATA%/LabInvoiceSystem/appsettings.json`。  
-- 如果文件不存在，会使用默认配置并在保存时自动创建。  
+## OCR 配置
 
----
+OCR 调用由 [OcrService.cs](./LabInvoiceSystem/Services/OcrService.cs) 负责。应用使用百度
+OAuth 接口获取 `access_token`，再调用增值税发票 OCR 接口。
 
-## 使用指南
+配置入口在“仪表盘”的“配置百度 API”按钮中：
 
-### 发票录入
+1. 填入百度 OCR 的 `API Key` 和 `Secret Key`。
+2. 点击“测试连接”，验证能否获取访问令牌。
+3. 点击“保存配置”，配置会写入用户目录。
 
-1. 打开应用后，左侧导航选择 **“发票录入”**。  
-2. 在左侧区域通过以下任一方式上传发票：  
-   - 点击“上传文件”按钮，打开系统文件选择对话框；  
-   - 直接将 PDF / 图片文件拖拽到左侧“拖拽发票到此处”区域。  
-3. 已上传的发票会显示在左侧列表中，并在后台自动完成：  
-   - 保存文件至临时目录 `temp_uploads`；  
-   - 对 PDF 文件执行 PDF→图片转换（首张）；  
-   - 调用百度 OCR 接口进行识别。
-4. 点击某一条发票记录，右侧会显示：  
-   - 发票图片预览；  
-   - 下方编辑表单：日期、金额、项目名称、支付方式等。  
-5. 如需统一设置日期，可使用右上方的日期选择器与“一键设日期”功能，对当前批次所有发票应用同一日期。
+请不要将生产环境 OCR 密钥提交到仓库。当前运行配置保存在：
 
-### 发票归档与导出
+```text
+%APPDATA%\LabInvoiceSystem\appsettings.json
+```
 
-#### 在录入界面归档
+应用还会在同一目录记录操作日志：
 
-1. 在右侧编辑表单中确认以下字段已正确填写：  
-   - 日期  
-   - 金额  
-   - 项目名称  
-   - 支付方式（如“公务卡”、“现金”等）
-2. 点击 **“确认并归档”**：  
-   - 应用会验证金额与项目名称是否填写。  
-   - 通过 `FileManagerService` 将对应文件从 `temp_uploads` 移动到归档目录：  
-     - 目录格式：`archive_data/YYYY-MM/`。  
-     - 文件命名：`YYYYMMDD-项目名称-支付方式-金额元.ext`。
-3. 如需一次性归档所有信息完整的发票，可使用 **“全部归档”** 按钮。
+```text
+%APPDATA%\LabInvoiceSystem\upload_logs.json
+```
 
-#### 在“发票导出”界面管理归档数据
+## 文件归档规则
 
-1. 左侧导航选择 **“发票导出”**。  
-2. 点击“刷新列表”按钮，系统会：  
-   - 从归档目录 `archive_data` 读取所有归档文件；  
-   - 解析文件名并生成 `ArchiveItem` 列表；  
-   - 按日期（`YYYY-MM-DD`）分组展示。  
-3. 在某天的分组卡片右上角可以：  
-   - **“导出为 ZIP”**：将该日期下所有发票打包为 ZIP，保存到你指定的位置。  
-   - **“删除”**：删除该日期下所有归档文件。  
-4. 在分组表格中每一条发票记录行的“操作”列可以：  
-   - 单独 **下载** 该发票文件到磁盘任意位置；  
-   - 单独 **删除** 该发票文件。
+默认目录来自 `AppSettings`：
 
-### 统计分析
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `ArchiveDirectory` | `archive_data` | 已归档发票根目录 |
+| `TempUploadDirectory` | `temp_uploads` | 上传后、归档前的临时目录 |
+| `ExportDirectory` | `export_data` | ZIP 和 Excel 导出目录 |
 
-1. 左侧导航选择 **“统计面板”**。  
-2. 点击“刷新数据”按钮，系统会：  
-   - 再次扫描归档目录 `archive_data`；  
-   - 计算：累计报销金额、发票总数、近 30 天报销金额；  
-   - 聚合每日支出数据，并生成过去一年的热力图。  
-3. 在统计界面中你可以看到：  
-   - 顶部三个 KPI 卡片展示关键数字。  
-   - 中间为按日划分的热力图，鼠标悬停可查看某日的具体金额及日期。  
-   - 右下角的图例展示从“少”到“多”的颜色梯度含义。  
-   - 顶部状态区域中的 OCR API 配置状态（如“API 就绪”或“未配置”），以及本月调用次数与配额（例如“本月调用: X/Y”）。
+发票归档时会写入：
 
-### OCR API 设置与测试
+```text
+archive_data/YYYY-MM/YYYYMMDD-项目名称-支付方式-金额元.ext
+archive_data/YYYY-MM/YYYYMMDD-项目名称-支付方式-金额元.json
+```
 
-1. 在统计面板中点击 **“API 设置”**（或等效入口），打开 OCR 配置对话框。  
-2. 在弹窗中填写：  
-   - `API Key`（对应 `AppSettings.BaiduApiKey`）  
-   - `Secret Key`（对应 `AppSettings.BaiduSecretKey`）  
-3. 点击 **“测试连接”**：  
-   - 程序会调用百度 OAuth 接口校验凭据是否有效；  
-   - 成功时提示“连接成功，API Key 有效”，失败时会显示错误描述。  
-4. 点击 **“保存”**：  
-   - 程序会将凭据写入 `%APPDATA%/LabInvoiceSystem/appsettings.json`；  
-   - 同时刷新统计面板中的 API 状态和“本月调用: X/Y” 显示。  
+JSON 元数据用于比单纯解析文件名更可靠地恢复发票日期、金额、项目、支付方式、发票号码、
+销售方名称和销售方税号。
 
----
+## 架构概览
 
-## 配置说明
+```mermaid
+flowchart LR
+    A["文件选择或拖拽上传"] --> B["FileManagerService 保存临时文件"]
+    B --> C{"是否 PDF"}
+    C -- "是" --> D["PdfService 渲染首页图片"]
+    C -- "否" --> E["直接读取图片字节"]
+    D --> F["OcrService 调用 Baidu VAT Invoice OCR"]
+    E --> F
+    F --> G["InvoiceInfo 待核对"]
+    G --> H["确认并归档"]
+    H --> I["archive_data/YYYY-MM 文件和 JSON 元数据"]
+    I --> J["发票导出 ZIP + Excel"]
+    I --> K["StatisticsService 统计和热力图"]
+```
 
-### AppSettings（`Models/AppSettings.cs`）
-
-`AppSettings` 类型定义了应用运行时的重要配置，主要包括：  
-
-- **OCR 配置**：  
-  - `BaiduAppId`：百度 OCR 应用 ID。  
-  - `BaiduApiKey`：百度 OCR API Key。  
-  - `BaiduSecretKey`：百度 OCR Secret Key。  
-  - `BaiduMonthlyUsage`：当前统计月份内已调用次数，由应用在每次识别后自动递增。  
-  - `BaiduMonthlyQuota`：当前月份允许的最大调用次数，用于在界面中展示“本月调用: X/Y”。  
-  - `BaiduUsageMonth`：当前统计的月份（例如 `"2025-11"`），用于在跨月时自动重置调用计数。  
-- **目录配置**：  
-  - `ArchiveDirectory`：发票归档根目录，默认值为 `"archive_data"`。  
-  - `TempUploadDirectory`：临时上传目录，默认值为 `"temp_uploads"`。  
-  - `ExportDirectory`：发票导出（ZIP + Excel）的默认目录，默认值为 `"export_data"`。  
-- **主题配置**：  
-  - `ThemeMode`：主题模式，`"Dark"` 或 `"Light"`。
-
-### SettingsService（`Services/SettingsService.cs`）
-
-- 采用单例模式 `SettingsService.Instance` 管理配置。  
-- 配置文件路径：  
-  - Windows 示例：`%APPDATA%/LabInvoiceSystem/appsettings.json`。  
-- 启动时逻辑：  
-  - 若配置文件存在：读取 JSON 并反序列化为 `AppSettings`。  
-  - 若不存在：使用默认 `AppSettings` 实例。  
-- 在保存配置时会确保：  
-  - 配置目录存在；  
-  - 结合 `EnsureDirectoriesExist` 方法，保证 `ArchiveDirectory`、`TempUploadDirectory` 以及非空的 `ExportDirectory` 对应的目录存在，不存在会自动创建。
-
----
-
-## 目录结构与架构概览
-
-### 关键目录结构（简要）
+## 目录结构
 
 ```text
 LabInvoiceSystem/
-├─ LabInvoiceSystem/           # 主项目
-│  ├─ App.axaml                # 应用入口 XAML
-│  ├─ App.axaml.cs             # 应用入口代码，初始化 MainWindowViewModel
-│  ├─ Program.cs               # .NET 程序入口
-│  ├─ Views/                   # 视图（XAML）
-│  │  ├─ MainWindow.axaml
-│  │  ├─ InvoiceImportView.axaml
-│  │  ├─ InvoiceExportView.axaml
-│  │  └─ StatisticsView.axaml
-│  ├─ ViewModels/              # 视图模型（MVVM）
-│  │  ├─ MainWindowViewModel.cs
-│  │  ├─ InvoiceImportViewModel.cs
-│  │  ├─ InvoiceExportViewModel.cs
-│  │  └─ StatisticsViewModel.cs
-│  ├─ Models/                  # 领域模型
-│  │  ├─ InvoiceInfo.cs
-│  │  ├─ ArchiveItem.cs
-│  │  ├─ StatisticsData.cs
-│  │  ├─ HeatmapDayData.cs
-│  │  ├─ AppSettings.cs
-│  │  └─ LogEntry.cs
-│  ├─ Services/                # 业务服务
-│  │  ├─ OcrService.cs
-│  │  ├─ PdfService.cs
-│  │  ├─ FileManagerService.cs
-│  │  ├─ StatisticsService.cs
-│  │  ├─ SettingsService.cs
-│  │  └─ LoggerService.cs
-│  ├─ Converters/              # UI 转换器
-│  ├─ Styles/                  # 应用样式与主题
-│  └─ ViewLocator.cs           # View 与 ViewModel 的关联
-├─ archive_data/               # 默认归档目录（按 YYYY-MM 子目录）
-├─ temp_uploads/               # 默认临时上传目录
-├─ LabInvoiceSystem.sln
-└─ start.bat                   # Windows 启动脚本
+|-- README.md
+|-- README.en.md
+|-- LabInvoiceSystem.sln
+|-- start.bat
+|-- archive_data/                         # 默认归档目录，运行时数据
+`-- LabInvoiceSystem/
+    |-- App.axaml                         # Avalonia 应用样式、资源和 ViewLocator
+    |-- Program.cs                        # 桌面应用入口
+    |-- Assets/                           # ICO、SVG、PNG 图标资源
+    |-- Models/                           # InvoiceInfo、ArchiveItem、StatisticsData、AppSettings
+    |-- ViewModels/                       # MainWindow、导入、导出、统计页面状态和命令
+    |-- Views/                            # AXAML 页面和窗口
+    |-- Services/                         # OCR、PDF、文件、设置、统计、日志服务
+    |-- Styles/                           # 图标、主题色和通用控件样式
+    |-- Converters/                       # UI 绑定转换器
+    `-- Properties/PublishProfiles/        # Windows 发布配置
 ```
 
-### 架构要点
+## 技术栈
 
-- **MVVM 模式**  
-  - `Views` 只关心界面布局与绑定。  
-  - `ViewModels` 实现具体业务逻辑与命令（`RelayCommand`）。  
-  - `Models` 承载领域数据（发票、统计、配置等）。  
-  - `Services` 负责与外部系统和底层资源的交互（文件系统、网络、PDF、统计等）。
+| 依赖 | 用途 |
+| --- | --- |
+| `Avalonia`, `Avalonia.Desktop` | 桌面 UI 框架 |
+| `Avalonia.Themes.Fluent`, `Avalonia.Fonts.Inter` | Fluent 风格和字体 |
+| `CommunityToolkit.Mvvm` | Observable 属性、RelayCommand 和 MVVM 支持 |
+| `Avalonia.Controls.DataGrid` | 归档发票表格展示 |
+| `LiveChartsCore.SkiaSharpView.Avalonia` | 图表与统计可视化 |
+| `MiniExcel` | 导出 Excel 明细 |
+| `PDFtoImage` | PDF 首页转图片 |
+| `SkiaSharp` | 图像渲染和处理 |
+| `Svg.Controls.Skia.Avalonia` | SVG 资源渲染 |
 
-- **导航逻辑**  
-  - `MainWindowViewModel` 中维护 `CurrentView` 和 `CurrentViewName`，通过 `Navigate` 命令在 Import / Export / Statistics 之间切换。  
-  - 部分 ViewModel 实现 `INavigable` 接口，在 `OnNavigatedTo` 中执行数据刷新逻辑（如导出列表、统计数据）。
+## 开发说明
 
-- **服务职责概览**  
-  - `OcrService`：  
-    - 负责管理 Baidu OCR `access_token` 的获取与缓存。  
-    - 将图片（或由 PDF 转换得到的图片）发送到百度增值税发票 OCR 接口，并解析返回 JSON。  
-  - `PdfService`：  
-    - 使用 `PDFtoImage` 与 `SkiaSharp` 将 PDF 的第一页转换成 PNG 图像。  
-    - 对 PDF 文件头和文件大小进行基本校验，避免处理损坏或伪造文件。  
-  - `FileManagerService`：  
-    - 保存上传文件到临时目录。  
-    - 按统一命名规则进行归档，维护 `archive_data/YYYY-MM` 目录结构。  
-    - 导出 ZIP、删除临时或归档文件。  
-  - `StatisticsService`：  
-    - 基于 `ArchiveItem` 计算总金额、总数量、每日金额、近 30 天金额等统计数据。  
-  - `SettingsService`：  
-    - 全局管理 `AppSettings` 的加载与保存。  
-  - `LoggerService`：  
-    - 将关键操作追加写入 JSON 日志文件，便于审计与追踪。
+- 默认页面由 [MainWindowViewModel.cs](./LabInvoiceSystem/ViewModels/MainWindowViewModel.cs) 控制。
+- View 和 ViewModel 通过 [ViewLocator.cs](./LabInvoiceSystem/ViewLocator.cs) 关联。
+- 主题切换会写入 `AppSettings.ThemeMode`。
+- 导出 ZIP 时，单一支付方式使用 `YYYYMMDD+支付方式.zip`，混合支付方式使用 `YYYYMMDD_发票.zip`。
+- 本仓库当前没有自动化测试项目。修改业务逻辑后，至少运行 `dotnet build` 做基础验证。
 
----
+## 常见问题
 
-## 技术栈与依赖
+### OCR 识别失败怎么办？
 
-本项目基于 .NET 8 与 Avalonia，主要依赖如下（来自 `LabInvoiceSystem.csproj`）：
+检查网络是否能访问百度智能云，确认 API Key 和 Secret Key 是否有效，并查看界面中的错误提示。
+如果 OCR 失败，发票仍会进入待核对状态，可以手工补全金额和项目后归档。
 
-- **UI 框架**  
-  - `Avalonia` 11.3.9  
-  - `Avalonia.Desktop` 11.3.9  
-  - `Avalonia.Themes.Fluent` 11.3.9  
-  - `Avalonia.Fonts.Inter` 11.3.9  
-  - `Svg.Controls.Skia.Avalonia` 11.3.6.2：用于渲染 SVG 图标与资源。
+### PDF 无法预览或识别怎么办？
 
-- **MVVM 支持**  
-  - `CommunityToolkit.Mvvm` 8.2.1
+确认文件是真实 PDF，文件头应为 `%PDF-`，且文件不为空、未损坏。应用只渲染首页用于预览和 OCR，
+多页 PDF 需要确认发票是否在第一页。
 
-- **控件与图表**  
-  - `Avalonia.Controls.DataGrid` 11.3.9：用于表格展示归档发票等。  
-  - `LiveChartsCore.SkiaSharpView.Avalonia` 2.0.0-rc4：用于可视化图表展示（如统计界面）。
+### 仪表盘没有数据怎么办？
 
-- **数据处理与导出**  
-  - `MiniExcel` 1.42.0：轻量级表格处理 / 导出组件（可用于 Excel 导出等场景）。
+仪表盘读取的是已归档文件。请先在“发票录入”中完成“确认并归档”，再进入仪表盘点击“刷新数据”。
 
-- **PDF 与图像处理**  
-  - `PDFtoImage` 4.1.0：将 PDF 转换为图像文件。  
-  - `SkiaSharp` 2.88.9：图像渲染与处理。
+### 导出的 ZIP 在哪里？
 
-- **其他**  
-  - .NET BCL 中的 `HttpClient`、`System.Text.Json` 等，用于调用百度 OCR API 与处理 JSON 数据。
+默认导出到 `export_data`。也可以在“发票导出”页面点击“设置导出路径”，选择新的导出目录。
 
----
+## 贡献 (Contributing)
 
-## 常见问题 FAQ
+当前仓库没有单独的贡献指南。提交改动前，请优先保持现有 MVVM 分层，避免提交本地运行数据、
+OCR 密钥、`bin` 或 `obj` 生成物，并至少执行项目构建验证。
 
-### 1. OCR 调用失败怎么办？
+## 反馈问题与联系 (Issues / Contact)
 
-可能原因：
+请通过 GitHub Issues 反馈缺陷、改进建议或使用问题：
 
-- 网络不可用或访问百度 OCR 接口受限。  
-- `BaiduAppId` / `BaiduApiKey` / `BaiduSecretKey` 配置不正确或已过期。  
-- 请求频率过高触发限流。
+[https://github.com/MIGO-OvO/LabInvoiceSystem/issues](https://github.com/MIGO-OvO/LabInvoiceSystem/issues)
 
-建议排查步骤：
+反馈时建议包含操作步骤、期望结果、实际结果、系统版本、发票文件类型以及错误截图或日志。
 
-- 检查本机网络环境并尝试通过浏览器访问百度 AI 平台。  
-- 查看 `%APPDATA%/LabInvoiceSystem/appsettings.json` 中的凭据是否填写正确。  
-- 检查应用输出的错误信息（控制台或 `error.log`）。
+## 许可证 (License)
 
-### 2. PDF 转图片失败怎么办？
+当前仓库未包含独立的 `LICENSE` 文件。若需要公开分发、二次开发或商业使用，请先补充明确的开源许可证。
 
-可能原因：
+## 致谢 (Acknowledgements)
 
-- 上传的文件不是合法 PDF（文件头不是 `%PDF-`）。  
-- PDF 文件为空或损坏。  
-- `PDFtoImage` 或 `SkiaSharp` 组件运行异常。
+本项目使用以下开源项目和服务构建：
 
-建议排查步骤：
-
-- 确认上传的文件在其他 PDF 阅读器中可以正常打开。  
-- 检查错误提示中是否包含“文件不是有效的 PDF 格式”或“PDF 转换未生成输出图片文件”等信息。  
-- 如定位到个别问题文件，可暂时跳过该文件并手动录入发票信息。
-
-### 3. 为什么统计界面没有数据显示？
-
-- 确认是否已经成功对发票执行“确认并归档”操作。  
-- 确认 `archive_data` 目录下确实存在归档文件。  
-- 在统计界面点击“刷新数据”按钮以重新加载最新归档文件。
-
-### 4. 日志和配置文件存在哪？
-
-- 配置文件：`%APPDATA%/LabInvoiceSystem/appsettings.json`。  
-- 操作日志：`%APPDATA%/LabInvoiceSystem/upload_logs.json`。
-
-### 5. 如何查看和控制 Baidu OCR 月调用次数？
-
-- 在统计面板中查看顶部状态区域的“本月调用: X/Y”，其中 `Y` 来自 `AppSettings.BaiduMonthlyQuota`。  
-- 如需调整配额上限，可在 `%APPDATA%/LabInvoiceSystem/appsettings.json` 中修改 `BaiduMonthlyQuota`，使其与你在百度控制台购买的套餐保持一致。  
-- 当实际调用接近或超过百度接口限制时，可能会在 OCR 调用失败提示中看到限流相关错误信息，可结合前述排查步骤处理。  
-
----
-
-## License 与致谢
-
-- **License**：本项目以 **MIT License** 开源，你可以在遵守 MIT 许可条款的前提下自由使用、修改和分发本项目。  
-- **致谢**：  
-  - [Avalonia UI](https://avaloniaui.net/)  
-  - [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/)  
-  - [LiveChartsCore](https://github.com/beto-rodriguez/LiveCharts2)  
-  - [MiniExcel](https://github.com/shps951023/MiniExcel)  
-  - [PDFtoImage](https://github.com/roryprimrose/PDFtoImage)  
-  - [SkiaSharp](https://github.com/mono/SkiaSharp)  
-  - 百度智能云 OCR 服务
+- [Avalonia UI](https://avaloniaui.net/)
+- [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/)
+- [LiveChartsCore](https://github.com/beto-rodriguez/LiveCharts2)
+- [MiniExcel](https://github.com/mini-software/MiniExcel)
+- [PDFtoImage](https://github.com/sungaila/PDFtoImage)
+- [SkiaSharp](https://github.com/mono/SkiaSharp)
+- [百度智能云 OCR](https://cloud.baidu.com/product/ocr)
