@@ -1,7 +1,7 @@
 # LabInvoiceSystem
 
 <p align="center">
-  <img src="./LabInvoiceSystem/Assets/genshin_impact_128.png" alt="LabInvoiceSystem 应用图标" width="96" />
+  <img src="./LabInvoiceSystem/Assets/image_readme.png" alt="LabInvoiceSystem 开屏图片" width="720" />
 </p>
 
 <p align="center">
