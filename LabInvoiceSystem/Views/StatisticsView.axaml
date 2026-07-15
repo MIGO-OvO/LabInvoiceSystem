@@ -7,15 +7,16 @@
              x:Class="LabInvoiceSystem.Views.StatisticsView"
              x:DataType="vm:StatisticsViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
         <!-- Top Bar -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
             <StackPanel Spacing="2">
-                <TextBlock Text="仪表盘" FontSize="24" FontWeight="Bold"/>
+                <TextBlock Text="仪表盘" FontSize="22" FontWeight="Bold"/>
                 <TextBlock Text="API设置与数据概览" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
             </StackPanel>
             
-            <Button Grid.Column="1" Command="{Binding RefreshCommand}" Classes="Primary" Padding="12,8">
+            <Button Grid.Column="1" Command="{Binding RefreshCommand}" Classes="Primary" Padding="12,8"
+                    IsEnabled="{Binding !IsProcessing}" AutomationProperties.Name="刷新统计数据">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" Width="14" Height="14"/>
                     <TextBlock Text="刷新数据"/>
@@ -29,13 +30,17 @@
                 <StackPanel Spacing="6">
                     <TextBlock Text="Baidu OCR API" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                     <StackPanel Orientation="Horizontal" Spacing="6">
-                        <Border Width="8" Height="8" CornerRadius="4" Background="{DynamicResource SuccessBrush}"/>
+                        <Border Width="8" Height="8" CornerRadius="4" Background="{DynamicResource SuccessBrush}"
+                                IsVisible="{Binding IsApiConfigured}"/>
+                        <Border Width="8" Height="8" CornerRadius="4" Background="{DynamicResource TextSecondaryBrush}"
+                                IsVisible="{Binding !IsApiConfigured}"/>
                         <TextBlock Text="{Binding ApiStatusText}" FontSize="14" FontWeight="SemiBold"/>
                     </StackPanel>
                     <TextBlock Text="{Binding MonthlyApiUsageText}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
                 </StackPanel>
 
-                <Button Grid.Column="1" Command="{Binding OpenApiSettingsCommand}" Theme="{DynamicResource TransparentButton}">
+                <Button Grid.Column="1" Command="{Binding OpenApiSettingsCommand}" Theme="{DynamicResource TransparentButton}"
+                        IsEnabled="{Binding !IsProcessing}" AutomationProperties.Name="配置百度 OCR API">
                     <Border CornerRadius="10" Padding="12,6" Background="{DynamicResource NavHoverBackgroundBrush}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <PathIcon Data="M3 3H21V21H3Z" Width="14" Height="14" Foreground="{DynamicResource PrimaryBrush}"/>
@@ -46,17 +51,26 @@
             </Grid>
         </Border>
 
+        <Border Grid.Row="2" Classes="Card" Padding="10,8" Margin="0,0,0,16"
+                AutomationProperties.LiveSetting="Polite">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <ProgressBar Width="72" Height="4" IsIndeterminate="True" IsVisible="{Binding IsProcessing}"
+                             VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="{Binding StatusMessage}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
         <!-- Main Content -->
-        <ScrollViewer Grid.Row="2">
+        <ScrollViewer Grid.Row="3" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Spacing="16">
                 <!-- KPI Cards -->
-                <Grid ColumnDefinitions="*,16,*,16,*">
+                <Grid x:Name="KpiGrid" ColumnDefinitions="*,16,*,16,*">
                     <!-- Total Amount -->
-                    <Border Grid.Column="0" Classes="Card" Padding="16">
+                    <Border x:Name="TotalAmountCard" Grid.Column="0" Classes="Card" Padding="16">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Spacing="6">
                                 <TextBlock Text="累计报销金额" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding TotalAmount, StringFormat='{}{0:C}'}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                <TextBlock Text="{Binding TotalAmount, StringFormat='{}{0:C}'}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
                             </StackPanel>
                             <Border Grid.Column="1" Width="40" Height="40" CornerRadius="10" Background="{DynamicResource Indigo400}" Opacity="0.1"/>
                             <PathIcon Grid.Column="1" Data="M7,15H9C9,16.08 10.37,17 12,17C13.63,17 15,16.08 15,15C15,13.9 13.96,13.5 11.76,12.97C9.64,12.44 7,11.78 7,9C7,7.21 8.47,5.69 10.5,5.18V3H13.5V5.18C15.53,5.69 17,7.21 17,9H15C15,7.92 13.63,7 12,7C10.37,7 9,7.92 9,9C9,10.1 10.04,10.5 12.24,11.03C14.36,11.56 17,12.22 17,15C17,16.79 15.53,18.31 13.5,18.82V21H10.5V18.82C8.47,18.31 7,16.79 7,15Z" 
@@ -65,11 +79,11 @@
                     </Border>
 
                     <!-- Invoice Count -->
-                    <Border Grid.Column="2" Classes="Card" Padding="16">
+                    <Border x:Name="InvoiceCountCard" Grid.Column="2" Classes="Card" Padding="16">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Spacing="6">
                                 <TextBlock Text="累计发票数量" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding TotalCount}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource Emerald500}"/>
+                                <TextBlock Text="{Binding TotalCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
                             </StackPanel>
                             <Border Grid.Column="1" Width="40" Height="40" CornerRadius="10" Background="{DynamicResource Emerald400}" Opacity="0.1"/>
                             <PathIcon Grid.Column="1" Data="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z" 
@@ -78,11 +92,11 @@
                     </Border>
 
                     <!-- Last 30 Days Amount -->
-                    <Border Grid.Column="4" Classes="Card" Padding="16">
+                    <Border x:Name="Last30DaysCard" Grid.Column="4" Classes="Card" Padding="16">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Spacing="6">
                                 <TextBlock Text="近30天报账金额" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding Last30DaysAmount, StringFormat='{}{0:C}'}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource Red500}"/>
+                                <TextBlock Text="{Binding Last30DaysAmount, StringFormat='{}{0:C}'}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
                             </StackPanel>
                             <Border Grid.Column="1" Width="40" Height="40" CornerRadius="10" Background="{DynamicResource Red400}" Opacity="0.1"/>
                             <PathIcon Grid.Column="1" Data="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z" 
@@ -95,8 +109,12 @@
                 <Border Classes="Card" Padding="16">
                     <StackPanel Spacing="12">
                         <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="报账热力图" FontSize="16" FontWeight="SemiBold"/>
-                            <TextBlock Grid.Column="1" Text="过去一年的报账活动" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                            <StackPanel>
+                                <TextBlock Text="报账热力图" FontSize="16" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding HeatmapSummary}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="{Binding HeatmapDateRange}" FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                         </Grid>
                         
                         <!-- Heatmap Grid -->
@@ -109,7 +127,9 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Width="12" Height="12" Margin="1" CornerRadius="2" Background="{Binding ColorHex}">
+                                        <Border Width="12" Height="12" Margin="1" CornerRadius="2"
+                                                Background="{Binding ColorHex}" BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="1" AutomationProperties.Name="{Binding AccessibleLabel}">
                                             <ToolTip.Tip>
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding Date, StringFormat='yyyy-MM-dd'}" FontWeight="SemiBold"/>
@@ -125,7 +145,8 @@
                         <!-- Legend -->
                         <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
                             <TextBlock Text="少" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                            <Border Width="12" Height="12" CornerRadius="2" Background="#F1F5F9"/>
+                            <Border Width="12" Height="12" CornerRadius="2" Background="Transparent"
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"/>
                             <Border Width="12" Height="12" CornerRadius="2" Background="#C7D2FE"/>
                             <Border Width="12" Height="12" CornerRadius="2" Background="#818CF8"/>
                             <Border Width="12" Height="12" CornerRadius="2" Background="#4F46E5"/>
@@ -138,33 +159,41 @@
         </ScrollViewer>
 
         <!-- API Settings Modal -->
-        <Border Grid.RowSpan="3" Background="#80000000" IsVisible="{Binding IsApiSettingsOpen}">
+        <Border Grid.RowSpan="4" Background="#80000000" IsVisible="{Binding IsApiSettingsOpen}">
             <Grid HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="320" MaxWidth="400">
                 <Border Classes="Card" Padding="20">
                     <StackPanel Spacing="14">
                         <TextBlock Text="配置 Baidu OCR API" FontSize="16" FontWeight="Bold"/>
+                        <TextBlock Text="启用后，发票图片会发送到百度 OCR 服务。程序会在首次上传前再次征求同意。"
+                                   FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}"/>
 
                         <StackPanel Spacing="4">
                             <TextBlock Text="API Key" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBox Text="{Binding ApiKeyInput}"/>
+                            <TextBox Text="{Binding ApiKeyInput}" AutomationProperties.Name="百度 API Key"/>
                         </StackPanel>
 
                         <StackPanel Spacing="4">
                             <TextBlock Text="Secret Key" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBox Text="{Binding SecretKeyInput}"/>
+                            <TextBox Text="{Binding SecretKeyInput}" PasswordChar="*" AutomationProperties.Name="百度 Secret Key"/>
+                            <TextBlock Text="{Binding SecretKeyHelpText}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </StackPanel>
 
-                        <TextBlock Text="{Binding TestResultMessage}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <ProgressBar IsIndeterminate="True" Height="4" IsVisible="{Binding IsTestingConnection}"/>
+                        <TextBlock Text="{Binding TestResultMessage}" FontSize="12" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" AutomationProperties.LiveSetting="Assertive"/>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                            <Button Classes="Primary" Command="{Binding TestApiCommand}" Padding="12,8">
+                            <Button Classes="Capsule" Command="{Binding CloseApiSettingsCommand}" Padding="12,8"
+                                    IsEnabled="{Binding !IsTestingConnection}">
+                                <TextBlock Text="取消"/>
+                            </Button>
+                            <Button Classes="Capsule" Command="{Binding TestApiCommand}" Padding="12,8"
+                                    IsEnabled="{Binding !IsTestingConnection}" AutomationProperties.Name="测试百度 API 连接">
                                 <TextBlock Text="测试连接"/>
                             </Button>
-                            <Button Classes="Primary" Command="{Binding SaveApiConfigCommand}" Padding="12,8">
+                            <Button Classes="Primary" Command="{Binding SaveApiConfigCommand}" Padding="12,8"
+                                    IsEnabled="{Binding !IsTestingConnection}" AutomationProperties.Name="保存百度 API 配置">
                                 <TextBlock Text="保存配置"/>
-                            </Button>
-                            <Button Classes="Primary" Command="{Binding CloseApiSettingsCommand}" Padding="12,8">
-                                <TextBlock Text="取消"/>
                             </Button>
                         </StackPanel>
                     </StackPanel>

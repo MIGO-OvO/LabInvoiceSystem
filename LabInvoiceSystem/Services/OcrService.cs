@@ -14,6 +14,26 @@ namespace LabInvoiceSystem.Services
 {
     public class OcrService
     {
+        private const int MaxItemNameLength = 10;
+        private static readonly string[] QuantityUnits =
+        {
+            "毫米", "厘米", "千克", "公斤", "毫升", "mm", "cm", "kg", "ml",
+            "个", "件", "只", "套", "箱", "包", "支", "张", "台", "瓶", "盒", "组",
+            "枚", "卷", "本", "块", "根", "条", "辆", "对", "双", "片", "份", "米", "克", "升", "m", "g", "l"
+        };
+
+#if DEBUG
+        static OcrService()
+        {
+            // ponytail: tiny self-check; add a test project only when OCR rules grow.
+            if (IsMeaningfulSpec("1") || IsMeaningfulSpec("10件") || IsMeaningfulSpec("一件") || IsMeaningfulSpec("米") ||
+                !IsMeaningfulSpec("M10") || !IsMeaningfulSpec("2芯2米"))
+            {
+                throw new InvalidOperationException("OCR specification filter self-check failed.");
+            }
+        }
+#endif
+
         private readonly HttpClient _httpClient;
         private string? _accessToken;
         private DateTime _tokenExpiration;
@@ -144,7 +164,7 @@ namespace LabInvoiceSystem.Services
                 var mergedItems = MergeNameAndSpec(normalizedNames, normalizedSpecs);
                 if (mergedItems.Count > 0)
                 {
-                    invoice.ItemName = string.Join(", ", mergedItems);
+                    invoice.ItemName = LimitItemName(string.Join(", ", mergedItems));
                 }
 
                 // 提取发票号码
@@ -187,7 +207,7 @@ namespace LabInvoiceSystem.Services
             {
                 var spec = i < specs.Count ? specs[i] : string.Empty;
                 var name = i < names.Count ? names[i] : string.Empty;
-                var final = !string.IsNullOrWhiteSpace(spec) ? spec : name;
+                var final = IsMeaningfulSpec(spec) ? spec : name;
 
                 if (!string.IsNullOrWhiteSpace(final))
                 {
@@ -196,6 +216,41 @@ namespace LabInvoiceSystem.Services
             }
 
             return result;
+        }
+
+        private static bool IsMeaningfulSpec(string spec)
+        {
+            var value = spec.Trim();
+            if (string.IsNullOrEmpty(value) || IsQuantityNumber(value))
+            {
+                return false;
+            }
+
+            foreach (var unit in QuantityUnits)
+            {
+                if (value.Equals(unit, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                if (value.EndsWith(unit, StringComparison.OrdinalIgnoreCase) &&
+                    IsQuantityNumber(value[..^unit.Length].Trim()))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsQuantityNumber(string value) =>
+            decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out _) ||
+            value.Length > 0 && value.All("零〇一二三四五六七八九十百千万两".Contains);
+
+        private static string LimitItemName(string value)
+        {
+            var trimmed = value.Trim();
+            return trimmed.Length <= MaxItemNameLength ? trimmed : trimmed[..MaxItemNameLength];
         }
 
         private List<string> ExtractCommodityList(JsonElement wordsResult, string propertyName)
@@ -352,7 +407,10 @@ namespace LabInvoiceSystem.Services
                 }
 
                 settings.BaiduMonthlyUsage++;
-                SettingsService.Instance.SaveSettings();
+                if (!SettingsService.Instance.SaveSettings())
+                {
+                    Console.WriteLine("更新百度 API 月调用计数失败: 配置文件无法写入");
+                }
             }
             catch (Exception ex)
             {

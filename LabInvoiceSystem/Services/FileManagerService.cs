@@ -3,27 +3,57 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading.Tasks;
 using LabInvoiceSystem.Models;
+using Microsoft.VisualBasic.FileIO;
 using MiniExcelLibs;
 
 namespace LabInvoiceSystem.Services
 {
     public class FileManagerService
     {
+#if DEBUG
+        static FileManagerService()
+        {
+            var baseline = new InvoiceInfo { InvoiceNumber = "001", SellerTaxId = "TAX-A" };
+            if (!HasSameInvoiceIdentity(baseline,
+                    new InvoiceInfo { InvoiceNumber = "001", SellerTaxId = "TAX-A" }) ||
+                HasSameInvoiceIdentity(baseline,
+                    new InvoiceInfo { InvoiceNumber = "001", SellerTaxId = "TAX-B" }) ||
+                !HasSameInvoiceIdentity(new InvoiceInfo { InvoiceNumber = "001" },
+                    new InvoiceInfo { InvoiceNumber = "001" }))
+            {
+                throw new InvalidOperationException("Duplicate identity self-check failed.");
+            }
+        }
+#endif
+
         private readonly string _archiveDir;
         private readonly string _tempUploadDir;
-        private readonly string _exportDir;
 
         public FileManagerService()
         {
             var settings = SettingsService.Instance.Settings;
             _archiveDir = settings.ArchiveDirectory;
             _tempUploadDir = settings.TempUploadDirectory;
-            _exportDir = settings.ExportDirectory;
 
             SettingsService.Instance.EnsureDirectoriesExist();
+        }
+
+        public IReadOnlyList<string> GetPendingUploadFiles()
+        {
+            if (!Directory.Exists(_tempUploadDir))
+            {
+                return Array.Empty<string>();
+            }
+
+            return Directory.GetFiles(_tempUploadDir)
+                .Where(path => new[] { ".pdf", ".jpg", ".jpeg", ".png" }
+                    .Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase))
+                .OrderBy(path => path)
+                .ToList();
         }
 
         public async Task<string> SaveUploadedFileAsync(byte[] fileBytes, string fileName)
@@ -85,67 +115,47 @@ namespace LabInvoiceSystem.Services
 
         public async Task ArchiveInvoiceAsync(InvoiceInfo invoice)
         {
+            if (string.IsNullOrEmpty(invoice.FilePath) || !File.Exists(invoice.FilePath))
+            {
+                throw new Exception("源文件不存在");
+            }
+
+            if (invoice.EntryDate == default)
+            {
+                invoice.EntryDate = DateTime.Today;
+            }
+
+            var sourcePath = invoice.FilePath;
             try
             {
-                if (string.IsNullOrEmpty(invoice.FilePath) || !File.Exists(invoice.FilePath))
+                var targetPath = await Task.Run(() =>
                 {
-                    throw new Exception("源文件不存在");
-                }
-
-                // 生成归档文件名: YYYYMMDD-项目名称-支付方式-金额元.pdf
-                var dateStr = invoice.InvoiceDate.ToString("yyyyMMdd");
-                var extension = Path.GetExtension(invoice.FilePath);
-                
-                // Sanitize parts to ensure they don't contain separators
-                var safeItemName = invoice.ItemName?.Replace("-", "_") ?? "未命名";
-                var safePaymentMethod = invoice.PaymentMethod?.Replace("-", "_") ?? "未分类";
-                
-                var newFileName = $"{dateStr}-{safeItemName}-{safePaymentMethod}-{invoice.Amount}元{extension}";
-                
-                // 清理文件名中的非法字符
-                newFileName = CleanFileName(newFileName);
-
-                // 目标目录: archive_data/YYYY-MM/
-                var yearMonth = invoice.InvoiceDate.ToString("yyyy-MM");
-                var targetDir = Path.Combine(_archiveDir, yearMonth);
-
-                if (!Directory.Exists(targetDir))
-                {
+                    // 生成归档文件名: YYYYMMDD-项目名称-支付方式-金额元.pdf
+                    var dateStr = invoice.InvoiceDate.ToString("yyyyMMdd");
+                    var extension = Path.GetExtension(sourcePath);
+                    var safeItemName = invoice.ItemName?.Replace("-", "_") ?? "未命名";
+                    var safePaymentMethod = invoice.PaymentMethod?.Replace("-", "_") ?? "未分类";
+                    var newFileName = CleanFileName($"{dateStr}-{safeItemName}-{safePaymentMethod}-{invoice.Amount}元{extension}");
+                    var targetDir = Path.Combine(_archiveDir, invoice.InvoiceDate.ToString("yyyy-MM"));
                     Directory.CreateDirectory(targetDir);
-                }
+                    var path = GetUniqueFilePath(Path.Combine(targetDir, newFileName));
 
-                var targetPath = Path.Combine(targetDir, newFileName);
-                targetPath = GetUniqueFilePath(targetPath);
+                    File.Move(sourcePath, path);
+                    try
+                    {
+                        WriteMetadata(path, invoice);
+                    }
+                    catch
+                    {
+                        File.Move(path, sourcePath);
+                        throw;
+                    }
 
-                // 移动文件
-                File.Move(invoice.FilePath, targetPath);
+                    return path;
+                });
 
-                // 更新状态
                 invoice.Status = InvoiceStatus.Archived;
                 invoice.FilePath = targetPath;
-
-                // 写入元数据 JSON
-                try
-                {
-                    var metadata = new InvoiceMetadata
-                    {
-                        InvoiceDate = invoice.InvoiceDate,
-                        Amount = invoice.Amount,
-                        ItemName = invoice.ItemName ?? string.Empty,
-                        PaymentMethod = invoice.PaymentMethod ?? string.Empty,
-                        InvoiceNumber = invoice.InvoiceNumber ?? string.Empty,
-                        SellerName = invoice.SellerName ?? string.Empty,
-                        SellerTaxId = invoice.SellerTaxId ?? string.Empty
-                    };
-
-                    var metadataPath = Path.ChangeExtension(targetPath, ".json");
-                    var json = JsonSerializer.Serialize(metadata);
-                    File.WriteAllText(metadataPath, json);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"保存发票元数据失败: {ex.Message}");
-                }
             }
             catch (Exception ex)
             {
@@ -198,6 +208,7 @@ namespace LabInvoiceSystem.Services
                                         FilePath = file,
                                         Status = InvoiceStatus.Archived,
                                         InvoiceDate = metadata.InvoiceDate,
+                                        EntryDate = ResolveEntryDate(metadata.EntryDate, metadataPath),
                                         Amount = metadata.Amount,
                                         ItemName = metadata.ItemName ?? string.Empty,
                                         PaymentMethod = metadata.PaymentMethod ?? string.Empty,
@@ -235,10 +246,79 @@ namespace LabInvoiceSystem.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"获取归档列表失败: {ex.Message}");
+                throw new IOException($"读取归档目录失败: {ex.Message}", ex);
             }
 
             return archives;
+        }
+
+        public Task<List<ArchiveItem>> GetArchivedInvoicesAsync() => Task.Run(GetArchivedInvoices);
+
+        public Task<ArchiveItem?> FindDuplicateInvoiceAsync(InvoiceInfo invoice)
+        {
+            return Task.Run(() =>
+            {
+                var archives = GetArchivedInvoices();
+                if (!string.IsNullOrWhiteSpace(invoice.InvoiceNumber))
+                {
+                    var byNumber = archives.FirstOrDefault(item => HasSameInvoiceIdentity(item.InvoiceInfo, invoice));
+                    if (byNumber != null)
+                    {
+                        return byNumber;
+                    }
+                }
+
+                if (!File.Exists(invoice.FilePath))
+                {
+                    return null;
+                }
+
+                var sourceLength = new FileInfo(invoice.FilePath).Length;
+                byte[]? sourceHash = null;
+                foreach (var item in archives.Where(item => File.Exists(item.FilePath) && new FileInfo(item.FilePath).Length == sourceLength))
+                {
+                    sourceHash ??= ComputeFileHash(invoice.FilePath);
+                    if (sourceHash.SequenceEqual(ComputeFileHash(item.FilePath)))
+                    {
+                        return item;
+                    }
+                }
+
+                return null;
+            });
+        }
+
+        public Task<InvoiceInfo?> FindDuplicateInCandidatesAsync(
+            InvoiceInfo invoice, IEnumerable<InvoiceInfo> candidates)
+        {
+            var candidateList = candidates.ToList();
+            return Task.Run(() =>
+            {
+                var byNumber = candidateList.FirstOrDefault(candidate => HasSameInvoiceIdentity(candidate, invoice));
+                if (byNumber != null)
+                {
+                    return byNumber;
+                }
+
+                if (!File.Exists(invoice.FilePath))
+                {
+                    return null;
+                }
+
+                var sourceLength = new FileInfo(invoice.FilePath).Length;
+                byte[]? sourceHash = null;
+                foreach (var candidate in candidateList.Where(candidate =>
+                             File.Exists(candidate.FilePath) && new FileInfo(candidate.FilePath).Length == sourceLength))
+                {
+                    sourceHash ??= ComputeFileHash(invoice.FilePath);
+                    if (sourceHash.SequenceEqual(ComputeFileHash(candidate.FilePath)))
+                    {
+                        return candidate;
+                    }
+                }
+
+                return null;
+            });
         }
 
         public async Task<string> ExportInvoicesToZipAsync(List<string> filePaths, string outputFileName)
@@ -280,15 +360,18 @@ namespace LabInvoiceSystem.Services
 
         public async Task<string> ExportInvoicesToZipWithExcelAsync(List<ArchiveItem> archives, string outputFileName, string excelFileName)
         {
-            try
+            return await Task.Run(() =>
             {
+              try
+              {
                 var tempDir = Path.Combine(Path.GetTempPath(), "LabInvoiceExport");
                 if (!Directory.Exists(tempDir))
                 {
                     Directory.CreateDirectory(tempDir);
                 }
 
-                var targetDir = !string.IsNullOrWhiteSpace(_exportDir) ? _exportDir : tempDir;
+                var configuredExportDir = SettingsService.Instance.Settings.ExportDirectory;
+                var targetDir = !string.IsNullOrWhiteSpace(configuredExportDir) ? configuredExportDir : tempDir;
                 if (!Directory.Exists(targetDir))
                 {
                     Directory.CreateDirectory(targetDir);
@@ -313,7 +396,8 @@ namespace LabInvoiceSystem.Services
                     var info = a.InvoiceInfo ?? new InvoiceInfo();
                     return new Dictionary<string, object?>
                     {
-                        ["日期"] = info.InvoiceDate,
+                        ["发票录入日期"] = info.EntryDate,
+                        ["购买日期"] = info.InvoiceDate,
                         ["金额"] = info.Amount,
                         ["项目名称"] = info.ItemName ?? string.Empty,
                         ["支付方式"] = info.PaymentMethod ?? string.Empty,
@@ -330,7 +414,8 @@ namespace LabInvoiceSystem.Services
                     {
                         new()
                         {
-                            ["日期"] = null,
+                            ["发票录入日期"] = null,
+                            ["购买日期"] = null,
                             ["金额"] = null,
                             ["项目名称"] = null,
                             ["支付方式"] = null,
@@ -378,13 +463,13 @@ namespace LabInvoiceSystem.Services
                     Console.WriteLine($"清理临时 Excel 文件失败: {ex.Message}");
                 }
 
-                await Task.CompletedTask;
                 return zipPath;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"导出 ZIP 和 Excel 失败: {ex.Message}");
-            }
+              }
+              catch (Exception ex)
+              {
+                  throw new Exception($"导出 ZIP 和 Excel 失败: {ex.Message}");
+              }
+            });
         }
 
         public void DeleteTempFile(string filePath)
@@ -398,73 +483,85 @@ namespace LabInvoiceSystem.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"删除临时文件失败: {ex.Message}");
+                throw new IOException($"删除临时文件失败: {ex.Message}", ex);
             }
         }
 
         public async Task DeleteArchivedFileAsync(string filePath)
         {
-            try
+            await Task.Run(() =>
             {
-                if (File.Exists(filePath))
+                try
                 {
-                    File.Delete(filePath);
+                    DeleteToRecycleBin(filePath);
                     DeleteMetadataIfExists(filePath);
                     TryDeleteParentDirectoryIfEmpty(filePath);
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"删除归档文件失败: {ex.Message}");
-            }
-            
-            await Task.CompletedTask;
+                catch (Exception ex)
+                {
+                    throw new Exception($"删除归档文件失败: {ex.Message}");
+                }
+            });
         }
 
         public async Task DeleteArchivedFilesAsync(List<string> filePaths)
         {
-            int successCount = 0;
-            var errors = new List<string>();
-
-            foreach (var filePath in filePaths)
+            await Task.Run(() =>
             {
-                try
+                int successCount = 0;
+                var errors = new List<string>();
+
+                foreach (var filePath in filePaths)
                 {
-                    if (File.Exists(filePath))
+                    try
                     {
-                        File.Delete(filePath);
+                        DeleteToRecycleBin(filePath);
                         DeleteMetadataIfExists(filePath);
                         TryDeleteParentDirectoryIfEmpty(filePath);
                         successCount++;
                     }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"{Path.GetFileName(filePath)}: {ex.Message}");
+                    }
                 }
-                catch (Exception ex)
+
+                if (errors.Any())
                 {
-                    errors.Add($"{Path.GetFileName(filePath)}: {ex.Message}");
+                    throw new Exception($"删除了 {successCount}/{filePaths.Count} 个文件。错误: {string.Join(", ", errors)}");
                 }
-            }
+            });
+        }
 
-            if (errors.Any())
-            {
-                throw new Exception($"删除了 {successCount}/{filePaths.Count} 个文件。错误: {string.Join(", ", errors)}");
-            }
-
-            await Task.CompletedTask;
+        public async Task UpdateArchivedMetadataAsync(ArchiveItem item)
+        {
+            await Task.Run(() => WriteMetadata(item.FilePath, item.InvoiceInfo));
+            item.Date = item.InvoiceInfo.InvoiceDate.ToString("yyyy-MM-dd");
         }
 
         private void DeleteMetadataIfExists(string filePath)
         {
-            try
+            var metadataPath = Path.ChangeExtension(filePath, ".json");
+            if (File.Exists(metadataPath))
             {
-                var metadataPath = Path.ChangeExtension(filePath, ".json");
-                if (File.Exists(metadataPath))
-                {
-                    File.Delete(metadataPath);
-                }
+                DeleteToRecycleBin(metadataPath);
             }
-            catch (Exception ex)
+        }
+
+        private static void DeleteToRecycleBin(string filePath)
+        {
+            if (!File.Exists(filePath))
             {
-                Console.WriteLine($"删除发票元数据失败: {ex.Message}");
+                return;
+            }
+
+            if (OperatingSystem.IsWindows())
+            {
+                FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+            }
+            else
+            {
+                File.Delete(filePath);
             }
         }
 
@@ -499,12 +596,77 @@ namespace LabInvoiceSystem.Services
         private class InvoiceMetadata
         {
             public DateTime InvoiceDate { get; set; }
+            public DateTime? EntryDate { get; set; }
             public decimal Amount { get; set; }
             public string ItemName { get; set; } = string.Empty;
             public string PaymentMethod { get; set; } = string.Empty;
             public string InvoiceNumber { get; set; } = string.Empty;
             public string SellerName { get; set; } = string.Empty;
             public string SellerTaxId { get; set; } = string.Empty;
+        }
+
+        private static void WriteMetadata(string filePath, InvoiceInfo invoice)
+        {
+            var metadata = new InvoiceMetadata
+            {
+                InvoiceDate = invoice.InvoiceDate,
+                EntryDate = invoice.EntryDate.Date,
+                Amount = invoice.Amount,
+                ItemName = invoice.ItemName ?? string.Empty,
+                PaymentMethod = invoice.PaymentMethod ?? string.Empty,
+                InvoiceNumber = invoice.InvoiceNumber ?? string.Empty,
+                SellerName = invoice.SellerName ?? string.Empty,
+                SellerTaxId = invoice.SellerTaxId ?? string.Empty
+            };
+            var metadataPath = Path.ChangeExtension(filePath, ".json");
+            var tempPath = metadataPath + ".tmp";
+            try
+            {
+                File.WriteAllText(tempPath, JsonSerializer.Serialize(metadata));
+                File.Move(tempPath, metadataPath, true);
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    try { File.Delete(tempPath); } catch { }
+                }
+            }
+        }
+
+        private static byte[] ComputeFileHash(string filePath)
+        {
+            using var stream = File.OpenRead(filePath);
+            return SHA256.HashData(stream);
+        }
+
+        private static DateTime ResolveEntryDate(DateTime? entryDate, string metadataPath)
+        {
+            return entryDate is { } value && value != default
+                ? value.Date
+                : File.GetCreationTime(metadataPath).Date;
+        }
+
+        private static bool HasSameInvoiceIdentity(InvoiceInfo left, InvoiceInfo right)
+        {
+            if (string.IsNullOrWhiteSpace(left.InvoiceNumber) || string.IsNullOrWhiteSpace(right.InvoiceNumber) ||
+                !string.Equals(left.InvoiceNumber.Trim(), right.InvoiceNumber.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(left.SellerTaxId) && !string.IsNullOrWhiteSpace(right.SellerTaxId))
+            {
+                return string.Equals(left.SellerTaxId.Trim(), right.SellerTaxId.Trim(), StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (!string.IsNullOrWhiteSpace(left.SellerName) && !string.IsNullOrWhiteSpace(right.SellerName))
+            {
+                return string.Equals(left.SellerName.Trim(), right.SellerName.Trim(), StringComparison.OrdinalIgnoreCase);
+            }
+
+            // 销售方信息不完整时宁可提示用户确认，不自动放过相同发票号码。
+            return true;
         }
 
         private string CleanFileName(string fileName)
@@ -547,7 +709,8 @@ namespace LabInvoiceSystem.Services
             {
                 FileName = fileName,
                 FilePath = filePath,
-                Status = InvoiceStatus.Archived
+                Status = InvoiceStatus.Archived,
+                EntryDate = File.GetCreationTime(filePath).Date
             };
 
             try

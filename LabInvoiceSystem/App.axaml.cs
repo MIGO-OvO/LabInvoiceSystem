@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using LabInvoiceSystem.Services;
 using LabInvoiceSystem.ViewModels;
 using LabInvoiceSystem.Views;
@@ -24,13 +25,13 @@ namespace LabInvoiceSystem
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
+                RequestedThemeVariant = SettingsService.Instance.Settings.ThemeMode == "Dark"
+                    ? ThemeVariant.Dark
+                    : ThemeVariant.Light;
                 desktop.MainWindow = new MainWindow
                 {
                     DataContext = new MainWindowViewModel(),
                 };
-
-                var fileManager = new FileManagerService();
-                fileManager.CleanupTempUploadDirectory();
 
                 desktop.Exit += (_, _) =>
                 {

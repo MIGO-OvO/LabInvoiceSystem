@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using PDFtoImage;
 using SkiaSharp;
@@ -29,20 +31,24 @@ namespace LabInvoiceSystem.Services
         /// <returns>图片字节数组</returns>
         public async Task<byte[]> ConvertPdfToImageAsync(string pdfPath, double dpiScale)
         {
-            // 使用ScreenHelper计算目标渲染DPI
+            if (!File.Exists(pdfPath))
+            {
+                throw new FileNotFoundException($"PDF 文件不存在: {pdfPath}");
+            }
+
             var targetDpi = ScreenHelper.CalculatePdfRenderDpi(dpiScale);
+            var cachePath = GetPreviewCachePath(pdfPath, targetDpi);
+
+            if (File.Exists(cachePath))
+            {
+                return await File.ReadAllBytesAsync(cachePath);
+            }
 
             return await Task.Run(async () =>
             {
-                var outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
+                var outputPath = cachePath + ".tmp";
                 try
                 {
-                    if (!File.Exists(pdfPath))
-                    {
-                        throw new FileNotFoundException($"PDF 文件不存在: {pdfPath}");
-                    }
-
-                    // 验证文件不为空
                     var fileInfo = new FileInfo(pdfPath);
                     if (fileInfo.Length == 0)
                     {
@@ -66,20 +72,27 @@ namespace LabInvoiceSystem.Services
                     var pdfBytes = await File.ReadAllBytesAsync(pdfPath);
                     var base64Pdf = Convert.ToBase64String(pdfBytes);
 
-                    // PDFtoImage.Conversion.SavePng expects (outputPath, base64Pdf, pageIndex, password, options)
-                    // 使用动态计算的DPI进行渲染，以获得高清预览效果
-                    Conversion.SavePng(outputPath, base64Pdf, 0, null, new RenderOptions { Dpi = targetDpi });
+                    if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux() ||
+                        OperatingSystem.IsMacOS() || OperatingSystem.IsAndroidVersionAtLeast(31))
+                    {
+                        Conversion.SavePng(outputPath, base64Pdf, 0, null, new RenderOptions { Dpi = targetDpi });
+                    }
+                    else
+                    {
+                        throw new PlatformNotSupportedException("当前系统不支持 PDF 预览转换");
+                    }
 
                     if (!File.Exists(outputPath))
                     {
                         throw new Exception("PDF 转换未生成输出图片文件");
                     }
 
-                    return await File.ReadAllBytesAsync(outputPath);
+                    File.Move(outputPath, cachePath, true);
+                    return await File.ReadAllBytesAsync(cachePath);
                 }
-                catch (FileNotFoundException fnfEx)
+                catch (FileNotFoundException)
                 {
-                    throw fnfEx;
+                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -94,6 +107,17 @@ namespace LabInvoiceSystem.Services
                     }
                 }
             });
+        }
+
+        private static string GetPreviewCachePath(string pdfPath, int targetDpi)
+        {
+            var fileInfo = new FileInfo(pdfPath);
+            var cacheDir = Path.Combine(SettingsService.Instance.Settings.TempUploadDirectory, "previews");
+            Directory.CreateDirectory(cacheDir);
+
+            var key = $"{fileInfo.FullName}|{fileInfo.Length}|{fileInfo.LastWriteTimeUtc.Ticks}|{targetDpi}";
+            var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(key)));
+            return Path.Combine(cacheDir, $"{hash}.png");
         }
     }
 }

@@ -32,9 +32,51 @@ namespace LabInvoiceSystem.Views
         public InvoiceImportView()
         {
             InitializeComponent();
-            
+            SizeChanged += OnSizeChanged;
+
             // 订阅DataContext变化以重置缩放
             DataContextChanged += OnDataContextChanged;
+        }
+
+        private void OnSizeChanged(object? sender, SizeChangedEventArgs e)
+        {
+            var mainGrid = this.FindControl<Grid>("MainSplitGrid");
+            var leftPane = this.FindControl<Grid>("LeftPane");
+            var rightPane = this.FindControl<Grid>("RightPane");
+            var rightEmpty = this.FindControl<Grid>("RightEmpty");
+            if (mainGrid == null || leftPane == null || rightPane == null || rightEmpty == null)
+            {
+                return;
+            }
+
+            mainGrid.ColumnDefinitions.Clear();
+            mainGrid.RowDefinitions.Clear();
+
+            if (e.NewSize.Width < 720)
+            {
+                mainGrid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+                mainGrid.RowDefinitions.Add(new RowDefinition(new GridLength(180)));
+                mainGrid.RowDefinitions.Add(new RowDefinition(new GridLength(12)));
+                mainGrid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+                Grid.SetColumn(leftPane, 0);
+                Grid.SetRow(leftPane, 0);
+                Grid.SetColumn(rightPane, 0);
+                Grid.SetRow(rightPane, 2);
+                Grid.SetColumn(rightEmpty, 0);
+                Grid.SetRow(rightEmpty, 2);
+                return;
+            }
+
+            mainGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(2, GridUnitType.Star)));
+            mainGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(16)));
+            mainGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(3, GridUnitType.Star)));
+            mainGrid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+            Grid.SetColumn(leftPane, 0);
+            Grid.SetRow(leftPane, 0);
+            Grid.SetColumn(rightPane, 2);
+            Grid.SetRow(rightPane, 0);
+            Grid.SetColumn(rightEmpty, 2);
+            Grid.SetRow(rightEmpty, 0);
         }
 
         protected override void OnLoaded(RoutedEventArgs e)
@@ -258,7 +300,7 @@ namespace LabInvoiceSystem.Views
 
         private async void OnDrop(object? sender, DragEventArgs e)
         {
-            var files = e.Data.GetFiles();
+            var files = e.DataTransfer.TryGetFiles();
             if (files == null) return;
 
             var validFiles = files

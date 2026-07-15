@@ -7,139 +7,352 @@
              x:Class="LabInvoiceSystem.Views.InvoiceExportView"
              x:DataType="vm:InvoiceExportViewModel">
 
-    <Grid RowDefinitions="Auto,*">
-        <!-- Top Bar -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
-            <StackPanel Spacing="2">
-                <TextBlock Text="数据导出" FontSize="24" FontWeight="Bold"/>
-                <TextBlock Text="按日期归档的发票数据" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
-            </StackPanel>
-            
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                <Button Command="{Binding SetExportDirectoryCommand}" Classes="Primary" Padding="12,8">
-                    <TextBlock Text="设置导出路径"/>
-                </Button>
-                <Button Command="{Binding OpenExportFolderCommand}" Classes="Success" Padding="12,8">
-                    <TextBlock Text="打开导出文件夹"/>
-                </Button>
-                <Button Command="{Binding RefreshCommand}" Classes="Primary" Padding="12,8">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" Width="14" Height="14"/>
-                        <TextBlock Text="刷新列表"/>
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-        </Grid>
+    <UserControl.Styles>
+        <Style Selector="ToggleButton.GroupDisclosure">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="MinWidth" Value="40"/>
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="ToggleButton.GroupDisclosure:checked">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+        <Style Selector="ToggleButton.GroupDisclosure:pointerover">
+            <Setter Property="Background" Value="{DynamicResource NavHoverBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+        </Style>
 
-        <!-- Grouped List -->
-        <ScrollViewer Grid.Row="1" IsVisible="{Binding DateGroups.Count}">
-            <ItemsControl ItemsSource="{Binding DateGroups}">
+        <Style Selector="ScrollViewer.InvoiceScroller /template/ ScrollBar:vertical">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="MinWidth" Value="10"/>
+            <Setter Property="Margin" Value="4,2,0,2"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="ScrollViewer.InvoiceScroller /template/ ScrollBar:vertical:pointerover">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Style>
+        <Style Selector="ScrollViewer.InvoiceScroller /template/ ScrollBar:vertical /template/ Thumb">
+            <Setter Property="Width" Value="5"/>
+            <Setter Property="MinWidth" Value="5"/>
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Opacity" Value="0.42"/>
+        </Style>
+        <Style Selector="ScrollViewer.InvoiceScroller /template/ ScrollBar:vertical /template/ Thumb:pointerover">
+            <Setter Property="Opacity" Value="0.72"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <StackPanel Grid.Row="0" Spacing="12" Margin="0,0,0,12">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <StackPanel Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="发票归档与导出" FontSize="22" FontWeight="Bold"/>
+                    <TextBlock Text="按录入日期和购买日期整理归档发票" FontSize="13"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </StackPanel>
+
+                <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                    <Button Command="{Binding ToggleSelectionCommand}" Classes="Capsule" Padding="12,8"
+                            IsEnabled="{Binding !IsProcessing}"
+                            ToolTip.Tip="选择或取消当前搜索结果中的全部发票"
+                            AutomationProperties.Name="{Binding SelectionToggleText}">
+                        <TextBlock Text="{Binding SelectionToggleText}"/>
+                    </Button>
+                    <Button Command="{Binding ExportSelectedCommand}" Classes="Primary" Padding="12,8" Margin="8,0,0,0"
+                            IsEnabled="{Binding !IsProcessing}" AutomationProperties.Name="导出选中的发票">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <PathIcon Data="{StaticResource IconExport}" Width="14" Height="14"/>
+                            <TextBlock Text="导出所选项"/>
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Watermark="搜索文件名、项目、发票号、销售方、日期或金额"
+                         FontSize="14"
+                         AutomationProperties.Name="搜索归档发票"/>
+                <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                    <Button Command="{Binding SetExportDirectoryCommand}" Classes="Capsule" Padding="12,8"
+                            IsEnabled="{Binding !IsProcessing}" AutomationProperties.Name="设置导出文件夹">
+                        <TextBlock Text="导出路径"/>
+                    </Button>
+                    <Button Command="{Binding OpenExportFolderCommand}" Classes="Capsule" Padding="12,8" Margin="8,0,0,0"
+                            IsEnabled="{Binding !IsProcessing}" AutomationProperties.Name="打开导出文件夹">
+                        <TextBlock Text="打开文件夹"/>
+                    </Button>
+                    <Button Command="{Binding RefreshCommand}" Classes="Capsule" Padding="12,8" Margin="8,0,0,0"
+                            IsEnabled="{Binding !IsProcessing}" AutomationProperties.Name="刷新归档列表">
+                        <TextBlock Text="刷新"/>
+                    </Button>
+                </WrapPanel>
+            </Grid>
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="{DynamicResource GridHeaderBackgroundBrush}" CornerRadius="8"
+                Padding="10,7" Margin="0,0,0,12" AutomationProperties.LiveSetting="Polite">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                <ProgressBar Width="56" Height="4" IsIndeterminate="True" IsVisible="{Binding IsProcessing}"
+                             VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="{Binding StatusMessage}" FontSize="13" TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                           MaxWidth="360" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                           Text="{Binding ExportDirectory, StringFormat='导出到：{0}'}"
+                           ToolTip.Tip="{Binding ExportDirectory}"/>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="2" Classes="InvoiceScroller" IsVisible="{Binding DateGroups.Count}"
+                      AllowAutoHide="True"
+                      HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding DateGroups}" Margin="0,0,6,0">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Classes="Card" Margin="0,0,0,16" Padding="16">
+                        <Border Classes="Card" Margin="0,0,0,12" Padding="16">
                             <StackPanel Spacing="12">
-                                <!-- Group Header -->
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                        <Border Width="40" Height="40" CornerRadius="8" Background="{DynamicResource Slate100}">
-                                            <PathIcon Data="{StaticResource IconArchive}" Width="18" Height="18" Foreground="{DynamicResource Slate600}"/>
-                                        </Border>
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Date}" FontSize="16" FontWeight="SemiBold"/>
-                                            <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" MinHeight="40">
+                                    <ToggleButton IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                  Classes="GroupDisclosure"
+                                                  VerticalAlignment="Center"
+                                                  ToolTip.Tip="展开或收起此录入日期"
+                                                  AutomationProperties.Name="展开或收起此录入日期">
+                                        <Panel>
+                                            <PathIcon Data="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"
+                                                      Width="16" Height="16" IsVisible="{Binding IsExpanded}"/>
+                                            <PathIcon Data="M8.59,16.59L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.59Z"
+                                                      Width="16" Height="16" IsVisible="{Binding !IsExpanded}"/>
+                                        </Panel>
+                                    </ToggleButton>
+
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                        <CheckBox IsChecked="{Binding IsAllSelected, Mode=TwoWay}" IsThreeState="True"
+                                                  VerticalAlignment="Center"
+                                                  AutomationProperties.Name="选择此录入日期的全部发票"/>
+                                        <StackPanel Spacing="1">
+                                            <TextBlock Text="{Binding Date, StringFormat='录入日期 {0}'}" FontSize="18" FontWeight="SemiBold"/>
+                                            <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}">
                                                 <TextBlock.Text>
-                                                    <MultiBinding StringFormat='共 {0} 张发票 | 总金额: ¥{1:F2}'>
-                                                        <Binding Path="TotalCount" />
-                                                        <Binding Path="TotalAmount" />
+                                                    <MultiBinding StringFormat='共 {0} 张 · 已选 {2} 张 · 合计 ¥{1:F2}'>
+                                                        <Binding Path="TotalCount"/>
+                                                        <Binding Path="TotalAmount"/>
+                                                        <Binding Path="SelectedCount"/>
                                                     </MultiBinding>
                                                 </TextBlock.Text>
                                             </TextBlock>
                                         </StackPanel>
                                     </StackPanel>
-
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" ClipToBounds="False">
-                                        <Button Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).ExportDateCommand}"
-                                                CommandParameter="{Binding Date}"
-                                                Classes="Primary" Padding="12,6">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <PathIcon Data="{StaticResource IconExport}" Width="14" Height="14"/>
-                                                <TextBlock Text="导出为 ZIP"/>
-                                            </StackPanel>
-                                        </Button>
-                                        
-                                        <Button Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).DeleteDateGroupCommand}"
-                                                CommandParameter="{Binding Date}"
-                                                Classes="Danger" Padding="12,6">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <PathIcon Data="{StaticResource IconDelete}" Width="14" Height="14"/>
-                                                <TextBlock Text="删除"/>
-                                            </StackPanel>
-                                        </Button>
-                                    </StackPanel>
                                 </Grid>
-                                
-                                <Border Height="1" Background="{DynamicResource BorderBrush}"/>
-                                
-                                <!-- Invoices Table -->
-                                <Grid RowDefinitions="Auto,*">
-                                    <!-- Table Header -->
-                                    <Border Background="{DynamicResource GridHeaderBackgroundBrush}" CornerRadius="6,6,0,0" Padding="10,8">
-                                        <Grid ColumnDefinitions="2*,*,*,2*,*,80" ColumnSpacing="8">
-                                            <TextBlock Text="文件名" FontWeight="SemiBold" FontSize="12" TextAlignment="Center" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" Text="日期" FontWeight="SemiBold" FontSize="12" TextAlignment="Center" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="2" Text="金额" FontWeight="SemiBold" FontSize="12" TextAlignment="Center" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="3" Text="项目" FontWeight="SemiBold" FontSize="12" TextAlignment="Center" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="4" Text="支付方式" FontWeight="SemiBold" FontSize="12" TextAlignment="Center" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="5" Text="操作" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Grid>
-                                    </Border>
 
-                                    <!-- Table Body -->
-                                    <Border Grid.Row="1" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="0,0,6,6" MaxHeight="250">
-                                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                                            <ItemsControl ItemsSource="{Binding Invoices}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="10,8" ClipToBounds="False">
-                                                            <Grid ColumnDefinitions="2*,*,*,2*,*,80" VerticalAlignment="Center" ColumnSpacing="8" ClipToBounds="False">
-                                                                <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" FontSize="12" TextAlignment="Center" VerticalAlignment="Center" ToolTip.Tip="{Binding FileName}"/>
-                                                                <TextBlock Grid.Column="1" Text="{Binding InvoiceInfo.InvoiceDate, StringFormat='yyyy-MM-dd'}" FontSize="12" TextAlignment="Center" VerticalAlignment="Center"/>
-                                                                <TextBlock Grid.Column="2" Text="{Binding InvoiceInfo.Amount, StringFormat='{}{0:C}'}" FontSize="12" TextAlignment="Center" VerticalAlignment="Center"/>
-                                                                <TextBlock Grid.Column="3" Text="{Binding InvoiceInfo.ItemName}" TextTrimming="CharacterEllipsis" FontSize="12" TextAlignment="Center" VerticalAlignment="Center" ToolTip.Tip="{Binding InvoiceInfo.ItemName}"/>
-                                                                <TextBlock Grid.Column="4" Text="{Binding InvoiceInfo.PaymentMethod}" FontSize="12" TextAlignment="Center" VerticalAlignment="Center"/>
-                                                                <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" ClipToBounds="False">
-                                                                    <Button Classes="NavButton" Padding="6,4" ClipToBounds="False"
-                                                                            Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).DownloadInvoiceCommand}"
-                                                                            CommandParameter="{Binding}" ToolTip.Tip="下载">
-                                                                        <PathIcon Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" Width="12" Height="12"/>
-                                                                    </Button>
-                                                                    <Button Classes="NavButton" Padding="6,4" ClipToBounds="False"
-                                                                            Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).DeleteInvoiceCommand}"
-                                                                            CommandParameter="{Binding}" ToolTip.Tip="删除">
-                                                                        <PathIcon Data="{StaticResource IconDelete}" Width="12" Height="12" Foreground="{DynamicResource Red500}"/>
-                                                                    </Button>
-                                                                </StackPanel>
-                                                            </Grid>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </ScrollViewer>
-                                    </Border>
-                                </Grid>
+                                <ItemsControl ItemsSource="{Binding PurchaseDateGroups}" IsVisible="{Binding IsExpanded}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0"
+                                                    Margin="28,0,0,0" Padding="0,8,0,0">
+                                                <StackPanel Spacing="8">
+                                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" MinHeight="40">
+                                                        <ToggleButton IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                                      Classes="GroupDisclosure"
+                                                                      ToolTip.Tip="展开或收起此购买日期"
+                                                                      AutomationProperties.Name="展开或收起此购买日期">
+                                                            <Panel>
+                                                                <PathIcon Data="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"
+                                                                          Width="14" Height="14" IsVisible="{Binding IsExpanded}"/>
+                                                                <PathIcon Data="M8.59,16.59L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.59Z"
+                                                                          Width="14" Height="14" IsVisible="{Binding !IsExpanded}"/>
+                                                            </Panel>
+                                                        </ToggleButton>
+
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                                            <CheckBox IsChecked="{Binding IsAllSelected, Mode=TwoWay}" IsThreeState="True"
+                                                                      AutomationProperties.Name="选择此购买日期的全部发票"/>
+                                                            <StackPanel Spacing="1">
+                                                                <TextBlock Text="{Binding Date, StringFormat='购买日期 {0}'}" FontSize="15" FontWeight="SemiBold"/>
+                                                                <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}">
+                                                                    <TextBlock.Text>
+                                                                        <MultiBinding StringFormat='共 {0} 张 · 已选 {2} 张 · 合计 ¥{1:F2}'>
+                                                                            <Binding Path="TotalCount"/>
+                                                                            <Binding Path="TotalAmount"/>
+                                                                            <Binding Path="SelectedCount"/>
+                                                                        </MultiBinding>
+                                                                    </TextBlock.Text>
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                            <Button Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).ExportDateCommand}"
+                                                                    CommandParameter="{Binding}" Theme="{DynamicResource TransparentButton}"
+                                                                    Width="36" Height="36" Padding="8"
+                                                                    ToolTip.Tip="导出此购买日期中选中的发票"
+                                                                    AutomationProperties.Name="导出此购买日期选中的发票">
+                                                                <PathIcon Data="{StaticResource IconExport}" Width="16" Height="16"/>
+                                                            </Button>
+                                                            <Button Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).DeleteDateGroupCommand}"
+                                                                    CommandParameter="{Binding}" Theme="{DynamicResource TransparentButton}"
+                                                                    Width="36" Height="36" Padding="8"
+                                                                    Foreground="{DynamicResource DangerBrush}"
+                                                                    ToolTip.Tip="将该日期组的发票移到回收站"
+                                                                    AutomationProperties.Name="将该日期组的发票移到回收站">
+                                                                <PathIcon Data="{StaticResource IconDelete}" Width="16" Height="16"/>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <Border IsVisible="{Binding IsExpanded}"
+                                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                                            CornerRadius="6" ClipToBounds="True">
+                                                        <ItemsControl ItemsSource="{Binding Invoices}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
+                                                                            Padding="8,6">
+                                                                        <Grid ColumnDefinitions="32,*,80,88,176" ColumnSpacing="8" VerticalAlignment="Center">
+                                                                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                                      AutomationProperties.Name="{Binding FileName, StringFormat='选择 {0}'}"/>
+                                                                            <TextBlock Grid.Column="1" Text="{Binding FileName}" FontSize="14"
+                                                                                       FontWeight="Medium" VerticalAlignment="Center"
+                                                                                       TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding FileName}"/>
+                                                                            <TextBlock Grid.Column="2" Text="{Binding InvoiceInfo.Amount, StringFormat='¥{0:F2}'}"
+                                                                                       FontSize="13" FontWeight="SemiBold" TextAlignment="Right"
+                                                                                       VerticalAlignment="Center"/>
+                                                                            <TextBlock Grid.Column="3" Text="{Binding InvoiceInfo.PaymentMethod}"
+                                                                                       FontSize="13" TextAlignment="Center" VerticalAlignment="Center"
+                                                                                       TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding InvoiceInfo.PaymentMethod}"/>
+                                                                            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="2"
+                                                                                        HorizontalAlignment="Right">
+                                                                                <Button Classes="NavButton" Padding="6,4" MinHeight="32"
+                                                                                        Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).OpenInvoiceCommand}"
+                                                                                        CommandParameter="{Binding}" ToolTip.Tip="用默认程序打开原文件"
+                                                                                        AutomationProperties.Name="打开原文件"><TextBlock Text="打开"/></Button>
+                                                                                <Button Classes="NavButton" Padding="6,4" MinHeight="32"
+                                                                                        Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).EditInvoiceCommand}"
+                                                                                        CommandParameter="{Binding}" ToolTip.Tip="修改归档信息或日期组"
+                                                                                        AutomationProperties.Name="编辑归档信息"><TextBlock Text="编辑"/></Button>
+                                                                                <Button Classes="NavButton" Padding="6,4" MinHeight="32"
+                                                                                        Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).DownloadInvoiceCommand}"
+                                                                                        CommandParameter="{Binding}" ToolTip.Tip="另存为副本"
+                                                                                        AutomationProperties.Name="另存发票副本"><TextBlock Text="另存"/></Button>
+                                                                                <Button Classes="NavButton" Padding="6,4" MinHeight="32"
+                                                                                        Command="{Binding $parent[UserControl].((vm:InvoiceExportViewModel)DataContext).DeleteInvoiceCommand}"
+                                                                                        CommandParameter="{Binding}" ToolTip.Tip="移到回收站"
+                                                                                        AutomationProperties.Name="将发票移到回收站"><TextBlock Text="删除" Foreground="{DynamicResource DangerBrush}"/></Button>
+                                                                            </StackPanel>
+                                                                        </Grid>
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-        
-        <!-- Empty State -->
-        <Grid Grid.Row="1" IsVisible="{Binding !DateGroups.Count}">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Opacity="0.5">
+
+        <Grid Grid.Row="2" IsVisible="{Binding !DateGroups.Count}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
                 <PathIcon Data="{StaticResource IconArchive}" Width="48" Height="48" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                <TextBlock Text="暂无归档数据" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <TextBlock Text="{Binding EmptyStateText}" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
             </StackPanel>
         </Grid>
+
+        <Border Grid.RowSpan="3" Background="#80000000" IsVisible="{Binding IsDeleteConfirmationOpen}">
+            <Border Classes="Card" Padding="20" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MinWidth="340" MaxWidth="480">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="{Binding DeleteConfirmationTitle}" FontSize="16" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding DeleteConfirmationMessage}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                        <Button Classes="Capsule" Command="{Binding CancelDeleteCommand}" Padding="12,8"
+                                AutomationProperties.Name="取消删除"><TextBlock Text="取消"/></Button>
+                        <Button Classes="Danger" Command="{Binding ConfirmDeleteCommand}" Padding="12,8"
+                                IsEnabled="{Binding !IsProcessing}" AutomationProperties.Name="确认删除">
+                            <TextBlock Text="确认删除"/>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <Border Grid.RowSpan="3" Background="#80000000" IsVisible="{Binding IsEditOpen}">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Margin="24">
+                <Border Classes="Card" Padding="20" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Width="460" MaxWidth="460">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="编辑归档信息" FontSize="18" FontWeight="Bold"/>
+                        <TextBlock Text="修改归档日期组后，发票会移动到对应分组；原始文件不会改变。" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
+                            <TextBlock Text="归档日期组" VerticalAlignment="Center"/>
+                            <DatePicker Grid.Column="1" SelectedDate="{Binding EditEntryDate}"
+                                        ToolTip.Tip="选择现有日期或新日期；保存后会自动归入对应组"
+                                        AutomationProperties.Name="归档日期组"/>
+                            <TextBlock Grid.Row="1" Text="购买日期" VerticalAlignment="Center"/>
+                            <DatePicker Grid.Row="1" Grid.Column="1" SelectedDate="{Binding EditInvoiceDate}" AutomationProperties.Name="购买日期"/>
+                            <TextBlock Grid.Row="2" Text="金额" VerticalAlignment="Center"/>
+                            <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding EditAmount}" Minimum="0" Increment="0.01"
+                                           FormatString="0.00" AutomationProperties.Name="金额"/>
+                            <TextBlock Grid.Row="3" Text="项目名称" VerticalAlignment="Center"/>
+                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EditItemName}" AutomationProperties.Name="项目名称"/>
+                            <TextBlock Grid.Row="4" Text="支付方式" VerticalAlignment="Center"/>
+                            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EditPaymentMethod}" AutomationProperties.Name="支付方式"/>
+                            <TextBlock Grid.Row="5" Text="发票号码" VerticalAlignment="Center"/>
+                            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding EditInvoiceNumber}" AutomationProperties.Name="发票号码"/>
+                            <TextBlock Grid.Row="6" Text="销售方" VerticalAlignment="Center"/>
+                            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding EditSellerName}" AutomationProperties.Name="销售方名称"/>
+                            <TextBlock Grid.Row="7" Text="销售方税号" VerticalAlignment="Center"/>
+                            <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding EditSellerTaxId}" AutomationProperties.Name="销售方税号"/>
+                        </Grid>
+                        <TextBlock Text="{Binding EditError}" Foreground="{DynamicResource Red500}" TextWrapping="Wrap"
+                                   IsVisible="{Binding EditError}" AutomationProperties.LiveSetting="Assertive"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                            <Button Classes="Capsule" Command="{Binding CancelEditCommand}" Padding="12,8"
+                                    IsEnabled="{Binding !IsProcessing}"><TextBlock Text="取消"/></Button>
+                            <Button Classes="Primary" Command="{Binding SaveEditCommand}" Padding="12,8"
+                                    IsEnabled="{Binding !IsProcessing}" AutomationProperties.Name="保存归档信息">
+                                <TextBlock Text="保存"/>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
+        </Border>
     </Grid>
 </UserControl>

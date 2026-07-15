@@ -16,5 +16,13 @@ namespace LabInvoiceSystem.Models
 
         [ObservableProperty]
         private string _colorHex = "#F1F5F9"; // 默认最浅色 (Slate100)
+
+        public string AccessibleLabel => Amount > 0
+            ? $"{Date:yyyy年M月d日}，报账金额 {Amount:C}"
+            : $"{Date:yyyy年M月d日}，无报账记录";
+
+        partial void OnDateChanged(DateTime value) => OnPropertyChanged(nameof(AccessibleLabel));
+
+        partial void OnAmountChanged(decimal value) => OnPropertyChanged(nameof(AccessibleLabel));
     }
 }

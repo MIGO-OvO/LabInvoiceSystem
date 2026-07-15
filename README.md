@@ -1,17 +1,13 @@
 # LabInvoiceSystem
 
 <p align="center">
-  <img src="./LabInvoiceSystem/Assets/image_readme.png" alt="LabInvoiceSystem 开屏图片" width="720" />
-</p>
-
-<p align="center">
   <a href="./README.en.md">English</a> | 简体中文
 </p>
 
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![Avalonia](https://img.shields.io/badge/Avalonia-11.3.9-8B44AC)](https://avaloniaui.net/)
 [![MVVM](https://img.shields.io/badge/Pattern-MVVM-0F766E)](https://learn.microsoft.com/dotnet/architecture/maui/mvvm)
-[![Windows](https://img.shields.io/badge/Primary%20Platform-Windows-0078D4?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
+[![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-0078D4)](https://github.com/MIGO-OvO/LabInvoiceSystem/releases)
 [![Baidu OCR](https://img.shields.io/badge/OCR-Baidu%20VAT%20Invoice-2563EB)](https://cloud.baidu.com/product/ocr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
@@ -21,8 +17,8 @@ LabInvoiceSystem 是一个面向实验室、课题组和科研报销场景的桌
 Avalonia 构建跨平台 UI，用 .NET 8 承载业务逻辑，围绕“上传发票、OCR 识别、人工核对、
 归档、按日报账导出、统计分析”这条流程减少手工整理发票的重复工作。
 
-当前项目主要面向 Windows 桌面环境使用。Avalonia 本身具备跨平台能力，但仓库中的启动脚本、
-发布配置、资源路径和文件打开行为都优先服务 Windows。
+2.0.0 提供 Windows、Linux 与 macOS 的 x64/arm64 自包含发布包。平台相关的文件打开、删除提示
+和 OCR 密钥保存策略会按当前系统处理。
 
 ## 核心功能
 
@@ -30,8 +26,8 @@ Avalonia 构建跨平台 UI，用 .NET 8 承载业务逻辑，围绕“上传发
 | --- | --- |
 | 发票录入 | 支持通过文件选择器或拖拽上传 PDF、JPG、JPEG、PNG 发票文件 |
 | PDF 预览 | 使用 `PDFtoImage` 和 `SkiaSharp` 将 PDF 首页渲染为图片，预览区支持缩放、拖动、双击重置 |
-| OCR 识别 | 调用百度增值税发票 OCR 接口，提取日期、金额、项目、发票号码、销售方名称和税号 |
-| 人工核对 | OCR 后进入待核对状态，可在界面中修正日期、金额、项目名称和支付方式 |
+| OCR 识别 | 经用户明确同意后，将发票图像发送至百度增值税发票 OCR 接口，提取日期、金额、项目、发票号码、销售方名称和税号 |
+| 人工核对 | OCR 后进入待核对状态，可修正全部导出字段；也可全程使用本机手工录入，不上传图像 |
 | 本地归档 | 按 `YYYY-MM` 分目录保存发票原文件，并为每张发票写入同名 JSON 元数据 |
 | 导出报账 | 按日期分组导出 ZIP，同时生成 Excel 明细表并打包到 ZIP 中 |
 | 统计仪表盘 | 展示累计金额、累计发票数量、近 30 天金额和过去一年报账热力图 |
@@ -50,15 +46,15 @@ Avalonia 构建跨平台 UI，用 .NET 8 承载业务逻辑，围绕“上传发
 | C# 源文件 | 31 |
 | AXAML 文件 | 8 |
 | 图标资源 | 8 |
-| 默认发布目标 | `win-x64`, self-contained, single file |
+| 发布目标 | Windows、Linux、macOS 的 `x64` / `arm64` 自包含包 |
 
 ## 快速开始 (Getting Started)
 
 ### 环境要求
 
-- Windows 10 或更高版本。
+- Windows 10+、主流 Linux 桌面发行版，或 macOS 12+。
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)，用于从源码运行、调试和发布。
-- 百度智能云 OCR 应用的 `API Key` 和 `Secret Key`，用于真实发票识别。
+- 百度智能云 OCR 应用的 `API Key` 和 `Secret Key`，用于真实发票识别；未配置时仍可手工录入归档。
 
 ### 安装与运行 (Installation)
 
@@ -80,28 +76,28 @@ dotnet run --project LabInvoiceSystem/LabInvoiceSystem.csproj
 start.bat
 ```
 
-### 发布 Windows 单文件版本
+### 获取发布版本
+
+可直接从 [GitHub Releases](https://github.com/MIGO-OvO/LabInvoiceSystem/releases) 下载对应系统和架构的压缩包。
+
+### 本地发布示例
 
 ```bash
-dotnet publish LabInvoiceSystem/LabInvoiceSystem.csproj ^
-  -c Release ^
-  -r win-x64 ^
-  --self-contained true ^
-  /p:PublishSingleFile=true
+dotnet publish LabInvoiceSystem/LabInvoiceSystem.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 ```
 
-仓库内的发布配置文件位于
-[发布配置](./LabInvoiceSystem/Properties/PublishProfiles/FolderProfile.pubxml)。
+将 `win-x64` 替换为 `win-arm64`、`linux-x64`、`linux-arm64`、`osx-x64` 或 `osx-arm64` 即可生成其他平台版本。
+标签 `v*` 会触发 [GitHub Actions 发布流程](./.github/workflows/release.yml)，自动构建六个平台包、生成 SHA-256 校验文件并创建 Release。
 
 ## 使用流程 (Usage)
 
 1. 打开应用后进入“发票录入”。
 2. 点击“上传文件”或将发票文件拖入左侧区域。
-3. PDF 会先转换成图片，图片文件会直接进入 OCR 流程。
+3. 首次使用云 OCR 时选择“同意并使用云 OCR”；如选择“仅手工录入”，图像不会上传。
 4. OCR 完成后，在右侧预览区核对发票图片和识别字段。
-5. 修正日期、金额、项目名称和支付方式。
+5. 修正日期、金额、项目名称、支付方式、发票号码、销售方名称和税号。
 6. 点击“确认并归档”，或使用“全部归档”批量处理。
-7. 进入“发票导出”，按日期查看归档记录，导出 ZIP 或删除归档文件。
+7. 进入“发票导出”，按日期查看、搜索或修改归档记录；Windows 删除会进入回收站，Linux/macOS 删除为不可恢复操作并会明确提示。
 8. 进入“仪表盘”，查看累计金额、发票数量、近 30 天金额和年度热力图。
 
 ## OCR 配置
@@ -109,22 +105,24 @@ dotnet publish LabInvoiceSystem/LabInvoiceSystem.csproj ^
 OCR 调用由 [OcrService.cs](./LabInvoiceSystem/Services/OcrService.cs) 负责。应用使用百度
 OAuth 接口获取 `access_token`，再调用增值税发票 OCR 接口。
 
+> 隐私说明：启用云 OCR 后，识别所需的发票图像会发送到百度智能云。应用会在首次上传前征求明确同意；选择“仅手工录入”时不会上传图像。归档、元数据和导出文件仍保存在本机。
+
 配置入口在“仪表盘”的“配置百度 API”按钮中：
 
-1. 填入百度 OCR 的 `API Key` 和 `Secret Key`。
+1. 填入百度 OCR 的 `API Key` 和 `Secret Key`。源码不内置默认密钥。
 2. 点击“测试连接”，验证能否获取访问令牌。
-3. 点击“保存配置”，配置会写入用户目录。
+3. 点击“保存配置”，配置会写入用户目录。Windows 使用当前用户范围的 DPAPI 加密 Secret Key；Linux/macOS 默认仅在当前会话保留 Secret Key，可通过 `LABINVOICESYSTEM_BAIDU_SECRET_KEY` 环境变量提供。弹窗中留空表示不修改当前值。
 
-请不要将生产环境 OCR 密钥提交到仓库。当前运行配置保存在：
+未配置 OCR 时，上传的发票会跳过网络识别并进入手工核对状态。请不要将生产环境 OCR 密钥提交到仓库。当前运行配置保存在系统用户应用数据目录下的：
 
 ```text
-%APPDATA%\LabInvoiceSystem\appsettings.json
+LabInvoiceSystem/appsettings.json
 ```
 
 应用还会在同一目录记录操作日志：
 
 ```text
-%APPDATA%\LabInvoiceSystem\upload_logs.json
+LabInvoiceSystem/upload_logs.json
 ```
 
 ## 文件归档规则

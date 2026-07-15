@@ -1,17 +1,13 @@
 # LabInvoiceSystem
 
 <p align="center">
-  <img src="./LabInvoiceSystem/Assets/image_readme.png" alt="LabInvoiceSystem splash screen" width="720" />
-</p>
-
-<p align="center">
   English | <a href="./README.md">简体中文</a>
 </p>
 
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![Avalonia](https://img.shields.io/badge/Avalonia-11.3.9-8B44AC)](https://avaloniaui.net/)
 [![MVVM](https://img.shields.io/badge/Pattern-MVVM-0F766E)](https://learn.microsoft.com/dotnet/architecture/maui/mvvm)
-[![Windows](https://img.shields.io/badge/Primary%20Platform-Windows-0078D4?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
+[![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-0078D4)](https://github.com/MIGO-OvO/LabInvoiceSystem/releases)
 [![Baidu OCR](https://img.shields.io/badge/OCR-Baidu%20VAT%20Invoice-2563EB)](https://cloud.baidu.com/product/ocr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
@@ -22,8 +18,8 @@ workflows. It uses Avalonia for the UI and .NET 8 for the application logic, wit
 uploading invoices, recognizing them with OCR, reviewing extracted fields, archiving files, exporting
 daily reimbursement packages, and reviewing spending statistics.
 
-The current project is primarily tuned for Windows desktop use. Avalonia can run cross-platform, but this
-repository's launcher, publish profile, resource paths, and file explorer behavior are Windows-first.
+Version 2.0.0 ships self-contained x64/arm64 packages for Windows, Linux, and macOS. Platform-specific file
+opening, deletion warnings, and OCR credential persistence follow the current operating system.
 
 ## Core Features
 
@@ -31,8 +27,8 @@ repository's launcher, publish profile, resource paths, and file explorer behavi
 | --- | --- |
 | Invoice import | Upload PDF, JPG, JPEG, and PNG invoices through a file picker or drag and drop |
 | PDF preview | Render the first PDF page with `PDFtoImage` and `SkiaSharp`; zoom, pan, and reset previews |
-| OCR extraction | Extract date, amount, item, invoice number, seller name, and seller tax ID |
-| Manual review | Review OCR results and correct date, amount, item name, and payment method before archiving |
+| OCR extraction | With explicit user consent, send the invoice image to Baidu VAT Invoice OCR and extract all supported fields |
+| Manual review | Correct every exported field, or use local manual entry without uploading the image |
 | Local archive | Store original invoice files by `YYYY-MM` and write same-name JSON metadata for each invoice |
 | Reimbursement export | Export invoices by date as a ZIP package with an Excel detail sheet included |
 | Statistics dashboard | Show total amount, invoice count, last-30-days amount, and a one-year spending heatmap |
@@ -51,15 +47,15 @@ repository's launcher, publish profile, resource paths, and file explorer behavi
 | C# source files | 31 |
 | AXAML files | 8 |
 | Icon assets | 8 |
-| Default publish target | `win-x64`, self-contained, single file |
+| Release targets | Windows, Linux, and macOS `x64` / `arm64` self-contained packages |
 
 ## Getting Started
 
 ### Requirements
 
-- Windows 10 or later.
+- Windows 10+, a mainstream Linux desktop distribution, or macOS 12+.
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) for running, debugging, and publishing.
-- A Baidu Cloud OCR application's `API Key` and `Secret Key` for real invoice recognition.
+- A Baidu Cloud OCR application's `API Key` and `Secret Key` for real invoice recognition; manual entry still works when OCR is not configured.
 
 ### Installation
 
@@ -81,28 +77,28 @@ On Windows, you can also run the root launcher:
 start.bat
 ```
 
-### Publish a Windows Single-File Build
+### Download a Release
+
+Download the archive for your operating system and architecture from [GitHub Releases](https://github.com/MIGO-OvO/LabInvoiceSystem/releases).
+
+### Local Publish Example
 
 ```bash
-dotnet publish LabInvoiceSystem/LabInvoiceSystem.csproj ^
-  -c Release ^
-  -r win-x64 ^
-  --self-contained true ^
-  /p:PublishSingleFile=true
+dotnet publish LabInvoiceSystem/LabInvoiceSystem.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 ```
 
-The repository publish profile is
-[FolderProfile.pubxml](./LabInvoiceSystem/Properties/PublishProfiles/FolderProfile.pubxml).
+Replace `win-x64` with `win-arm64`, `linux-x64`, `linux-arm64`, `osx-x64`, or `osx-arm64` for another target.
+Tags matching `v*` run the [GitHub Actions release workflow](./.github/workflows/release.yml), which builds all six packages, creates SHA-256 checksums, and publishes the Release.
 
 ## Usage Workflow
 
 1. Open the app and start in "Invoice Import".
 2. Click "Upload File" or drag invoice files into the left panel.
-3. PDF files are converted to images first; image files go directly into OCR processing.
+3. On first use, explicitly accept cloud OCR or choose manual entry; manual entry does not upload the image.
 4. After OCR finishes, review the invoice preview and extracted fields on the right.
-5. Correct date, amount, item name, and payment method.
+5. Correct date, amount, item name, payment method, invoice number, seller name, and seller tax ID.
 6. Click "Confirm and Archive", or use "Archive All" for a complete batch.
-7. Open "Invoice Export" to review archived records by date, export ZIP files, or delete archived files.
+7. Open "Invoice Export" to search, review, or edit archived records and export ZIP files. Windows deletion uses the Recycle Bin; Linux/macOS clearly warn before permanent deletion.
 8. Open "Dashboard" to view total amount, invoice count, last-30-days amount, and the yearly heatmap.
 
 ## OCR Configuration
@@ -110,22 +106,24 @@ The repository publish profile is
 OCR is handled by [OcrService.cs](./LabInvoiceSystem/Services/OcrService.cs). The app obtains an `access_token`
 through Baidu OAuth and then calls the VAT invoice OCR endpoint.
 
+> Privacy: when cloud OCR is enabled, the invoice image required for recognition is sent to Baidu Cloud. The app asks for explicit consent before the first upload. Choosing manual entry keeps the image local. Archives, metadata, and exports remain on the device.
+
 Use the "Configure Baidu API" button in the dashboard:
 
-1. Enter the Baidu OCR `API Key` and `Secret Key`.
+1. Enter the Baidu OCR `API Key` and `Secret Key`. The source code does not include default credentials.
 2. Click "Test Connection" to verify token access.
-3. Click "Save Configuration" to persist the settings.
+3. Click "Save Configuration" to persist the settings. Windows protects the Secret Key with user-scoped DPAPI. Linux/macOS keep it for the current session only by default; use `LABINVOICESYSTEM_BAIDU_SECRET_KEY` to provide it through the environment. Leave the field blank to keep the current value.
 
-Do not commit production OCR credentials to the repository. Runtime settings are saved here:
+When OCR is not configured, uploaded invoices skip network recognition and remain available for manual review. Do not commit production OCR credentials to the repository. Runtime settings are saved under the OS user application-data directory at:
 
 ```text
-%APPDATA%\LabInvoiceSystem\appsettings.json
+LabInvoiceSystem/appsettings.json
 ```
 
 Operation logs are saved in the same profile directory:
 
 ```text
-%APPDATA%\LabInvoiceSystem\upload_logs.json
+LabInvoiceSystem/upload_logs.json
 ```
 
 ## Archive Rules

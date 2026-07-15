@@ -17,6 +17,16 @@ namespace LabInvoiceSystem.ViewModels
         [ObservableProperty]
         private bool _isPaneOpen = true;
 
+        [ObservableProperty]
+        private bool _isExitConfirmationOpen;
+
+        [ObservableProperty]
+        private string _shellMessage = string.Empty;
+
+        public bool HasShellMessage => !string.IsNullOrWhiteSpace(ShellMessage);
+
+        partial void OnShellMessageChanged(string value) => OnPropertyChanged(nameof(HasShellMessage));
+
         // Track if user manually closed the pane to prevent auto-reopening
         private bool _userManuallyClosed = false;
 
@@ -30,6 +40,8 @@ namespace LabInvoiceSystem.ViewModels
             _importViewModel = new InvoiceImportViewModel();
             _currentView = _importViewModel;
         }
+
+        public bool HasPendingInvoices => _importViewModel?.UploadedInvoices.Count > 0;
 
         [RelayCommand]
         private void Navigate(string viewName)
@@ -92,12 +104,19 @@ namespace LabInvoiceSystem.ViewModels
 
             var currentTheme = app.RequestedThemeVariant;
             var newTheme = currentTheme == ThemeVariant.Dark ? ThemeVariant.Light : ThemeVariant.Dark;
-            app.RequestedThemeVariant = newTheme;
-
-            // Save setting
             var settings = SettingsService.Instance.Settings;
+            var previousMode = settings.ThemeMode;
+            app.RequestedThemeVariant = newTheme;
             settings.ThemeMode = newTheme == ThemeVariant.Dark ? "Dark" : "Light";
-            SettingsService.Instance.SaveSettings();
+            if (!SettingsService.Instance.SaveSettings())
+            {
+                settings.ThemeMode = previousMode;
+                app.RequestedThemeVariant = currentTheme;
+                ShellMessage = "主题偏好保存失败，已恢复原主题";
+                return;
+            }
+
+            ShellMessage = string.Empty;
         }
     }
 }
