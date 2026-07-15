@@ -1,252 +1,322 @@
 # LabInvoiceSystem
 
 <p align="center">
-  <a href="./README.en.md">English</a> | 简体中文
+  简体中文 · <a href="./README.en.md">English</a>
 </p>
 
+[![Release](https://img.shields.io/github/v/release/MIGO-OvO/LabInvoiceSystem?display_name=tag)](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/latest)
+[![Build and release](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/workflows/release.yml/badge.svg)](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/workflows/release.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![Avalonia](https://img.shields.io/badge/Avalonia-11.3.9-8B44AC)](https://avaloniaui.net/)
-[![MVVM](https://img.shields.io/badge/Pattern-MVVM-0F766E)](https://learn.microsoft.com/dotnet/architecture/maui/mvvm)
-[![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-0078D4)](https://github.com/MIGO-OvO/LabInvoiceSystem/releases)
-[![Baidu OCR](https://img.shields.io/badge/OCR-Baidu%20VAT%20Invoice-2563EB)](https://cloud.baidu.com/product/ocr)
+[![Avalonia 11.3.9](https://img.shields.io/badge/Avalonia-11.3.9-8B44AC)](https://avaloniaui.net/)
+[![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20macOS-x64%20%7C%20arm64-0078D4)](https://github.com/MIGO-OvO/LabInvoiceSystem/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
+> 最新正式版：[LabInvoiceSystem 2.0.0](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/tag/v2.0.0)
 
 ## 项目概览 (Overview)
 
-LabInvoiceSystem 是一个面向实验室、课题组和科研报销场景的桌面发票管理工具。它用
-Avalonia 构建跨平台 UI，用 .NET 8 承载业务逻辑，围绕“上传发票、OCR 识别、人工核对、
-归档、按日报账导出、统计分析”这条流程减少手工整理发票的重复工作。
+LabInvoiceSystem 是面向实验室、课题组和科研报销场景的跨平台桌面发票工具。它将发票上传、
+百度云 OCR、人工核对、本地归档、报账导出和支出统计整合到一个 Avalonia 应用中。
 
-2.0.0 提供 Windows、Linux 与 macOS 的 x64/arm64 自包含发布包。平台相关的文件打开、删除提示
-和 OCR 密钥保存策略会按当前系统处理。
+2.0.0 引入“录入日期 → 购买日期”两级归档结构，并允许在编辑窗口中将发票调整到任意录入日期组。
+应用可在不启用云 OCR 的情况下完成纯本机手工录入；归档原文件、JSON 元数据和导出文件始终保存在本机。
 
-## 核心功能
+## 核心能力
 
-| 模块 | 能力 |
+| 模块 | 当前能力 |
 | --- | --- |
-| 发票录入 | 支持通过文件选择器或拖拽上传 PDF、JPG、JPEG、PNG 发票文件 |
-| PDF 预览 | 使用 `PDFtoImage` 和 `SkiaSharp` 将 PDF 首页渲染为图片，预览区支持缩放、拖动、双击重置 |
-| OCR 识别 | 经用户明确同意后，将发票图像发送至百度增值税发票 OCR 接口，提取日期、金额、项目、发票号码、销售方名称和税号 |
-| 人工核对 | OCR 后进入待核对状态，可修正全部导出字段；也可全程使用本机手工录入，不上传图像 |
-| 本地归档 | 按 `YYYY-MM` 分目录保存发票原文件，并为每张发票写入同名 JSON 元数据 |
-| 导出报账 | 按日期分组导出 ZIP，同时生成 Excel 明细表并打包到 ZIP 中 |
-| 统计仪表盘 | 展示累计金额、累计发票数量、近 30 天金额和过去一年报账热力图 |
-| API 管理 | 在仪表盘中配置、测试并保存 Baidu OCR API Key 和 Secret Key |
-| 操作日志 | 将上传、归档、删除、导出等关键动作写入用户目录下的 JSON 日志 |
+| 发票录入 | 文件选择或拖拽导入 PDF、JPG、JPEG、PNG；最多并行处理 3 个文件 |
+| OCR 与人工录入 | 明确同意后调用百度增值税发票 OCR；未配置或拒绝云 OCR 时可手工录入 |
+| PDF 预览 | 渲染 PDF 首页，支持滚轮缩放、拖动和平移复位 |
+| 核对与校验 | 编辑购买日期、金额、项目、支付方式、发票号、销售方和税号 |
+| 重复检测 | 归档前检查当前批次和历史归档中的疑似重复发票，支持人工确认 |
+| 两级归档 | 按录入日期和购买日期分组，可搜索、折叠、批量选择和手动调整日期组 |
+| 报账导出 | 导出选中发票原文件，并在 ZIP 中附带 8 字段 Excel 明细 |
+| 统计仪表盘 | 显示累计金额、发票数量、近 30 天金额和过去一年支出热力图 |
+| 本机配置 | 保存主题、目录、OCR 用量、字段纠正记录和操作日志 |
 
-## 项目状态
+## 当前状态
 
 | 指标 | 当前值 |
 | --- | --- |
-| 应用类型 | 桌面端发票 OCR、归档和导出工具 |
-| 目标框架 | `net8.0` |
-| UI 框架 | Avalonia 11.3.9, Fluent theme |
-| 架构模式 | MVVM, `CommunityToolkit.Mvvm` |
-| 主要工作区 | 发票录入、发票导出、仪表盘 |
-| C# 源文件 | 31 |
-| AXAML 文件 | 8 |
-| 图标资源 | 8 |
-| 发布目标 | Windows、Linux、macOS 的 `x64` / `arm64` 自包含包 |
+| 正式版本 | `2.0.0`，发布于 2026-07-15 |
+| 目标框架 | `.NET 8` / `net8.0` |
+| UI 框架 | Avalonia 11.3.9，Fluent 主题 |
+| 架构 | MVVM，`CommunityToolkit.Mvvm` |
+| 发布平台 | Windows、Linux、macOS 的 x64 与 arm64 |
+| 发布方式 | 自包含单文件应用，压缩为 ZIP 或 TAR.GZ |
+| 发布校验 | 6 平台 GitHub Actions 构建 + `SHA256SUMS.txt` |
+| 项目规模 | 31 个 C# 文件、8 个 AXAML 文件、9 个资源文件 |
+| 许可证 | MIT |
 
 ## 快速开始 (Getting Started)
 
-### 环境要求
+### 下载发布版 (Installation)
 
-- Windows 10+、主流 Linux 桌面发行版，或 macOS 12+。
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)，用于从源码运行、调试和发布。
-- 百度智能云 OCR 应用的 `API Key` 和 `Secret Key`，用于真实发票识别；未配置时仍可手工录入归档。
+前往 [GitHub Releases](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/latest)，按系统和处理器架构下载：
 
-### 安装与运行 (Installation)
+| 系统 | x64 | arm64 |
+| --- | --- | --- |
+| Windows | `LabInvoiceSystem-2.0.0-win-x64.zip` | `LabInvoiceSystem-2.0.0-win-arm64.zip` |
+| Linux | `LabInvoiceSystem-2.0.0-linux-x64.tar.gz` | `LabInvoiceSystem-2.0.0-linux-arm64.tar.gz` |
+| macOS | `LabInvoiceSystem-2.0.0-osx-x64.tar.gz` | `LabInvoiceSystem-2.0.0-osx-arm64.tar.gz` |
+
+这些发布包已包含 .NET 运行时，普通用户无需另外安装 .NET SDK。
+
+### 运行发布包
+
+#### Windows
+
+解压 ZIP 后运行 `LabInvoiceSystem.exe`。
+
+#### Linux
+
+```bash
+tar -xzf LabInvoiceSystem-2.0.0-linux-x64.tar.gz
+chmod +x LabInvoiceSystem
+./LabInvoiceSystem
+```
+
+#### macOS
+
+```bash
+tar -xzf LabInvoiceSystem-2.0.0-osx-arm64.tar.gz
+chmod +x LabInvoiceSystem
+./LabInvoiceSystem
+```
+
+macOS 包目前未签名。若系统阻止首次启动，请在“系统设置 → 隐私与安全性”中确认打开。
+
+### 校验下载文件
+
+Release 同时提供 `SHA256SUMS.txt`。在 Windows 上可运行：
+
+```powershell
+Get-FileHash .\LabInvoiceSystem-2.0.0-win-x64.zip -Algorithm SHA256
+```
+
+在 Linux 或 macOS 上可运行：
+
+```bash
+sha256sum LabInvoiceSystem-2.0.0-linux-x64.tar.gz
+```
+
+将输出与 `SHA256SUMS.txt` 中对应条目比较。
+
+### 从源码运行
+
+源码开发需要 [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)。
 
 ```bash
 git clone https://github.com/MIGO-OvO/LabInvoiceSystem.git
 cd LabInvoiceSystem
-```
-
-### 从源码运行
-
-```bash
 dotnet restore
 dotnet run --project LabInvoiceSystem/LabInvoiceSystem.csproj
 ```
 
-也可以在 Windows 上直接运行根目录脚本：
-
-```bat
-start.bat
-```
-
-### 获取发布版本
-
-可直接从 [GitHub Releases](https://github.com/MIGO-OvO/LabInvoiceSystem/releases) 下载对应系统和架构的压缩包。
-
-### 本地发布示例
-
-```bash
-dotnet publish LabInvoiceSystem/LabInvoiceSystem.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
-```
-
-将 `win-x64` 替换为 `win-arm64`、`linux-x64`、`linux-arm64`、`osx-x64` 或 `osx-arm64` 即可生成其他平台版本。
-标签 `v*` 会触发 [GitHub Actions 发布流程](./.github/workflows/release.yml)，自动构建六个平台包、生成 SHA-256 校验文件并创建 Release。
+Windows 也可以运行根目录的 `start.bat`。
 
 ## 使用流程 (Usage)
 
-1. 打开应用后进入“发票录入”。
-2. 点击“上传文件”或将发票文件拖入左侧区域。
-3. 首次使用云 OCR 时选择“同意并使用云 OCR”；如选择“仅手工录入”，图像不会上传。
-4. OCR 完成后，在右侧预览区核对发票图片和识别字段。
-5. 修正日期、金额、项目名称、支付方式、发票号码、销售方名称和税号。
-6. 点击“确认并归档”，或使用“全部归档”批量处理。
-7. 进入“发票导出”，按日期查看、搜索或修改归档记录；Windows 删除会进入回收站，Linux/macOS 删除为不可恢复操作并会明确提示。
-8. 进入“仪表盘”，查看累计金额、发票数量、近 30 天金额和年度热力图。
+1. 在“发票录入”中选择或拖入发票文件。
+2. 首次使用云 OCR 时确认隐私提示；也可以选择“仅手工录入”。
+3. 在右侧预览并核对购买日期、金额、项目、支付方式、发票号和销售方信息。
+4. 处理可能出现的重复发票警告，然后单张归档或批量归档。
+5. 在“发票导出”中按录入日期和购买日期浏览、搜索或编辑归档记录。
+6. 选择发票或日期组，导出包含原文件和 Excel 明细的 ZIP。
+7. 在“仪表盘”中查看累计数据、近 30 天支出和年度热力图。
 
-## OCR 配置
+## 归档与导出
 
-OCR 调用由 [OcrService.cs](./LabInvoiceSystem/Services/OcrService.cs) 负责。应用使用百度
-OAuth 接口获取 `access_token`，再调用增值税发票 OCR 接口。
+### 两级日期模型
 
-> 隐私说明：启用云 OCR 后，识别所需的发票图像会发送到百度智能云。应用会在首次上传前征求明确同意；选择“仅手工录入”时不会上传图像。归档、元数据和导出文件仍保存在本机。
+- `EntryDate`：发票进入系统或用户指定的归档组日期，是导出页的大层级。
+- `InvoiceDate`：实际购买日期，是录入日期下的次级分组。
+- 编辑已归档发票的 `EntryDate` 后，列表会立即将它归入新的录入日期组。
 
-配置入口在“仪表盘”的“配置百度 API”按钮中：
+### 文件与元数据
 
-1. 填入百度 OCR 的 `API Key` 和 `Secret Key`。源码不内置默认密钥。
-2. 点击“测试连接”，验证能否获取访问令牌。
-3. 点击“保存配置”，配置会写入用户目录。Windows 使用当前用户范围的 DPAPI 加密 Secret Key；Linux/macOS 默认仅在当前会话保留 Secret Key，可通过 `LABINVOICESYSTEM_BAIDU_SECRET_KEY` 环境变量提供。弹窗中留空表示不修改当前值。
-
-未配置 OCR 时，上传的发票会跳过网络识别并进入手工核对状态。请不要将生产环境 OCR 密钥提交到仓库。当前运行配置保存在系统用户应用数据目录下的：
-
-```text
-LabInvoiceSystem/appsettings.json
-```
-
-应用还会在同一目录记录操作日志：
-
-```text
-LabInvoiceSystem/upload_logs.json
-```
-
-## 文件归档规则
-
-默认目录来自 `AppSettings`：
-
-| 配置项 | 默认值 | 说明 |
-| --- | --- | --- |
-| `ArchiveDirectory` | `archive_data` | 已归档发票根目录 |
-| `TempUploadDirectory` | `temp_uploads` | 上传后、归档前的临时目录 |
-| `ExportDirectory` | `export_data` | ZIP 和 Excel 导出目录 |
-
-发票归档时会写入：
+原文件按购买月份保存在 `archive_data/YYYY-MM/`，并写入同名 JSON 元数据：
 
 ```text
 archive_data/YYYY-MM/YYYYMMDD-项目名称-支付方式-金额元.ext
 archive_data/YYYY-MM/YYYYMMDD-项目名称-支付方式-金额元.json
 ```
 
-JSON 元数据用于比单纯解析文件名更可靠地恢复发票日期、金额、项目、支付方式、发票号码、
-销售方名称和销售方税号。
+JSON 保存录入日期、购买日期、金额、项目、支付方式、发票号码、销售方名称和销售方税号。
+
+### ZIP 与 Excel
+
+导出的 ZIP 包含所选发票原文件和一份 Excel 明细。Excel 字段为：
+
+```text
+发票录入日期、购买日期、金额、项目名称、支付方式、发票号码、销售方名称、销售方税号
+```
+
+单一支付方式的 ZIP 默认命名为 `日期+支付方式.zip`，混合支付方式使用 `日期_发票.zip`。
+
+## OCR、隐私与密钥
+
+云 OCR 使用百度智能云 OAuth 和增值税发票识别接口。源码不包含默认 API Key 或 Secret Key。
+
+- 应用只在用户明确同意后上传识别所需的发票图像。
+- 选择“仅手工录入”时不会将图像发送到百度云。
+- Windows 使用当前用户范围的 DPAPI 加密保存 Secret Key。
+- Linux 和 macOS 默认只在当前会话保留 Secret Key，不写入磁盘。
+- Linux 和 macOS 可通过 `LABINVOICESYSTEM_BAIDU_SECRET_KEY` 环境变量提供 Secret Key。
+- OCR 调用次数按月记录；未配置 OCR 时不影响手工归档和导出。
+
+## 平台差异
+
+| 行为 | Windows | Linux / macOS |
+| --- | --- | --- |
+| 删除归档文件 | 移到系统回收站，可恢复 | 永久删除，确认窗口会明确提示 |
+| Secret Key | DPAPI 加密持久化 | 会话内保存，或使用环境变量 |
+| 导出后定位 | 在资源管理器中选中文件 | 打开导出目录 |
+| 发布格式 | ZIP | TAR.GZ |
+
+## 数据与配置目录
+
+默认运行目录：
+
+| 配置项 | 默认值 | 用途 |
+| --- | --- | --- |
+| `ArchiveDirectory` | `archive_data` | 发票原文件与 JSON 元数据 |
+| `TempUploadDirectory` | `temp_uploads` | 尚未归档的临时文件 |
+| `ExportDirectory` | `export_data` | ZIP 和 Excel 导出结果 |
+
+应用设置和操作日志位于当前系统的用户应用数据目录：
+
+```text
+LabInvoiceSystem/appsettings.json
+LabInvoiceSystem/upload_logs.json
+```
+
+请勿提交这些运行数据、真实发票或 OCR 密钥。
 
 ## 架构概览
 
 ```mermaid
 flowchart LR
-    A["文件选择或拖拽上传"] --> B["FileManagerService 保存临时文件"]
-    B --> C{"是否 PDF"}
-    C -- "是" --> D["PdfService 渲染首页图片"]
-    C -- "否" --> E["直接读取图片字节"]
-    D --> F["OcrService 调用 Baidu VAT Invoice OCR"]
+    A["选择或拖拽发票"] --> B["临时文件与预览"]
+    B --> C{"云 OCR 已配置且获同意？"}
+    C -- "是" --> D["Baidu OCR"]
+    C -- "否" --> E["人工录入"]
+    D --> F["人工核对与重复检测"]
     E --> F
-    F --> G["InvoiceInfo 待核对"]
-    G --> H["确认并归档"]
-    H --> I["archive_data/YYYY-MM 文件和 JSON 元数据"]
-    I --> J["发票导出 ZIP + Excel"]
-    I --> K["StatisticsService 统计和热力图"]
+    F --> G["原文件 + JSON 元数据"]
+    G --> H["录入日期 → 购买日期归档"]
+    H --> I["ZIP + Excel 导出"]
+    H --> J["统计指标与年度热力图"]
 ```
+
+主要分层：
+
+- `Views`：Avalonia AXAML 页面和少量窗口交互代码。
+- `ViewModels`：页面状态、命令、校验和分组逻辑。
+- `Services`：OCR、PDF 渲染、文件归档、设置、统计和日志。
+- `Models`：发票、归档项、日期组、统计和配置模型。
 
 ## 目录结构
 
 ```text
 LabInvoiceSystem/
-|-- README.md
-|-- README.en.md
-|-- LabInvoiceSystem.sln
-|-- start.bat
-|-- archive_data/                         # 默认归档目录，运行时数据
-`-- LabInvoiceSystem/
-    |-- App.axaml                         # Avalonia 应用样式、资源和 ViewLocator
-    |-- Program.cs                        # 桌面应用入口
-    |-- Assets/                           # ICO、SVG、PNG 图标资源
-    |-- Models/                           # InvoiceInfo、ArchiveItem、StatisticsData、AppSettings
-    |-- ViewModels/                       # MainWindow、导入、导出、统计页面状态和命令
-    |-- Views/                            # AXAML 页面和窗口
-    |-- Services/                         # OCR、PDF、文件、设置、统计、日志服务
-    |-- Styles/                           # 图标、主题色和通用控件样式
-    |-- Converters/                       # UI 绑定转换器
-    `-- Properties/PublishProfiles/        # Windows 发布配置
+├── .github/workflows/release.yml      # 六平台构建与 GitHub Release
+├── LabInvoiceSystem.sln
+├── README.md / README.en.md
+├── RELEASE_NOTES.md
+├── LICENSE
+├── start.bat                          # Windows 源码启动脚本
+└── LabInvoiceSystem/
+    ├── Assets/                        # 应用图标和资源
+    ├── Converters/                    # Avalonia 绑定转换器
+    ├── Models/                        # 领域与界面模型
+    ├── Services/                      # OCR、文件、PDF、配置、统计、日志
+    ├── Styles/                        # 主题颜色、图标和控件样式
+    ├── ViewModels/                    # 录入、导出、仪表盘和主窗口逻辑
+    ├── Views/                         # AXAML 页面及代码后置
+    ├── App.axaml                      # 应用资源入口
+    ├── Program.cs                     # 桌面应用入口
+    └── LabInvoiceSystem.csproj        # .NET 项目与版本配置
 ```
 
 ## 技术栈
 
-| 依赖 | 用途 |
-| --- | --- |
-| `Avalonia`, `Avalonia.Desktop` | 桌面 UI 框架 |
-| `Avalonia.Themes.Fluent`, `Avalonia.Fonts.Inter` | Fluent 风格和字体 |
-| `CommunityToolkit.Mvvm` | Observable 属性、RelayCommand 和 MVVM 支持 |
-| `Avalonia.Controls.DataGrid` | 归档发票表格展示 |
-| `LiveChartsCore.SkiaSharpView.Avalonia` | 图表与统计可视化 |
-| `MiniExcel` | 导出 Excel 明细 |
-| `PDFtoImage` | PDF 首页转图片 |
-| `SkiaSharp` | 图像渲染和处理 |
-| `Svg.Controls.Skia.Avalonia` | SVG 资源渲染 |
+| 依赖 | 版本 | 用途 |
+| --- | --- | --- |
+| Avalonia / Avalonia.Desktop | 11.3.9 | 跨平台桌面 UI |
+| Avalonia Fluent / Inter | 11.3.9 | 主题与字体 |
+| CommunityToolkit.Mvvm | 8.2.1 | Observable 属性与 RelayCommand |
+| LiveChartsCore Avalonia | 2.0.0-rc4 | 仪表盘图表 |
+| MiniExcel | 1.42.0 | Excel 明细导出 |
+| PDFtoImage | 4.1.0 | PDF 首页渲染 |
+| SkiaSharp | 2.88.9 | 图像处理 |
+| Svg.Controls.Skia.Avalonia | 11.3.6.2 | SVG 资源显示 |
 
-## 开发说明
+## 构建与发布
 
-- 默认页面由 [MainWindowViewModel.cs](./LabInvoiceSystem/ViewModels/MainWindowViewModel.cs) 控制。
-- View 和 ViewModel 通过 [ViewLocator.cs](./LabInvoiceSystem/ViewLocator.cs) 关联。
-- 主题切换会写入 `AppSettings.ThemeMode`。
-- 导出 ZIP 时，单一支付方式使用 `YYYYMMDD+支付方式.zip`，混合支付方式使用 `YYYYMMDD_发票.zip`。
-- 本仓库当前没有自动化测试项目。修改业务逻辑后，至少运行 `dotnet build` 做基础验证。
+本地 Release 构建示例：
+
+```bash
+dotnet publish LabInvoiceSystem/LabInvoiceSystem.csproj \
+  -c Release -r win-x64 --self-contained true \
+  -p:PublishSingleFile=true \
+  -p:IncludeNativeLibrariesForSelfExtract=true
+```
+
+可用 RID：`win-x64`、`win-arm64`、`linux-x64`、`linux-arm64`、`osx-x64`、`osx-arm64`。
+
+[发布工作流](./.github/workflows/release.yml) 会在 PR 中验证六个平台；推送 `v*` 标签后，它会重新构建、
+压缩产物、生成 SHA-256 校验文件并创建 GitHub Release。
+
+## 已知限制
+
+- 云 OCR 依赖百度智能云账户、有效凭据和网络连接。
+- PDF 预览与 OCR 仅处理第一页；多页发票应确保目标内容位于首页。
+- macOS 发布包尚未签名或公证。
+- 当前仓库没有独立的自动化测试项目，CI 负责六平台编译与打包验证。
 
 ## 常见问题
 
-### OCR 识别失败怎么办？
+### OCR 失败后还能归档吗？
 
-检查网络是否能访问百度智能云，确认 API Key 和 Secret Key 是否有效，并查看界面中的错误提示。
-如果 OCR 失败，发票仍会进入待核对状态，可以手工补全金额和项目后归档。
+可以。发票会保留在待核对状态，可手工补全必填字段后归档。
 
-### PDF 无法预览或识别怎么办？
+### 为什么重新启动后 Linux/macOS 的 Secret Key 消失？
 
-确认文件是真实 PDF，文件头应为 `%PDF-`，且文件不为空、未损坏。应用只渲染首页用于预览和 OCR，
-多页 PDF 需要确认发票是否在第一页。
+这是当前的安全策略：非 Windows 平台不会将 Secret Key 写入配置文件。需要持久使用时，请设置
+`LABINVOICESYSTEM_BAIDU_SECRET_KEY` 环境变量。
 
-### 仪表盘没有数据怎么办？
+### 仪表盘为什么没有数据？
 
-仪表盘读取的是已归档文件。请先在“发票录入”中完成“确认并归档”，再进入仪表盘点击“刷新数据”。
+仪表盘只统计已归档发票。请先完成归档，再进入仪表盘刷新数据。
 
-### 导出的 ZIP 在哪里？
+### 导出文件在哪里？
 
-默认导出到 `export_data`。也可以在“发票导出”页面点击“设置导出路径”，选择新的导出目录。
+默认位于 `export_data`。可在“发票导出”页面修改导出目录并直接打开该目录。
 
 ## 贡献 (Contributing)
 
-当前仓库没有单独的贡献指南。提交改动前，请优先保持现有 MVVM 分层，避免提交本地运行数据、
-OCR 密钥、`bin` 或 `obj` 生成物，并至少执行项目构建验证。
+欢迎提交 Issue 或 Pull Request。提交前请：
 
-## 反馈问题与联系 (Issues / Contact)
+1. 保持现有 MVVM 分层和命名方式。
+2. 不提交真实发票、OCR 密钥、`archive_data`、`temp_uploads`、`bin` 或 `obj`。
+3. 至少运行 `dotnet build LabInvoiceSystem/LabInvoiceSystem.csproj -c Release`。
+4. 涉及发布逻辑时，确认六个平台矩阵能够通过。
 
-请通过 GitHub Issues 反馈缺陷、改进建议或使用问题：
+## 问题反馈与联系 (Issues / Contact)
 
-[https://github.com/MIGO-OvO/LabInvoiceSystem/issues](https://github.com/MIGO-OvO/LabInvoiceSystem/issues)
+请通过 [GitHub Issues](https://github.com/MIGO-OvO/LabInvoiceSystem/issues) 报告缺陷或提出建议，
+也可以联系仓库维护者 [@MIGO-OvO](https://github.com/MIGO-OvO)。
 
-反馈时建议包含操作步骤、期望结果、实际结果、系统版本、发票文件类型以及错误截图或日志。
+问题报告建议包含复现步骤、期望结果、实际结果、操作系统、处理器架构、文件类型和相关日志。
 
 ## 许可证 (License)
 
-本项目使用 [MIT License](./LICENSE) 开源。你可以在遵守 MIT 许可证条款的前提下自由使用、
-复制、修改、合并、发布、分发、再授权和销售本项目副本。
+本项目使用 [MIT License](./LICENSE)。你可以在保留许可证与版权声明的前提下使用、复制、修改、
+合并、发布、分发、再授权或销售本项目副本。
 
 ## 致谢 (Acknowledgements)
-
-本项目使用以下开源项目和服务构建：
 
 - [Avalonia UI](https://avaloniaui.net/)
 - [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/)
