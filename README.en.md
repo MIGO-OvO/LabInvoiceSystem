@@ -1,258 +1,328 @@
 # LabInvoiceSystem
 
 <p align="center">
-  English | <a href="./README.md">简体中文</a>
+  <a href="./README.md">简体中文</a> · English
 </p>
 
+[![Release](https://img.shields.io/github/v/release/MIGO-OvO/LabInvoiceSystem?display_name=tag)](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/latest)
+[![Build and release](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/workflows/release.yml/badge.svg)](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/workflows/release.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![Avalonia](https://img.shields.io/badge/Avalonia-11.3.9-8B44AC)](https://avaloniaui.net/)
-[![MVVM](https://img.shields.io/badge/Pattern-MVVM-0F766E)](https://learn.microsoft.com/dotnet/architecture/maui/mvvm)
-[![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-0078D4)](https://github.com/MIGO-OvO/LabInvoiceSystem/releases)
-[![Baidu OCR](https://img.shields.io/badge/OCR-Baidu%20VAT%20Invoice-2563EB)](https://cloud.baidu.com/product/ocr)
+[![Avalonia 11.3.9](https://img.shields.io/badge/Avalonia-11.3.9-8B44AC)](https://avaloniaui.net/)
+[![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20macOS-x64%20%7C%20arm64-0078D4)](https://github.com/MIGO-OvO/LabInvoiceSystem/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
+> Latest stable release: [LabInvoiceSystem 2.0.0](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/tag/v2.0.0)
 
 ## Overview
 
-LabInvoiceSystem is a desktop invoice management tool for laboratory, research group, and reimbursement
-workflows. It uses Avalonia for the UI and .NET 8 for the application logic, with a workflow centered on
-uploading invoices, recognizing them with OCR, reviewing extracted fields, archiving files, exporting
-daily reimbursement packages, and reviewing spending statistics.
+LabInvoiceSystem is a cross-platform desktop invoice tool for laboratories, research groups, and reimbursement
+workflows. It combines file import, Baidu Cloud OCR, manual review, local archiving, reimbursement export,
+and spending statistics in one Avalonia application.
 
-Version 2.0.0 ships self-contained x64/arm64 packages for Windows, Linux, and macOS. Platform-specific file
-opening, deletion warnings, and OCR credential persistence follow the current operating system.
+Version 2.0.0 introduces a two-level "entry date → purchase date" archive and lets users move an archived
+invoice to any entry-date group from the existing edit window. The full workflow also works without cloud OCR:
+original files, JSON metadata, and exports remain on the local device.
 
 ## Core Features
 
-| Area | Capability |
+| Area | Current capability |
 | --- | --- |
-| Invoice import | Upload PDF, JPG, JPEG, and PNG invoices through a file picker or drag and drop |
-| PDF preview | Render the first PDF page with `PDFtoImage` and `SkiaSharp`; zoom, pan, and reset previews |
-| OCR extraction | With explicit user consent, send the invoice image to Baidu VAT Invoice OCR and extract all supported fields |
-| Manual review | Correct every exported field, or use local manual entry without uploading the image |
-| Local archive | Store original invoice files by `YYYY-MM` and write same-name JSON metadata for each invoice |
-| Reimbursement export | Export invoices by date as a ZIP package with an Excel detail sheet included |
-| Statistics dashboard | Show total amount, invoice count, last-30-days amount, and a one-year spending heatmap |
-| API management | Configure, test, and save Baidu OCR API Key and Secret Key from the dashboard |
-| Operation log | Record upload, archive, delete, and export actions as a JSON log in the user profile |
+| Invoice import | Pick or drag PDF, JPG, JPEG, and PNG files; process up to three concurrently |
+| OCR and manual entry | Call Baidu VAT Invoice OCR after consent, or complete the workflow entirely by hand |
+| PDF preview | Render the first page with wheel zoom, panning, and reset controls |
+| Review and validation | Edit dates, amount, item, payment method, invoice number, seller, and tax ID |
+| Duplicate detection | Check the current batch and archive, then let the user confirm possible duplicates |
+| Two-level archive | Group by entry and purchase date; search, collapse, select, and reassign groups |
+| Reimbursement export | Package original invoices and an eight-column Excel detail sheet in one ZIP |
+| Dashboard | Show total amount, invoice count, last-30-days amount, and a one-year heatmap |
+| Local settings | Persist theme, directories, OCR usage, field corrections, and operation logs |
 
-## Project Status
+## Project Status and Metrics
 
-| Metric | Current Value |
+| Metric | Current value |
 | --- | --- |
-| Application type | Desktop invoice OCR, archive, and export tool |
-| Target framework | `net8.0` |
-| UI framework | Avalonia 11.3.9, Fluent theme |
-| Architecture pattern | MVVM, `CommunityToolkit.Mvvm` |
-| Main workspaces | Invoice import, invoice export, dashboard |
-| C# source files | 31 |
-| AXAML files | 8 |
-| Icon assets | 8 |
-| Release targets | Windows, Linux, and macOS `x64` / `arm64` self-contained packages |
+| Stable version | `2.0.0`, released 2026-07-15 |
+| Target framework | `.NET 8` / `net8.0` |
+| UI framework | Avalonia 11.3.9 with Fluent theme |
+| Architecture | MVVM with `CommunityToolkit.Mvvm` |
+| Release platforms | Windows, Linux, and macOS on x64 and arm64 |
+| Distribution | Self-contained single-file app in ZIP or TAR.GZ |
+| Release verification | Six GitHub Actions builds plus `SHA256SUMS.txt` |
+| Repository size | 31 C# files, 8 AXAML files, and 9 asset files |
+| License | MIT |
 
 ## Getting Started
 
-### Requirements
+### Download a Release (Installation)
 
-- Windows 10+, a mainstream Linux desktop distribution, or macOS 12+.
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) for running, debugging, and publishing.
-- A Baidu Cloud OCR application's `API Key` and `Secret Key` for real invoice recognition; manual entry still works when OCR is not configured.
+Open [GitHub Releases](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/latest) and select your operating
+system and CPU architecture:
 
-### Installation
+| Operating system | x64 | arm64 |
+| --- | --- | --- |
+| Windows | `LabInvoiceSystem-2.0.0-win-x64.zip` | `LabInvoiceSystem-2.0.0-win-arm64.zip` |
+| Linux | `LabInvoiceSystem-2.0.0-linux-x64.tar.gz` | `LabInvoiceSystem-2.0.0-linux-arm64.tar.gz` |
+| macOS | `LabInvoiceSystem-2.0.0-osx-x64.tar.gz` | `LabInvoiceSystem-2.0.0-osx-arm64.tar.gz` |
+
+Release packages include the .NET runtime, so end users do not need the .NET SDK.
+
+### Run a Release Package
+
+#### Windows
+
+Extract the ZIP file and run `LabInvoiceSystem.exe`.
+
+#### Linux
+
+```bash
+tar -xzf LabInvoiceSystem-2.0.0-linux-x64.tar.gz
+chmod +x LabInvoiceSystem
+./LabInvoiceSystem
+```
+
+#### macOS
+
+```bash
+tar -xzf LabInvoiceSystem-2.0.0-osx-arm64.tar.gz
+chmod +x LabInvoiceSystem
+./LabInvoiceSystem
+```
+
+The macOS package is currently unsigned. If the first launch is blocked, allow it from
+System Settings → Privacy & Security.
+
+### Verify a Download
+
+Each Release includes `SHA256SUMS.txt`. On Windows:
+
+```powershell
+Get-FileHash .\LabInvoiceSystem-2.0.0-win-x64.zip -Algorithm SHA256
+```
+
+On Linux or macOS:
+
+```bash
+sha256sum LabInvoiceSystem-2.0.0-linux-x64.tar.gz
+```
+
+Compare the result with the matching line in `SHA256SUMS.txt`.
+
+### Run From Source
+
+Source development requires the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
 
 ```bash
 git clone https://github.com/MIGO-OvO/LabInvoiceSystem.git
 cd LabInvoiceSystem
-```
-
-### Run From Source
-
-```bash
 dotnet restore
 dotnet run --project LabInvoiceSystem/LabInvoiceSystem.csproj
 ```
 
-On Windows, you can also run the root launcher:
-
-```bat
-start.bat
-```
-
-### Download a Release
-
-Download the archive for your operating system and architecture from [GitHub Releases](https://github.com/MIGO-OvO/LabInvoiceSystem/releases).
-
-### Local Publish Example
-
-```bash
-dotnet publish LabInvoiceSystem/LabInvoiceSystem.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
-```
-
-Replace `win-x64` with `win-arm64`, `linux-x64`, `linux-arm64`, `osx-x64`, or `osx-arm64` for another target.
-Tags matching `v*` run the [GitHub Actions release workflow](./.github/workflows/release.yml), which builds all six packages, creates SHA-256 checksums, and publishes the Release.
+Windows users can also run `start.bat` from the repository root.
 
 ## Usage Workflow
 
-1. Open the app and start in "Invoice Import".
-2. Click "Upload File" or drag invoice files into the left panel.
-3. On first use, explicitly accept cloud OCR or choose manual entry; manual entry does not upload the image.
-4. After OCR finishes, review the invoice preview and extracted fields on the right.
-5. Correct date, amount, item name, payment method, invoice number, seller name, and seller tax ID.
-6. Click "Confirm and Archive", or use "Archive All" for a complete batch.
-7. Open "Invoice Export" to search, review, or edit archived records and export ZIP files. Windows deletion uses the Recycle Bin; Linux/macOS clearly warn before permanent deletion.
-8. Open "Dashboard" to view total amount, invoice count, last-30-days amount, and the yearly heatmap.
+1. Pick or drag invoice files into the Invoice Import workspace.
+2. Accept the cloud OCR privacy notice on first use, or choose manual entry.
+3. Review the preview and correct the purchase date, amount, item, payment method, invoice number, and seller.
+4. Resolve any possible-duplicate warning, then archive one invoice or the complete batch.
+5. Browse, search, or edit records in Invoice Export by entry date and purchase date.
+6. Select invoices or a date group and export a ZIP containing originals and an Excel detail sheet.
+7. Review totals, recent spending, and the annual heatmap on the Dashboard.
 
-## OCR Configuration
+## Archive and Export Model
 
-OCR is handled by [OcrService.cs](./LabInvoiceSystem/Services/OcrService.cs). The app obtains an `access_token`
-through Baidu OAuth and then calls the VAT invoice OCR endpoint.
+### Two Date Levels
 
-> Privacy: when cloud OCR is enabled, the invoice image required for recognition is sent to Baidu Cloud. The app asks for explicit consent before the first upload. Choosing manual entry keeps the image local. Archives, metadata, and exports remain on the device.
+- `EntryDate` is when the invoice entered the system or the archive date chosen by the user. It is the top level.
+- `InvoiceDate` is the actual purchase date and forms the second level under an entry date.
+- Changing `EntryDate` in the archive editor immediately moves the invoice to the matching entry-date group.
 
-Use the "Configure Baidu API" button in the dashboard:
+### Files and Metadata
 
-1. Enter the Baidu OCR `API Key` and `Secret Key`. The source code does not include default credentials.
-2. Click "Test Connection" to verify token access.
-3. Click "Save Configuration" to persist the settings. Windows protects the Secret Key with user-scoped DPAPI. Linux/macOS keep it for the current session only by default; use `LABINVOICESYSTEM_BAIDU_SECRET_KEY` to provide it through the environment. Leave the field blank to keep the current value.
-
-When OCR is not configured, uploaded invoices skip network recognition and remain available for manual review. Do not commit production OCR credentials to the repository. Runtime settings are saved under the OS user application-data directory at:
-
-```text
-LabInvoiceSystem/appsettings.json
-```
-
-Operation logs are saved in the same profile directory:
-
-```text
-LabInvoiceSystem/upload_logs.json
-```
-
-## Archive Rules
-
-Default paths come from `AppSettings`:
-
-| Setting | Default | Meaning |
-| --- | --- | --- |
-| `ArchiveDirectory` | `archive_data` | Root directory for archived invoices |
-| `TempUploadDirectory` | `temp_uploads` | Temporary directory before archive |
-| `ExportDirectory` | `export_data` | ZIP and Excel export directory |
-
-Archived invoices are written as:
+Original files are stored by purchase month under `archive_data/YYYY-MM/`, with same-name JSON metadata:
 
 ```text
 archive_data/YYYY-MM/YYYYMMDD-item-paymentMethod-amount元.ext
 archive_data/YYYY-MM/YYYYMMDD-item-paymentMethod-amount元.json
 ```
 
-The JSON metadata is used to recover invoice date, amount, item, payment method, invoice number,
-seller name, and seller tax ID more reliably than parsing the file name alone.
+JSON stores the entry date, purchase date, amount, item, payment method, invoice number, seller name, and tax ID.
+
+### ZIP and Excel
+
+An export ZIP contains the selected original invoices and one Excel detail sheet with these columns:
+
+```text
+Entry date, purchase date, amount, item name, payment method, invoice number, seller name, seller tax ID
+```
+
+For one payment method, ZIP names use `date+paymentMethod.zip`; mixed methods use `date_invoices.zip`.
+
+## OCR, Privacy, and Credentials
+
+Cloud recognition uses Baidu Cloud OAuth and the VAT Invoice OCR endpoint. No API credentials are embedded
+in the source code.
+
+- Images are uploaded only after the user explicitly consents to cloud OCR.
+- Manual-entry mode does not send invoice images to Baidu Cloud.
+- Windows encrypts the Secret Key with current-user DPAPI before persisting it.
+- Linux and macOS keep the Secret Key in memory for the current session and do not write it to disk.
+- Linux and macOS can read the key from `LABINVOICESYSTEM_BAIDU_SECRET_KEY`.
+- Monthly OCR calls are tracked locally; OCR configuration is optional for archiving and export.
+
+## Platform Differences
+
+| Behavior | Windows | Linux / macOS |
+| --- | --- | --- |
+| Archive deletion | Move to the Recycle Bin and allow recovery | Permanently delete after an explicit warning |
+| Secret Key | Persist with DPAPI encryption | Keep for the session or read from an environment variable |
+| Reveal export | Select the file in File Explorer | Open the export directory |
+| Release format | ZIP | TAR.GZ |
+
+## Data and Configuration
+
+Default runtime directories:
+
+| Setting | Default | Purpose |
+| --- | --- | --- |
+| `ArchiveDirectory` | `archive_data` | Original invoices and JSON metadata |
+| `TempUploadDirectory` | `temp_uploads` | Files waiting to be archived |
+| `ExportDirectory` | `export_data` | ZIP and Excel exports |
+
+Settings and operation logs live under the current operating system's user application-data directory:
+
+```text
+LabInvoiceSystem/appsettings.json
+LabInvoiceSystem/upload_logs.json
+```
+
+Do not commit runtime data, real invoices, or OCR credentials.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    A["File picker or drag-and-drop upload"] --> B["FileManagerService saves temporary file"]
-    B --> C{"Is it a PDF?"}
-    C -- "Yes" --> D["PdfService renders first page"]
-    C -- "No" --> E["Read image bytes directly"]
-    D --> F["OcrService calls Baidu VAT Invoice OCR"]
+    A["Pick or drag invoices"] --> B["Temporary files and preview"]
+    B --> C{"Cloud OCR configured and approved?"}
+    C -- "Yes" --> D["Baidu OCR"]
+    C -- "No" --> E["Manual entry"]
+    D --> F["Review and duplicate detection"]
     E --> F
-    F --> G["InvoiceInfo awaiting review"]
-    G --> H["Confirm and archive"]
-    H --> I["archive_data/YYYY-MM file and JSON metadata"]
-    I --> J["ZIP + Excel export"]
-    I --> K["StatisticsService metrics and heatmap"]
+    F --> G["Original file + JSON metadata"]
+    G --> H["Entry date → purchase date archive"]
+    H --> I["ZIP + Excel export"]
+    H --> J["Statistics and annual heatmap"]
 ```
+
+The main layers are:
+
+- `Views`: Avalonia AXAML pages and small amounts of window interaction code.
+- `ViewModels`: page state, commands, validation, and grouping behavior.
+- `Services`: OCR, PDF rendering, file archive, settings, statistics, and logging.
+- `Models`: invoices, archive items, date groups, statistics, and settings.
 
 ## Repository Structure
 
 ```text
 LabInvoiceSystem/
-|-- README.md
-|-- README.en.md
-|-- LabInvoiceSystem.sln
-|-- start.bat
-|-- archive_data/                         # Default archive directory, runtime data
-`-- LabInvoiceSystem/
-    |-- App.axaml                         # Avalonia app styles, resources, and ViewLocator
-    |-- Program.cs                        # Desktop app entry point
-    |-- Assets/                           # ICO, SVG, and PNG icon assets
-    |-- Models/                           # InvoiceInfo, ArchiveItem, StatisticsData, AppSettings
-    |-- ViewModels/                       # Main window, import, export, and dashboard state/commands
-    |-- Views/                            # AXAML pages and window
-    |-- Services/                         # OCR, PDF, file, settings, statistics, and logging services
-    |-- Styles/                           # Icons, theme colors, and shared control styles
-    |-- Converters/                       # UI binding converters
-    `-- Properties/PublishProfiles/        # Windows publish configuration
+├── .github/workflows/release.yml      # Six-platform build and GitHub Release
+├── LabInvoiceSystem.sln
+├── README.md / README.en.md
+├── RELEASE_NOTES.md
+├── LICENSE
+├── start.bat                          # Windows source launcher
+└── LabInvoiceSystem/
+    ├── Assets/                        # Application icons and resources
+    ├── Converters/                    # Avalonia binding converters
+    ├── Models/                        # Domain and view state models
+    ├── Services/                      # OCR, files, PDF, settings, statistics, logs
+    ├── Styles/                        # Theme colors, icons, and control styles
+    ├── ViewModels/                    # Import, export, dashboard, and shell logic
+    ├── Views/                         # AXAML pages and code-behind
+    ├── App.axaml                      # Application resource entry point
+    ├── Program.cs                     # Desktop application entry point
+    └── LabInvoiceSystem.csproj        # Project, dependencies, and version
 ```
 
 ## Technology Stack
 
-| Dependency | Purpose |
-| --- | --- |
-| `Avalonia`, `Avalonia.Desktop` | Desktop UI framework |
-| `Avalonia.Themes.Fluent`, `Avalonia.Fonts.Inter` | Fluent styling and font |
-| `CommunityToolkit.Mvvm` | Observable properties, RelayCommand, and MVVM support |
-| `Avalonia.Controls.DataGrid` | Archived invoice table display |
-| `LiveChartsCore.SkiaSharpView.Avalonia` | Charts and statistics visualization |
-| `MiniExcel` | Excel detail export |
-| `PDFtoImage` | First-page PDF image rendering |
-| `SkiaSharp` | Image rendering and processing |
-| `Svg.Controls.Skia.Avalonia` | SVG resource rendering |
+| Dependency | Version | Purpose |
+| --- | --- | --- |
+| Avalonia / Avalonia.Desktop | 11.3.9 | Cross-platform desktop UI |
+| Avalonia Fluent / Inter | 11.3.9 | Theme and fonts |
+| CommunityToolkit.Mvvm | 8.2.1 | Observable properties and RelayCommand |
+| LiveChartsCore Avalonia | 2.0.0-rc4 | Dashboard charts |
+| MiniExcel | 1.42.0 | Excel detail export |
+| PDFtoImage | 4.1.0 | First-page PDF rendering |
+| SkiaSharp | 2.88.9 | Image processing |
+| Svg.Controls.Skia.Avalonia | 11.3.6.2 | SVG rendering |
 
-## Development Notes
+## Build and Release
 
-- The active page is managed by [MainWindowViewModel.cs](./LabInvoiceSystem/ViewModels/MainWindowViewModel.cs).
-- Views and view models are linked through [ViewLocator.cs](./LabInvoiceSystem/ViewLocator.cs).
-- Theme changes are persisted to `AppSettings.ThemeMode`.
-- ZIP exports use `YYYYMMDD+paymentMethod.zip` for one payment method, otherwise `YYYYMMDD_发票.zip`.
-- This repository currently has no automated test project. Run at least `dotnet build` after logic changes.
+Example local Release build:
+
+```bash
+dotnet publish LabInvoiceSystem/LabInvoiceSystem.csproj \
+  -c Release -r win-x64 --self-contained true \
+  -p:PublishSingleFile=true \
+  -p:IncludeNativeLibrariesForSelfExtract=true
+```
+
+Supported RIDs: `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `osx-x64`, and `osx-arm64`.
+
+The [release workflow](./.github/workflows/release.yml) validates all six targets on pull requests. A `v*` tag
+rebuilds and packages them, writes SHA-256 checksums, and creates the GitHub Release.
+
+## Known Limitations
+
+- Cloud OCR requires a Baidu Cloud account, valid credentials, and network access.
+- PDF preview and OCR process only the first page; multi-page invoices should place the invoice on page one.
+- macOS packages are not yet code-signed or notarized.
+- The repository has no separate automated test project; CI verifies compilation and packaging on six targets.
 
 ## FAQ
 
-### What should I check if OCR fails?
+### Can I archive an invoice after OCR fails?
 
-Verify network access to Baidu Cloud, confirm the API Key and Secret Key are valid, and review the error
-message shown in the app. If OCR fails, the invoice still moves into review state, so you can fill in the
-amount and item manually before archiving.
+Yes. The invoice remains available for review, and you can enter the required fields manually before archiving.
 
-### What should I check if a PDF cannot be previewed or recognized?
+### Why does my Secret Key disappear after restarting on Linux or macOS?
 
-Make sure the file is a real PDF, starts with `%PDF-`, is not empty, and is not corrupted. The app only
-renders the first page for preview and OCR, so multi-page PDFs should have the invoice on the first page.
+This is the current security policy: non-Windows platforms do not write the Secret Key to the settings file.
+Set `LABINVOICESYSTEM_BAIDU_SECRET_KEY` when persistent availability is required.
 
-### Why is the dashboard empty?
+### Why is the Dashboard empty?
 
-The dashboard reads archived files. Finish "Confirm and Archive" in the import workspace first, then open
-the dashboard and click "Refresh Data".
+The Dashboard reads archived invoices only. Archive at least one invoice, then refresh the Dashboard.
 
-### Where does ZIP export output go?
+### Where are exports saved?
 
-By default, exports go to `export_data`. You can change the destination from the "Invoice Export" page with
-"Set Export Path".
+The default is `export_data`. Use Invoice Export to choose another directory or open the current one.
 
 ## Contributing
 
-This repository does not currently include a dedicated contribution guide. Before submitting changes, keep
-the existing MVVM layering, avoid committing local runtime data, OCR credentials, `bin` or `obj` outputs, and
-run at least a project build verification.
+Issues and pull requests are welcome. Before submitting a change:
 
-## Contact and Issues
+1. Keep the existing MVVM layering and naming style.
+2. Do not commit real invoices, OCR credentials, `archive_data`, `temp_uploads`, `bin`, or `obj`.
+3. Run `dotnet build LabInvoiceSystem/LabInvoiceSystem.csproj -c Release` at minimum.
+4. For release changes, verify that the six-platform matrix succeeds.
 
-Use GitHub Issues for bugs, improvements, or usage questions:
+## Reporting Issues and Contact
 
-[https://github.com/MIGO-OvO/LabInvoiceSystem/issues](https://github.com/MIGO-OvO/LabInvoiceSystem/issues)
+Use [GitHub Issues](https://github.com/MIGO-OvO/LabInvoiceSystem/issues) for bugs and feature requests,
+or contact the repository maintainer [@MIGO-OvO](https://github.com/MIGO-OvO).
 
-Helpful reports include steps to reproduce, expected result, actual result, Windows version, invoice file type,
-and any relevant screenshots or logs.
+Include reproduction steps, expected and actual behavior, operating system, CPU architecture, file type,
+and relevant logs when possible.
 
 ## License
 
-This project is open source under the [MIT License](./LICENSE). You may use, copy, modify, merge, publish,
-distribute, sublicense, and sell copies of the project under the MIT terms.
+LabInvoiceSystem is available under the [MIT License](./LICENSE). You may use, copy, modify, merge, publish,
+distribute, sublicense, or sell copies while preserving the license and copyright notice.
 
 ## Acknowledgements
-
-This project is built with the following open source projects and services:
 
 - [Avalonia UI](https://avaloniaui.net/)
 - [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/)
