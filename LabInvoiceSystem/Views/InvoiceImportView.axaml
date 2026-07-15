@@ -16,12 +16,12 @@
         <converters:DateTimeToDateTimeOffsetConverter x:Key="DateTimeToDateTimeOffset"/>
     </UserControl.Resources>
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
         <!-- Top Bar -->
         <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
-            <TextBlock Text="发票录入" FontSize="24" FontWeight="Bold" VerticalAlignment="Center"/>
+            <TextBlock Text="发票录入" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
             
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+            <WrapPanel Grid.Column="2" HorizontalAlignment="Right">
                 <!-- 统一日期选择器 -->
                 <Border VerticalAlignment="Center" 
                         IsVisible="{Binding UploadedInvoices.Count}">
@@ -32,14 +32,18 @@
                 <Button Command="{Binding SetUniformDateCommand}"
                         Classes="Primary"
                         Padding="14,8"
-                        IsVisible="{Binding UploadedInvoices.Count}">
-                    <TextBlock Text="一键设日期" FontWeight="SemiBold"/>
+                        IsVisible="{Binding UploadedInvoices.Count}"
+                        IsEnabled="{Binding !IsProcessing}"
+                        Margin="8,0,0,0">
+                    <TextBlock Text="统一购买日期" FontWeight="SemiBold"/>
                 </Button>
                 
                 <Button Command="{Binding ArchiveAllCommand}"
                         Classes="Success"
                         Padding="14,8"
-                        IsVisible="{Binding UploadedInvoices.Count}">
+                        IsVisible="{Binding UploadedInvoices.Count}"
+                        IsEnabled="{Binding !IsProcessing}"
+                        Margin="8,0,0,0">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <PathIcon Data="{StaticResource IconArchive}" Width="16" Height="16"/>
                         <TextBlock Text="全部归档"/>
@@ -48,17 +52,63 @@
                 
                 <Button Command="{Binding UploadFilesCommand}"
                         Classes="Primary"
+                        HotKey="Ctrl+O"
+                        IsEnabled="{Binding !IsProcessing}"
+                        AutomationProperties.Name="上传发票文件"
+                        Margin="8,0,0,0"
                         Padding="14,8">
                     <TextBlock Text="上传文件"/>
                 </Button>
-            </StackPanel>
+            </WrapPanel>
         </Grid>
 
+        <Border Grid.Row="1"
+                Classes="Card"
+                Padding="14"
+                Margin="0,0,0,12"
+                BorderBrush="{DynamicResource PrimaryBrush}"
+                IsVisible="{Binding IsCloudOcrNoticeVisible}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="使用百度云 OCR 前请确认" FontWeight="SemiBold"/>
+                    <TextBlock Text="识别时会把发票图像上传至百度云。你也可以只在本机手工录入，原文件不会上传。"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Button Classes="Primary"
+                            Command="{Binding AcceptCloudOcrNoticeCommand}"
+                            Content="同意并启用云端 OCR"/>
+                    <Button Classes="Capsule"
+                            Command="{Binding UseManualEntryCommand}"
+                            Content="仅手工录入"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Classes="Card" Padding="10" Margin="0,0,0,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding StatusMessage}"
+                           AutomationProperties.LiveSetting="Polite"
+                           FontSize="12"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"/>
+                <Button Grid.Column="1"
+                        Command="{Binding CancelProcessingCommand}"
+                        IsVisible="{Binding IsProcessing}"
+                        Classes="Danger"
+                        Padding="10,6">
+                    <TextBlock Text="取消处理"/>
+                </Button>
+            </Grid>
+        </Border>
+
         <!-- Main Split Layout - 使用比例布局 -->
-        <Grid Grid.Row="1" ColumnDefinitions="2*,16,3*">
+        <Grid x:Name="MainSplitGrid" Grid.Row="3" ColumnDefinitions="2*,16,3*">
         
             <!-- Left Pane: File List & Drop Zone -->
-            <Grid Grid.Column="0" RowDefinitions="Auto,*"
+            <Grid x:Name="LeftPane" Grid.Column="0" RowDefinitions="Auto,*"
                   DragDrop.AllowDrop="True"
                   DragDrop.Drop="OnDrop">
                 <!-- Drop Zone (Visible when empty) -->
@@ -70,6 +120,7 @@
                         BorderThickness="2"
                         BorderBrush="{DynamicResource BorderBrush}"
                         CornerRadius="12"
+                        AutomationProperties.Name="上传或拖入发票文件"
                         Classes="Card">
                     <Button.Styles>
                         <Style Selector="Button:pointerover /template/ ContentPresenter">
@@ -106,37 +157,65 @@
                                                 <!-- Status Icon -->
                                                 <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Margin="0,0,12,0"
                                                         Background="{DynamicResource NavHoverBackgroundBrush}">
-                                                    <Path Data="{Binding Status, Converter={StaticResource StatusToIcon}}"
-                                                          Fill="{DynamicResource PrimaryBrush}"
-                                                          Width="16" Height="16"
-                                                          Stretch="Uniform"
-                                                          HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center"/>
+                                                    <Viewbox Width="16" Height="16"
+                                                             HorizontalAlignment="Center"
+                                                             VerticalAlignment="Center">
+                                                        <Path Data="{Binding Status, Converter={StaticResource StatusToIcon}}"
+                                                              Fill="{Binding Status, Converter={StaticResource StatusToColor}}"
+                                                              Width="24" Height="24"
+                                                              Stretch="Uniform"/>
+                                                    </Viewbox>
                                                 </Border>
                                                 
                                                 <!-- Info -->
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
                                                     <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
-                                                    <TextBlock Text="{Binding Status, Converter={StaticResource StatusToText}}" 
-                                                               FontSize="11" 
-                                                               Foreground="{DynamicResource TextSecondaryBrush}"
-                                                               Margin="0,2,0,0"/>
-                                                </StackPanel>
-                                                
-                                                <!-- Delete Action -->
-                                                <Button Grid.Column="2"
-                                                        Classes="Danger"
-                                                        Theme="{DynamicResource TransparentButton}"
-                                                        Padding="10"
-                                                        MinWidth="36"
-                                                        MinHeight="36"
+                                                     <TextBlock Text="{Binding Status, Converter={StaticResource StatusToText}}"
+                                                                FontSize="11"
+                                                                Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                Margin="0,2,0,0"/>
+                                                     <TextBlock Text="{Binding ProcessingMessage}"
+                                                                IsVisible="{Binding HasProcessingMessage}"
+                                                                FontSize="11"
+                                                                Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                TextTrimming="CharacterEllipsis"/>
+                                                     <TextBlock Text="{Binding ErrorMessage}"
+                                                                IsVisible="{Binding HasErrorMessage}"
+                                                                FontSize="11"
+                                                                Foreground="{DynamicResource Red500}"
+                                                                TextTrimming="CharacterEllipsis"
+                                                                ToolTip.Tip="{Binding ErrorMessage}"/>
+                                                 </StackPanel>
+
+                                                 <!-- Delete Action -->
+                                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                     <Button Classes="Primary"
+                                                             Theme="{DynamicResource TransparentButton}"
+                                                             Padding="10"
+                                                             MinWidth="44"
+                                                             MinHeight="44"
+                                                             IsVisible="{Binding CanRetryOcr}"
+                                                             Command="{Binding $parent[UserControl].((vm:InvoiceImportViewModel)DataContext).RetryOcrCommand}"
+                                                     CommandParameter="{Binding}"
+                                                     AutomationProperties.Name="重试 OCR"
+                                                     ToolTip.Tip="重试 OCR">
+                                                         <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" Width="18" Height="18" Foreground="{DynamicResource PrimaryBrush}"/>
+                                                     </Button>
+                                                     <Button
+                                                         Classes="Danger"
+                                                         Theme="{DynamicResource TransparentButton}"
+                                                         Padding="10"
+                                                        MinWidth="44"
+                                                        MinHeight="44"
                                                         VerticalAlignment="Center"
                                                         Command="{Binding $parent[UserControl].((vm:InvoiceImportViewModel)DataContext).DeleteInvoiceCommand}"
-                                                        CommandParameter="{Binding}"
-                                                        ToolTip.Tip="删除此发票">
-                                                    <PathIcon Data="{StaticResource IconDelete}" Width="18" Height="18" Foreground="{DynamicResource Red500}"/>
-                                                </Button>
-                                            </Grid>
+                                                         CommandParameter="{Binding}"
+                                                         AutomationProperties.Name="从待处理列表删除发票"
+                                                         ToolTip.Tip="删除此发票">
+                                                         <PathIcon Data="{StaticResource IconDelete}" Width="18" Height="18" Foreground="White"/>
+                                                     </Button>
+                                                 </StackPanel>
+                                             </Grid>
                                         </Border>
                                     </Border>
                                 </Button>
@@ -147,7 +226,7 @@
             </Grid>
 
             <!-- Right Pane: Preview & Edit -->
-            <Grid Grid.Column="2" RowDefinitions="*,Auto" IsVisible="{Binding SelectedInvoice, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <Grid x:Name="RightPane" Grid.Column="2" RowDefinitions="*,Auto" IsVisible="{Binding SelectedInvoice, Converter={x:Static ObjectConverters.IsNotNull}}">
                 
                 <!-- Preview Area with Zoom Controls -->
                 <Border Grid.Row="0" Classes="Card" Margin="0,0,0,16" Padding="0" ClipToBounds="True">
@@ -162,28 +241,30 @@
                             <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                                 <Button Theme="{DynamicResource TransparentButton}" 
                                         Padding="6" 
+                                        AutomationProperties.Name="缩小发票预览"
                                         ToolTip.Tip="缩小"
                                         Click="OnZoomOutClick">
                                     <PathIcon Data="M19,13H5V11H19V13Z" Width="14" Height="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Button>
                                 <Button Theme="{DynamicResource TransparentButton}" 
                                         Padding="6" 
+                                        AutomationProperties.Name="让发票预览适应窗口"
                                         ToolTip.Tip="适应窗口 (双击图片)"
                                         Click="OnFitToWindowClick">
                                     <PathIcon Data="M5,5H10V7H7V10H5V5M14,5H19V10H17V7H14V5M17,14H19V19H14V17H17V14M10,17V19H5V14H7V17H10Z" Width="14" Height="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Button>
                                 <Button Theme="{DynamicResource TransparentButton}" 
                                         Padding="6" 
+                                        AutomationProperties.Name="放大发票预览"
                                         ToolTip.Tip="放大"
                                         Click="OnZoomInClick">
                                     <PathIcon Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Width="14" Height="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Button>
                                 <TextBlock Text="滚轮缩放 | 拖动平移 | 双击重置" 
-                                           FontSize="10" 
+                                           FontSize="12"
                                            Foreground="{DynamicResource TextSecondaryBrush}" 
                                            VerticalAlignment="Center"
-                                           Margin="8,0,0,0"
-                                           Opacity="0.7"/>
+                                           Margin="8,0,0,0"/>
                             </StackPanel>
                         </Border>
                         
@@ -229,25 +310,52 @@
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <Border Classes="Card" Padding="16">
                         <StackPanel Spacing="12">
-                            <Grid ColumnDefinitions="Auto,*">
-                                <Border Width="4" Height="20" Background="{DynamicResource PrimaryBrush}" CornerRadius="2" Margin="0,0,10,0"/>
-                                <TextBlock Grid.Column="1" Text="确认信息" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
-                            </Grid>
+                            <TextBlock Text="确认信息" FontSize="16" FontWeight="Bold"/>
 
                             <Grid ColumnDefinitions="*,12,*">
                                 <StackPanel Grid.Column="0" Spacing="6">
-                                    <TextBlock Text="日期" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                    <DatePicker SelectedDate="{Binding SelectedInvoice.InvoiceDate, Converter={StaticResource DateTimeToDateTimeOffset}}"/>
+                                    <TextBlock Text="购买日期" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <DatePicker SelectedDate="{Binding SelectedInvoice.InvoiceDate, Converter={StaticResource DateTimeToDateTimeOffset}}"
+                                                AutomationProperties.Name="购买日期"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Spacing="6">
                                     <TextBlock Text="金额 (¥)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                    <TextBox Text="{Binding SelectedInvoice.Amount}"/>
+                                    <TextBox Text="{Binding SelectedInvoice.Amount}"
+                                             AutomationProperties.Name="发票金额"/>
+                                    <TextBlock Text="{Binding SelectedInvoice.AmountError}"
+                                               IsVisible="{Binding SelectedInvoice.HasAmountError}"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource DangerBrush}"/>
                                 </StackPanel>
                             </Grid>
 
                             <StackPanel Spacing="6">
                                 <TextBlock Text="项目名称" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                <TextBox Text="{Binding SelectedInvoice.ItemName}"/>
+                                <TextBox Text="{Binding SelectedInvoice.ItemName}"
+                                         AutomationProperties.Name="项目名称"/>
+                                <TextBlock Text="{Binding SelectedInvoice.ItemNameError}"
+                                           IsVisible="{Binding SelectedInvoice.HasItemNameError}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource DangerBrush}"/>
+                            </StackPanel>
+
+                            <Grid ColumnDefinitions="*,12,*">
+                                <StackPanel Grid.Column="0" Spacing="6">
+                                    <TextBlock Text="发票号码" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBox Text="{Binding SelectedInvoice.InvoiceNumber}"
+                                             AutomationProperties.Name="发票号码"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Spacing="6">
+                                    <TextBlock Text="销售方名称" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBox Text="{Binding SelectedInvoice.SellerName}"
+                                             AutomationProperties.Name="销售方名称"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="销售方税号" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <TextBox Text="{Binding SelectedInvoice.SellerTaxId}"
+                                         AutomationProperties.Name="销售方税号"/>
                             </StackPanel>
 
                             <StackPanel Spacing="6">
@@ -277,9 +385,33 @@
                                 </Grid>
                             </StackPanel>
 
-                            <Button Classes="Primary" 
+                            <Border Classes="Card"
+                                    Padding="12"
+                                    BorderBrush="{DynamicResource DangerBrush}"
+                                    IsVisible="{Binding SelectedInvoice.HasDuplicateWarning}">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="{Binding SelectedInvoice.DuplicateWarning}"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource DangerBrush}"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                                        <Button Classes="Capsule"
+                                                Command="{Binding CancelDuplicateCommand}"
+                                                CommandParameter="{Binding SelectedInvoice}"
+                                                Content="返回核对"/>
+                                        <Button Classes="Danger"
+                                                Command="{Binding ArchiveDuplicateCommand}"
+                                                CommandParameter="{Binding SelectedInvoice}"
+                                                Content="仍然归档"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Button Classes="Primary"
                                     Command="{Binding ArchiveSingleCommand}"
                                     CommandParameter="{Binding SelectedInvoice}"
+                                    HotKey="Ctrl+Enter"
+                                    IsEnabled="{Binding !IsProcessing}"
+                                    IsVisible="{Binding !SelectedInvoice.HasDuplicateWarning}"
                                     HorizontalAlignment="Stretch" 
                                     HorizontalContentAlignment="Center"
                                     Padding="14,10">
@@ -291,8 +423,8 @@
             </Grid>
             
             <!-- Empty State for Right Pane -->
-            <Grid Grid.Column="2" IsVisible="{Binding SelectedInvoice, Converter={x:Static ObjectConverters.IsNull}}">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Opacity="0.5">
+            <Grid x:Name="RightEmpty" Grid.Column="2" IsVisible="{Binding SelectedInvoice, Converter={x:Static ObjectConverters.IsNull}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
                     <PathIcon Data="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" 
                               Width="48" Height="48" Foreground="{DynamicResource TextSecondaryBrush}"/>
                     <TextBlock Text="选择文件查看详情" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>

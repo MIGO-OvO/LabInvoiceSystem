@@ -26,6 +26,15 @@ namespace LabInvoiceSystem.ViewModels
 
         [ObservableProperty]
         private string _statusMessage = "准备就绪";
+
+        [ObservableProperty]
+        private bool _isProcessing;
+
+        [ObservableProperty]
+        private string _heatmapDateRange = string.Empty;
+
+        [ObservableProperty]
+        private string _heatmapSummary = "过去一年暂无报账记录";
         
         // KPI Properties
         [ObservableProperty]
@@ -64,6 +73,9 @@ namespace LabInvoiceSystem.ViewModels
         [ObservableProperty]
         private bool _isTestSuccess;
 
+        [ObservableProperty]
+        private string _secretKeyHelpText = "Secret Key 留空表示不修改已有值";
+
         public StatisticsViewModel()
         {
             _fileManager = new FileManagerService();
@@ -83,12 +95,13 @@ namespace LabInvoiceSystem.ViewModels
         [RelayCommand]
         private async Task RefreshAsync()
         {
+            if (IsProcessing) return;
+            IsProcessing = true;
             StatusMessage = "正在刷新统计数据...";
 
             try
             {
-                // 加载归档数据
-                var archives = _fileManager.GetArchivedInvoices();
+                var archives = await _fileManager.GetArchivedInvoicesAsync();
                 
                 // 计算统计数据
                 Statistics = _statisticsService.CalculateStatistics(archives);
@@ -101,14 +114,16 @@ namespace LabInvoiceSystem.ViewModels
                 // 生成热力图数据
                 GenerateHeatmapData();
 
-                StatusMessage = $"已加载 {archives.Count} 个发票的统计数据";
+                StatusMessage = $"统计已更新，共 {archives.Count} 张归档发票";
             }
             catch (Exception ex)
             {
                 StatusMessage = $"刷新失败: {ex.Message}";
             }
-
-            await Task.CompletedTask;
+            finally
+            {
+                IsProcessing = false;
+            }
         }
 
         private void GenerateHeatmapData()
@@ -118,6 +133,14 @@ namespace LabInvoiceSystem.ViewModels
             // 生成过去365天的数据
             var today = DateTime.Now.Date;
             var startDate = today.AddDays(-364); // 包含今天共365天
+            HeatmapDateRange = $"{startDate:yyyy-MM-dd} 至 {today:yyyy-MM-dd}";
+            var activeDays = Statistics.DailyExpenses.Count(pair => pair.Key >= startDate && pair.Key <= today && pair.Value > 0);
+            var yearlyAmount = Statistics.DailyExpenses
+                .Where(pair => pair.Key >= startDate && pair.Key <= today)
+                .Sum(pair => pair.Value);
+            HeatmapSummary = activeDays == 0
+                ? "过去一年暂无报账记录"
+                : $"过去一年有 {activeDays} 天发生报账，合计 {yearlyAmount:C}";
 
             // 计算颜色级别的阈值
             var amounts = Statistics.DailyExpenses.Values.Where(v => v > 0).ToList();
@@ -140,7 +163,7 @@ namespace LabInvoiceSystem.ViewModels
                 if (amount == 0)
                 {
                     level = 0;
-                    colorHex = "#F1F5F9"; // Slate100
+                    colorHex = "Transparent";
                 }
                 else if (amount < threshold1)
                 {
@@ -201,7 +224,10 @@ namespace LabInvoiceSystem.ViewModels
             var settings = SettingsService.Instance.Settings;
 
             ApiKeyInput = settings.BaiduApiKey ?? string.Empty;
-            SecretKeyInput = settings.BaiduSecretKey ?? string.Empty;
+            SecretKeyInput = string.Empty;
+            SecretKeyHelpText = string.IsNullOrWhiteSpace(settings.BaiduSecretKey)
+                ? "请输入 Secret Key"
+                : "Secret Key 已保存，留空表示不修改";
             TestResultMessage = string.Empty;
             IsTestSuccess = false;
             IsTestingConnection = false;
@@ -218,7 +244,8 @@ namespace LabInvoiceSystem.ViewModels
         [RelayCommand]
         private async Task TestApiAsync()
         {
-            if (string.IsNullOrWhiteSpace(ApiKeyInput) || string.IsNullOrWhiteSpace(SecretKeyInput))
+            var secretKey = GetSecretKeyForSaveOrTest();
+            if (string.IsNullOrWhiteSpace(ApiKeyInput) || string.IsNullOrWhiteSpace(secretKey))
             {
                 TestResultMessage = "请填写完整的 API Key 与 Secret Key";
                 IsTestSuccess = false;
@@ -231,7 +258,9 @@ namespace LabInvoiceSystem.ViewModels
 
             try
             {
-                var url = $"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={ApiKeyInput}&client_secret={SecretKeyInput}";
+                var url = "https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials" +
+                          $"&client_id={Uri.EscapeDataString(ApiKeyInput.Trim())}" +
+                          $"&client_secret={Uri.EscapeDataString(secretKey)}";
 
                 var response = await _httpClient.GetAsync(url);
                 var body = await response.Content.ReadAsStringAsync();
@@ -276,15 +305,46 @@ namespace LabInvoiceSystem.ViewModels
         private void SaveApiConfig()
         {
             var settings = SettingsService.Instance.Settings;
+            var apiKey = ApiKeyInput?.Trim() ?? string.Empty;
+            var secretKey = GetSecretKeyForSaveOrTest();
 
-            settings.BaiduApiKey = ApiKeyInput?.Trim() ?? string.Empty;
-            settings.BaiduSecretKey = SecretKeyInput?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(secretKey))
+            {
+                TestResultMessage = "请填写完整的 API Key 与 Secret Key";
+                IsTestSuccess = false;
+                return;
+            }
 
-            SettingsService.Instance.SaveSettings();
+            var previousApiKey = settings.BaiduApiKey;
+            var previousSecretKey = settings.BaiduSecretKey;
+
+            settings.BaiduApiKey = apiKey;
+            if (!string.IsNullOrWhiteSpace(SecretKeyInput))
+            {
+                settings.BaiduSecretKey = SecretKeyInput.Trim();
+            }
+
+            if (!SettingsService.Instance.SaveSettings())
+            {
+                settings.BaiduApiKey = previousApiKey;
+                settings.BaiduSecretKey = previousSecretKey;
+                TestResultMessage = "配置保存失败，请检查应用数据目录权限";
+                IsTestSuccess = false;
+                return;
+            }
 
             LoadApiStatusFromSettings();
-
+            StatusMessage = OperatingSystem.IsWindows()
+                ? "百度 OCR 配置已安全保存"
+                : "API Key 已保存；Secret Key 仅在本次运行中保留";
             IsApiSettingsOpen = false;
+        }
+
+        private string GetSecretKeyForSaveOrTest()
+        {
+            return string.IsNullOrWhiteSpace(SecretKeyInput)
+                ? SettingsService.Instance.Settings.BaiduSecretKey
+                : SecretKeyInput.Trim();
         }
     }
 }

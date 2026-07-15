@@ -1,0 +1,10 @@
+.vs/
+.ai-bridge/
+**/bin/
+**/obj/
+artifacts/
+publish/
+**/archive_data/
+**/temp_uploads/
+**/export_data/
+*.user

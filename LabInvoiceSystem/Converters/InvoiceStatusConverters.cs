@@ -16,8 +16,10 @@ namespace LabInvoiceSystem.Converters
                 return status switch
                 {
                     InvoiceStatus.Pending => "待识别",
-                    InvoiceStatus.Processing => "识别中...",
+                    InvoiceStatus.ConvertingPdf => "PDF 转换中",
+                    InvoiceStatus.OcrProcessing => "OCR 识别中",
                     InvoiceStatus.Review => "待确认",
+                    InvoiceStatus.Failed => "失败",
                     InvoiceStatus.Archived => "已归档",
                     _ => "未知状态"
                 };
@@ -45,8 +47,10 @@ namespace LabInvoiceSystem.Converters
             var iconKey = status switch
             {
                 InvoiceStatus.Pending => "IconFile",
-                InvoiceStatus.Processing => "IconImport",
+                InvoiceStatus.ConvertingPdf => "IconImport",
+                InvoiceStatus.OcrProcessing => "IconImport",
                 InvoiceStatus.Review => "IconFile",
+                InvoiceStatus.Failed => "IconDelete",
                 InvoiceStatus.Archived => "IconArchive",
                 _ => "IconFile"
             };
@@ -89,8 +93,10 @@ namespace LabInvoiceSystem.Converters
                 string colorKey = status switch
                 {
                     InvoiceStatus.Pending => "TextSecondaryBrush",
-                    InvoiceStatus.Processing => "PrimaryBrush",
-                    InvoiceStatus.Review => "DangerBrush", // Using Danger for attention
+                    InvoiceStatus.ConvertingPdf => "PrimaryBrush",
+                    InvoiceStatus.OcrProcessing => "PrimaryBrush",
+                    InvoiceStatus.Review => "TextSecondaryBrush",
+                    InvoiceStatus.Failed => "DangerBrush",
                     InvoiceStatus.Archived => "SuccessBrush",
                     _ => "TextSecondaryBrush"
                 };

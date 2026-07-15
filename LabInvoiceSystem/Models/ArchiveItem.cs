@@ -18,5 +18,8 @@ namespace LabInvoiceSystem.Models
 
         [ObservableProperty]
         private InvoiceInfo _invoiceInfo = new();
+
+        [ObservableProperty]
+        private bool _isSelected = true;
     }
 }

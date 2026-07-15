@@ -22,9 +22,13 @@
 
             <Color x:Key="Emerald400">#34d399</Color>
             <Color x:Key="Emerald500">#10b981</Color>
+            <Color x:Key="Emerald700">#047857</Color>
+            <Color x:Key="Emerald800">#065f46</Color>
 
             <Color x:Key="Red400">#f87171</Color>
             <Color x:Key="Red500">#ef4444</Color>
+            <Color x:Key="Red600">#dc2626</Color>
+            <Color x:Key="Red700">#b91c1c</Color>
 
             <!-- Brushes -->
             <Color x:Key="AppBackgroundColor">#f8fafc</Color>
@@ -33,10 +37,18 @@
             <SolidColorBrush x:Key="TextPrimaryBrush" Color="{DynamicResource Slate900}" />
             <SolidColorBrush x:Key="TextSecondaryBrush" Color="{DynamicResource Slate500}" />
             <SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource Slate200}" />
-            <SolidColorBrush x:Key="PrimaryBrush" Color="{DynamicResource Indigo500}" />
+            <SolidColorBrush x:Key="PrimaryBrush" Color="{DynamicResource Indigo600}" />
             <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{DynamicResource Indigo600}" />
-            <SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource Emerald400}" />
-            <SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource Red400}" />
+            <SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource Emerald700}" />
+            <SolidColorBrush x:Key="SuccessHoverBrush" Color="{DynamicResource Emerald800}" />
+            <SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource Red600}" />
+            <SolidColorBrush x:Key="DangerHoverBrush" Color="{DynamicResource Red700}" />
+            <SolidColorBrush x:Key="PrimaryActionBrush" Color="#4F46E5" />
+            <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="#4338CA" />
+            <SolidColorBrush x:Key="SuccessActionBrush" Color="#047857" />
+            <SolidColorBrush x:Key="SuccessActionHoverBrush" Color="#065F46" />
+            <SolidColorBrush x:Key="DangerActionBrush" Color="#B91C1C" />
+            <SolidColorBrush x:Key="DangerActionHoverBrush" Color="#991B1B" />
             
             <!-- Glass Effect -->
             <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#B3FFFFFF" /> <!-- 70% White -->
@@ -66,9 +78,13 @@
 
             <Color x:Key="Emerald400">#34d399</Color>
             <Color x:Key="Emerald500">#10b981</Color>
+            <Color x:Key="Emerald700">#047857</Color>
+            <Color x:Key="Emerald800">#065f46</Color>
 
             <Color x:Key="Red400">#f87171</Color>
             <Color x:Key="Red500">#ef4444</Color>
+            <Color x:Key="Red600">#dc2626</Color>
+            <Color x:Key="Red700">#b91c1c</Color>
 
             <!-- Brushes -->
             <Color x:Key="AppBackgroundColor">#0f172a</Color>
@@ -80,7 +96,16 @@
             <SolidColorBrush x:Key="PrimaryBrush" Color="{DynamicResource Indigo400}" />
             <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{DynamicResource Indigo500}" />
             <SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource Emerald400}" />
+            <SolidColorBrush x:Key="SuccessHoverBrush" Color="{DynamicResource Emerald500}" />
             <SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource Red400}" />
+            <SolidColorBrush x:Key="DangerHoverBrush" Color="{DynamicResource Red500}" />
+            <!-- Action fills remain dark enough for white button labels (WCAG AA). -->
+            <SolidColorBrush x:Key="PrimaryActionBrush" Color="#4F46E5" />
+            <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="#4338CA" />
+            <SolidColorBrush x:Key="SuccessActionBrush" Color="#047857" />
+            <SolidColorBrush x:Key="SuccessActionHoverBrush" Color="#065F46" />
+            <SolidColorBrush x:Key="DangerActionBrush" Color="#B91C1C" />
+            <SolidColorBrush x:Key="DangerActionHoverBrush" Color="#991B1B" />
             
             <!-- Glass Effect -->
             <SolidColorBrush x:Key="GlassBackgroundBrush" Color="#B31E293B" /> <!-- 70% Slate800 -->

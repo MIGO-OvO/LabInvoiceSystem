@@ -7,6 +7,23 @@ namespace LabInvoiceSystem.Services
 {
     public class StatisticsService
     {
+#if DEBUG
+        static StatisticsService()
+        {
+            var today = DateTime.Now.Date;
+            var samples = new List<ArchiveItem>
+            {
+                new() { InvoiceInfo = new InvoiceInfo { InvoiceDate = today, Amount = 1 } },
+                new() { InvoiceInfo = new InvoiceInfo { InvoiceDate = today.AddDays(-29), Amount = 2 } },
+                new() { InvoiceInfo = new InvoiceInfo { InvoiceDate = today.AddDays(-30), Amount = 4 } }
+            };
+            if (new StatisticsService().CalculateLast30DaysAmount(samples) != 3)
+            {
+                throw new InvalidOperationException("Last-30-days statistics self-check failed.");
+            }
+        }
+#endif
+
         public StatisticsData CalculateStatistics(List<ArchiveItem> archives)
         {
             var stats = new StatisticsData();
@@ -41,7 +58,8 @@ namespace LabInvoiceSystem.Services
 
         public decimal CalculateLast30DaysAmount(List<ArchiveItem> archives)
         {
-            var thirtyDaysAgo = DateTime.Now.Date.AddDays(-30);
+            // 包含今天在内的连续 30 个自然日。
+            var thirtyDaysAgo = DateTime.Now.Date.AddDays(-29);
             return archives
                 .Where(a => a.InvoiceInfo.InvoiceDate.Date >= thirtyDaysAgo)
                 .Sum(a => a.InvoiceInfo.Amount);

@@ -10,8 +10,7 @@
         Icon="/Assets/genshin_impact.ico"
         Title="LabInvoiceSystem"
         WindowStartupLocation="CenterScreen"
-        TransparencyLevelHint="AcrylicBlur"
-        Background="Transparent"
+        Background="{DynamicResource AppBackgroundBrush}"
         ExtendClientAreaToDecorationsHint="True">
 
     <Design.DataContext>
@@ -19,23 +18,14 @@
     </Design.DataContext>
 
     <Panel>
-        <!-- Background Gradient/Tint -->
         <Border IsHitTestVisible="False" Background="{DynamicResource AppBackgroundBrush}" />
 
-        <!-- 整体缩放容器 - 包含导航栏和内容区域 -->
-        <Viewbox Stretch="Uniform" 
-                 StretchDirection="Both"
-                 x:Name="MainViewbox">
-            <Border x:Name="ViewboxContent" 
-                    Width="1280" 
-                    Height="800">
-                <!-- Main Layout -->
-                <SplitView IsPaneOpen="{Binding IsPaneOpen}"
-                           DisplayMode="CompactInline"
-                           OpenPaneLength="180"
-                           CompactPaneLength="0"
-                           PaneBackground="{DynamicResource CardBackgroundBrush}"
-                           Background="Transparent">
+        <SplitView IsPaneOpen="{Binding IsPaneOpen}"
+                   DisplayMode="CompactInline"
+                   OpenPaneLength="192"
+                   CompactPaneLength="0"
+                   PaneBackground="{DynamicResource CardBackgroundBrush}"
+                   Background="Transparent">
 
                     <SplitView.Pane>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -50,14 +40,8 @@
                                     <TextBlock Text="发票助手" 
                                                FontSize="18" 
                                                FontWeight="Bold" 
-                                               VerticalAlignment="Center">
-                                        <TextBlock.Foreground>
-                                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
-                                                <GradientStop Offset="0" Color="{DynamicResource Indigo500}"/>
-                                                <GradientStop Offset="1" Color="#c084fc"/>
-                                            </LinearGradientBrush>
-                                        </TextBlock.Foreground>
-                                    </TextBlock>
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
                                 </StackPanel>
 
                                 <!-- Navigation -->
@@ -101,13 +85,15 @@
                                         Margin="0,0,0,16">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <StackPanel Spacing="2">
-                                            <TextBlock Text="Version 1.0.0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <TextBlock Text="Version 2.0.0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                             <TextBlock Text="Powered by Baidu OCR" FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" Opacity="0.7"/>
                                         </StackPanel>
                                         
                                         <Button Grid.Column="1" 
                                                 Command="{Binding ToggleThemeCommand}"
                                                 Theme="{DynamicResource TransparentButton}"
+                                                AutomationProperties.Name="切换明暗主题"
+                                                ToolTip.Tip="切换明暗主题"
                                                 Padding="6">
                                             <PathIcon Data="{StaticResource IconTheme}" 
                                                       Width="16" Height="16"
@@ -127,6 +113,7 @@
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Center"
                                         Theme="{DynamicResource TransparentButton}"
+                                        AutomationProperties.Name="打开导航栏"
                                         IsVisible="{Binding !IsPaneOpen}">
                                     <PathIcon Data="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" 
                                               Width="18" Height="18"
@@ -139,14 +126,47 @@
                                 <TransitioningContentControl Content="{Binding CurrentView}"
                                                              x:Name="ContentArea">
                                     <TransitioningContentControl.PageTransition>
-                                        <CrossFade Duration="0:0:0.3" />
+                                        <CrossFade Duration="0:0:0.15" />
                                     </TransitioningContentControl.PageTransition>
                                 </TransitioningContentControl>
                             </Border>
                         </Grid>
                     </SplitView.Content>
                 </SplitView>
+
+        <Border Background="#99000000"
+                IsVisible="{Binding IsExitConfirmationOpen}">
+            <Border Classes="Card"
+                    Width="420"
+                    Padding="24"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="还有未归档的发票" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock Text="现在退出会丢弃本次 OCR 和人工修改。原始文件不会受影响。"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                        <Button x:Name="ContinueWorkButton"
+                                Classes="Primary"
+                                Click="OnContinueWorkClick"
+                                Content="继续处理"/>
+                        <Button Classes="Danger"
+                                Click="OnDiscardAndExitClick"
+                                Content="退出并丢弃"/>
+                    </StackPanel>
+                </StackPanel>
             </Border>
-        </Viewbox>
+        </Border>
+
+        <Border Classes="Card"
+                IsVisible="{Binding HasShellMessage}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="20"
+                Padding="12,8"
+                AutomationProperties.LiveSetting="Assertive">
+            <TextBlock Text="{Binding ShellMessage}" TextWrapping="Wrap" MaxWidth="360"/>
+        </Border>
     </Panel>
 </Window>
