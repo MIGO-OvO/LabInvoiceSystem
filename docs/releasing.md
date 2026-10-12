@@ -2,9 +2,9 @@
 
 ## 工作流
 
-`ci.yml`：Rustfmt、Clippy、Rust 真实业务测试、Vitest、TypeScript/Vite 构建、Windows 原生 WebView 验收，及 Windows x64 / macOS Intel / Apple Silicon 实际安装包构建。
+`ci.yml`：Rustfmt、Clippy、Rust 真实业务测试、Vitest、TypeScript/Vite 构建、Windows 原生 WebView 验收，及 Windows x64 / macOS Intel / Apple Silicon 实际安装包构建。Windows 安装检查包含官方被动更新参数及自动启动；macOS 检查 DMG 安装、签名结构与真实 SQLite 初始化。
 
-`release.yml`：SemVer tag 与 package/Cargo/Tauri 版本一致，三平台构建 → Tauri 签名 → 同算法签名/版本校验、篡改反例 → 全部资产清单及 SHA256 → GitHub Release。缺一架构就不发布。`latest.json` 仅包含可作为正式更新发布的平台。
+`release.yml`：SemVer tag 与 package/Cargo/Tauri 版本一致，按版本读取 `docs/releases/<version>.md`；三平台构建与 Tauri 签名 → 实际安装/启动检查 → 同算法签名/版本校验、篡改反例 → 全部资产清单及 SHA256 → GitHub Release。缺一架构就不发布。`latest.json` 仅包含可作为正式更新发布的平台。
 
 `pages.yml`：解析实际存在的 Release 资产，运行桌面/移动、深浅主题、200%文字和 WCAG AA 验收，再部署 GitHub Pages。
 
@@ -36,8 +36,12 @@ macOS 完整组通过官方 Tauri bundler 导入证书、签名和公证；工�
 ## 仓库迁移
 
 旧仓库重命名后仓库 ID、refs、Release ID、资产 ID/名称/大小保持一致；本地额外保留完整 bundle、mirror、Release 资产及原工作区未提交改动备份。新仓库单独创建，没有覆盖旧历史。新开发在 `codex/v3-rebuild`，验收通过后合并 main 再创建版本 tag。
-# Windows 真实更新验收
+## Windows 真实更新验收
 
 本次使用未发布的 `3.0.0-qa.0` 引导程序，连接正式 GitHub Releases 的 `latest.json` 与实际签名 NSIS，验证稍后、跳过、下载、安装、重启及合成归档保留。测试不会启动自定义更新服务器或替换生产公钥。
 
+3.0.1 的真实公开升级 7 项已通过，全部元数据、来源、原件字节和设置保留，测试安装卸载且合成数据移入外部备份。NSIS 保持 `displayLanguageSelector: false`，防止首次静默安装未保存语言时被动更新弹出选择窗口。详细证据见 [acceptance.md](acceptance.md)。
+
 在 ignored `.cache/updater-bootstrap/version.json` 写入 `{"version":"3.0.0-qa.0"}`，通过 `node scripts/build-desktop.mjs --no-bundle --config .cache/updater-bootstrap/version.json` 构建并复制可执行文件。发布后下载实际 NSIS，运行 `node scripts/windows-upgrade-check.mjs <实际安装包路径> <引导程序路径>`。测试要求默认数据目录没有任何现有发票；已有数据时拒绝运行。测试数据明确为合成内容，完成后将其完整移入本地备份目录，并卸载测试安装。
+
+验收脚本从 package.json 读取目标版本。使用下一版本时，引导程序须低于已发布版本，并保持生产公钥和端点；不为重验而移动历史 tag 或覆盖 Release 资产。

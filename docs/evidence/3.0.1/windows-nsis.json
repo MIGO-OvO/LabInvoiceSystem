@@ -1,0 +1,17 @@
+{
+  "startedAt": "2026-10-12T22:10:35.441Z",
+  "installer": "LabInvoiceSystem_3.0.1_windows_x64-setup.exe",
+  "cases": [
+    "NSIS silent installation into isolated application directory",
+    "Installed production executable and embedded React/Rust IPC start successfully",
+    "Production navigation, statistics and settings operate",
+    "Official passive update arguments finish without a language prompt and automatically restart the installed application",
+    "NSIS uninstall completes"
+  ],
+  "result": "passed",
+  "exit": {
+    "code": null,
+    "signal": "SIGTERM"
+  },
+  "finishedAt": "2026-10-12T22:11:03.295Z"
+}

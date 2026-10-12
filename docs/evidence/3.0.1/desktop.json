@@ -1,0 +1,107 @@
+{
+  "startedAt": "2026-10-12T22:07:01.271Z",
+  "platform": "win32",
+  "cases": [
+    {
+      "name": "legacy JSON import retains dates and historical category",
+      "result": "passed"
+    },
+    {
+      "name": "cloud OCR refuses upload before consent",
+      "result": "passed"
+    },
+    {
+      "name": "local PDF preview, pagination and zoom use real original",
+      "result": "passed"
+    },
+    {
+      "name": "manual field editing, explicit review, validation and archive",
+      "result": "passed"
+    },
+    {
+      "name": "batch category, manual review and transaction archive",
+      "result": "passed"
+    },
+    {
+      "name": "search, archive editing, category totals and themes",
+      "result": "passed"
+    },
+    {
+      "name": "soft delete and UI restore preserve original and totals",
+      "result": "passed"
+    },
+    {
+      "name": "real ZIP + XLSX + versioned Manifest export",
+      "result": "passed"
+    },
+    {
+      "name": "updater drains operations, backs up, rejects edits, then unlocks",
+      "result": "passed"
+    },
+    {
+      "name": "restart retains local archives and settings",
+      "result": "passed"
+    },
+    {
+      "name": "read-only ZIP preview, independent errors and cancel before writing",
+      "result": "passed"
+    },
+    {
+      "name": "multiple submission ZIPs: exact roundtrip, independent corrupt ZIP failure",
+      "result": "passed"
+    },
+    {
+      "name": "cross-batch duplicates, retry and persistent provenance",
+      "result": "passed"
+    },
+    {
+      "name": "update preparation cancels an active import and preserves committed data",
+      "result": "passed"
+    }
+  ],
+  "accessibility": [
+    {
+      "name": "archive-dark",
+      "width": 1024,
+      "height": 768,
+      "violations": []
+    },
+    {
+      "name": "dashboard-dark",
+      "width": 1024,
+      "height": 768,
+      "violations": []
+    },
+    {
+      "name": "dashboard-light",
+      "width": 1024,
+      "height": 768,
+      "violations": []
+    },
+    {
+      "name": "zip-preview-dark",
+      "width": 1024,
+      "height": 768,
+      "violations": []
+    },
+    {
+      "name": "import-dark",
+      "width": 1024,
+      "height": 768,
+      "violations": []
+    }
+  ],
+  "consoleErrors": [],
+  "screenshots": [
+    "portal/assets/desktop-archive.png",
+    "portal/assets/desktop-dashboard.png",
+    "portal/assets/desktop-import.png"
+  ],
+  "cdpConnectionError": "browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9223\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://127.0.0.1:9223\u001b[22m\n",
+  "lastExit": {
+    "code": null,
+    "signal": "SIGTERM"
+  },
+  "result": "passed",
+  "finishedAt": "2026-10-12T22:07:23.616Z"
+}

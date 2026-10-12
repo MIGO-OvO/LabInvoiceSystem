@@ -1,0 +1,17 @@
+{
+  "startedAt": "2026-10-12T22:30:24.736Z",
+  "bootstrapVersion": "3.0.0-qa.0",
+  "targetVersion": "3.0.1",
+  "endpoint": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/latest/download/latest.json",
+  "cases": [
+    "Real synthetic invoice archived before upgrade",
+    "Official updater discovers the real public v3.0.1 manifest",
+    "Later reminder persists",
+    "Skip version persists and manual check can override it",
+    "Official updater downloads, verifies signature, installs and restarts production release",
+    "Archive identity, original bytes, category, amount and settings survive the real upgrade",
+    "Update preparation creates an actual database backup"
+  ],
+  "result": "passed",
+  "finishedAt": "2026-10-12T22:30:48.270Z"
+}

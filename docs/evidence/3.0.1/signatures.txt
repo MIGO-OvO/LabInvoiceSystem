@@ -1,0 +1,10 @@
+cargo run -p release-tools --locked -- src-tauri/tauri.conf.json 3.0.1 .cache/public-release-v3.0.1/LabInvoiceSystem_3.0.1_windows_x64-setup.exe .cache/public-release-v3.0.1/LabInvoiceSystem_3.0.1_macos_x64.app.tar.gz .cache/public-release-v3.0.1/LabInvoiceSystem_3.0.1_macos_arm64.app.tar.gz
+
+Exit code: 0
+Verified artifact, authenticated version, tamper rejection: LabInvoiceSystem_3.0.1_windows_x64-setup.exe
+Verified artifact, authenticated version, tamper rejection: LabInvoiceSystem_3.0.1_macos_x64.app.tar.gz
+Verified artifact, authenticated version, tamper rejection: LabInvoiceSystem_3.0.1_macos_arm64.app.tar.gz
+
+Source: the actual local verification of assets downloaded from the published v3.0.1 Release on 2026-10-13 (Asia/Shanghai).
+Verification includes rejection of a changed byte and a forged authenticated version.
+Updater signatures do not establish Apple notarization or Windows Authenticode status.

@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-10-12T22:27:59.275Z",
+  "architecture": "x64",
+  "artifact": "LabInvoiceSystem_3.0.1_macos_x64.dmg",
+  "cases": [
+    "Actual DMG mounts and app copies to isolated installation directory",
+    "Installed application code signature is structurally valid (distribution status recorded separately)",
+    "Installed native application stays running and initializes real SQLite storage"
+  ],
+  "result": "passed",
+  "limitation": "Runner smoke test does not verify interactive WKWebView behavior or end-user Gatekeeper acceptance.",
+  "finishedAt": "2026-10-12T22:28:11.066Z"
+}
