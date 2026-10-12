@@ -193,12 +193,21 @@ struct Package {
     rows: Vec<SpreadsheetRow>,
     issues: Vec<Issue>,
 }
+
+fn inspect_blob(repo: Option<&Repository>, name: &str, bytes: &[u8]) -> Result<(String, String)> {
+    if let Some(repo) = repo {
+        repo.put_blob(name, bytes)
+    } else {
+        validate_file(name, bytes)?;
+        Ok((digest(bytes), extension(name)))
+    }
+}
 fn progress(job: &mut ImportJob, count: u64, notify: &mut impl FnMut(&ImportJob)) {
     job.bytes_read += count;
     notify(job);
 }
 fn parse_zip(
-    repo: &Repository,
+    repo: Option<&Repository>,
     path: &Path,
     job: &mut ImportJob,
     cancel: &AtomicBool,
@@ -307,7 +316,7 @@ fn parse_zip(
             progress(job, n, notify)
         })?;
         drop(entry);
-        let (hash, ext) = repo.put_blob(&member, &bytes)?;
+        let (hash, ext) = inspect_blob(repo, &member, &bytes)?;
         let name = Path::new(&member)
             .file_name()
             .context("原件文件名无效")?
@@ -450,7 +459,7 @@ fn parse_zip(
 }
 
 fn raw_file(
-    repo: &Repository,
+    repo: Option<&Repository>,
     path: &Path,
     job: &mut ImportJob,
     cancel: &AtomicBool,
@@ -470,7 +479,7 @@ fn raw_file(
     let bytes = read_limited(File::open(path)?, MAX_FILE_BYTES, cancel, |n| {
         progress(job, n, notify)
     })?;
-    let (hash, ext) = repo.put_blob(&name, &bytes)?;
+    let (hash, ext) = inspect_blob(repo, &name, &bytes)?;
     let mut invoice = Invoice::draft(&job.id, &name, &hash, &ext, size);
     apply_filename(&mut invoice);
     let mut kind = "manual";
@@ -585,6 +594,120 @@ fn commit_package(repo: &mut Repository, package: Package, job: &mut ImportJob) 
     Ok(())
 }
 
+/// Uses the same validated parser as import, without storing blobs, jobs or invoices.
+pub fn preview_imports(
+    repo: &Repository,
+    paths: &[PathBuf],
+    cancel: &AtomicBool,
+    mut notify: impl FnMut(&ImportJob),
+) -> Result<Vec<ImportPreviewSource>> {
+    ensure!(
+        !paths.is_empty() && paths.len() <= 128,
+        "一次可预览1至128个来源"
+    );
+    let mut seen = repo.list()?;
+    let mut job = ImportJob {
+        id: new_id(),
+        state: "preview".into(),
+        total_containers: paths.len(),
+        ..Default::default()
+    };
+    let mut sources = Vec::new();
+    let short = |text: &str| {
+        let mut characters = text.chars();
+        let mut value = characters.by_ref().take(160).collect::<String>();
+        if characters.next().is_some() {
+            value.push('…');
+        }
+        value
+    };
+    for path in paths {
+        cancelled(cancel)?;
+        let mut source = ImportPreviewSource {
+            container_name: path
+                .file_name()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .into(),
+            ..Default::default()
+        };
+        let result = if path.is_dir() {
+            (|| -> Result<Package> {
+                let mut package = Package {
+                    invoices: vec![],
+                    rows: vec![],
+                    issues: vec![],
+                };
+                for file in scan_legacy(path)? {
+                    let next = raw_file(None, &file, &mut job, cancel, &mut notify)?;
+                    package.invoices.extend(next.invoices);
+                    package.issues.extend(next.issues);
+                }
+                Ok(package)
+            })()
+        } else if extension(&path.to_string_lossy()) == "zip" {
+            parse_zip(None, path, &mut job, cancel, &mut notify)
+        } else {
+            raw_file(None, path, &mut job, cancel, &mut notify)
+        };
+        cancelled(cancel)?;
+        match result {
+            Ok(package) => {
+                source.invoice_count = package.invoices.len();
+                source.unassigned_rows = package.rows.len();
+                source.issues = package.issues;
+                for mut invoice in package.invoices {
+                    cancelled(cancel)?;
+                    let duplicate = seen.iter().any(|other| {
+                        other.state != "deleted"
+                            && (other.blob_hash == invoice.blob_hash
+                                || identity_matches(other, &invoice))
+                    });
+                    source.duplicate_count += usize::from(duplicate);
+                    let total = source.categories.entry(invoice.category).or_default();
+                    total.count += 1;
+                    total.amount_cents = total
+                        .amount_cents
+                        .checked_add(invoice.amount_cents)
+                        .context("预览金额合计超限")?;
+                    if source.invoices.len() < 50 {
+                        let provenance = invoice.sources.last();
+                        source.invoices.push(PreviewInvoice {
+                            file_name: short(&invoice.file_name),
+                            member_name: provenance
+                                .map(|s| short(&s.member_name))
+                                .unwrap_or_default(),
+                            member_index: provenance.and_then(|s| s.member_index),
+                            item_name: short(&invoice.item_name),
+                            category: invoice.category,
+                            entry_date: invoice.entry_date.clone(),
+                            purchase_date: invoice.purchase_date.clone(),
+                            amount_cents: invoice.amount_cents,
+                            payment_method: short(&invoice.payment_method),
+                            invoice_number: short(&invoice.invoice_number),
+                            metadata_kind: provenance
+                                .map(|s| s.metadata_kind.clone())
+                                .unwrap_or_default(),
+                            duplicate,
+                        });
+                    }
+                    // Only identity and hash are needed for comparisons with subsequent sources.
+                    invoice.sources.clear();
+                    invoice.warnings.clear();
+                    invoice.item_name.clear();
+                    invoice.ocr_item_name.clear();
+                    seen.push(invoice);
+                }
+            }
+            Err(error) => source.error = Some(format!("{error:#}")),
+        }
+        sources.push(source);
+        job.processed_containers += 1;
+        notify(&job);
+    }
+    Ok(sources)
+}
+
 pub fn import_paths(
     repo: &mut Repository,
     paths: &[PathBuf],
@@ -612,12 +735,12 @@ pub fn import_paths(
         let result = if path.is_dir() {
             import_legacy_folder(repo, path, &mut job, cancel, &mut notify)
         } else if extension(&path.to_string_lossy()) == "zip" {
-            parse_zip(repo, path, &mut job, cancel, &mut notify).and_then(|package| {
+            parse_zip(Some(repo), path, &mut job, cancel, &mut notify).and_then(|package| {
                 cancelled(cancel)?;
                 commit_package(repo, package, &mut job)
             })
         } else {
-            raw_file(repo, path, &mut job, cancel, &mut notify).and_then(|package| {
+            raw_file(Some(repo), path, &mut job, cancel, &mut notify).and_then(|package| {
                 cancelled(cancel)?;
                 commit_package(repo, package, &mut job)
             })
@@ -735,7 +858,7 @@ fn import_legacy_folder(
         issues: vec![],
     };
     for path in files {
-        let mut next = raw_file(repo, &path, job, cancel, notify)?;
+        let mut next = raw_file(Some(repo), &path, job, cancel, notify)?;
         for invoice in &mut next.invoices {
             if let Some(source) = invoice.sources.last_mut() {
                 source.container_name = root

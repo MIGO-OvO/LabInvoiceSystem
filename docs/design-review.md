@@ -48,3 +48,7 @@ Method: dual-agent（A: `/root/portal_critique_a` · B: `/root/portal_critique_b
 目标 slug：`portal-index-html`。无 ignore list，A/B 保持独立。B 的浏览器始终 hidden；API 明示 evaluate 只读、无 DOM mutation，因此未注入 overlay、未启动 live-server；采用一次 CLI、原生截图、只读 DOM、键盘和日志作为明确 fallback。独立临时浏览器页已关闭、视口/主题状态已恢复，无临时源码修改。技术自动化截图与报告留在 ignored `test-results/`，正式产品图保存在 `portal/assets/`。
 
 发布/签名事实继续以 Release inventory 与 acceptance.md 为准；设计结论不替代软件安全、安装或更新验收。
+
+## 桌面接收预览补齐
+
+只读 ZIP 预览沿用桌面既有的 Slate/Indigo、Radix 确认窗口、来源 disclosure 和明细表格。每包独立显示分类/日期/金额/支付/身份及错误，实际解析完成后才允许确认。确认操作固定在窗口底部，来源与表格可键盘滚动；长字段和超过50张的来源以明确的展示上限保护可读性，完整导入数据保留。真实 Tauri 合成数据截图已检查，1024×768 下预览窗口 axe AA 无违规，取消不写入及确认后独立导入通过实际原生命令和界面验收。门户既有设计审查结论不变。

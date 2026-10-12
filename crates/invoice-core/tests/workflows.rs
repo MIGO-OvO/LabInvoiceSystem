@@ -121,6 +121,97 @@ fn legacy_migration_keeps_originals_backup_and_undo() {
 }
 
 #[test]
+fn zip_preview_is_read_only_with_categories_duplicates_and_independent_errors() {
+    let temp = TempDir::new().unwrap();
+    let raw = temp.path().join("original.pdf");
+    fs::write(&raw, pdf("preview original")).unwrap();
+    let mut sender = Repository::open(temp.path().join("sender")).unwrap();
+    let imported = import(&mut sender, &[raw]);
+    complete(
+        &mut sender,
+        &imported.invoice_ids[0],
+        Category::LabSupplies,
+        12345,
+    );
+    sender.archive(&imported.invoice_ids).unwrap();
+    let zip = temp.path().join("submission.zip");
+    export_zip(
+        &sender,
+        &imported.invoice_ids,
+        &zip,
+        &AtomicBool::new(false),
+        |_| {},
+    )
+    .unwrap();
+    let corrupt = temp.path().join("broken.zip");
+    fs::write(&corrupt, b"invalid synthetic archive").unwrap();
+    let receiver = Repository::open(temp.path().join("receiver")).unwrap();
+    let original_zip = fs::read(&zip).unwrap();
+    let mut progress = 0;
+    let result = preview_imports(
+        &receiver,
+        &[zip.clone(), zip.clone(), corrupt],
+        &AtomicBool::new(false),
+        |job| {
+            progress = job.processed_containers;
+        },
+    )
+    .unwrap();
+    assert_eq!(progress, 3);
+    assert_eq!(result[0].invoice_count, 1);
+    assert_eq!(result[0].duplicate_count, 0);
+    assert_eq!(
+        result[0].categories[&Category::LabSupplies].amount_cents,
+        12345
+    );
+    assert_eq!(result[0].invoices[0].metadata_kind, "manifest-v1");
+    assert_eq!(result[0].invoices[0].entry_date, "2026-10-12");
+    assert_eq!(result[1].duplicate_count, 1);
+    assert!(result[2].error.is_some());
+    assert!(receiver.list().unwrap().is_empty());
+    assert!(receiver.jobs().unwrap().is_empty());
+    assert!(fs::read_dir(receiver.root.join("objects"))
+        .unwrap()
+        .next()
+        .is_none());
+    assert!(fs::read_dir(receiver.root.join("backups"))
+        .unwrap()
+        .next()
+        .is_none());
+    assert_eq!(fs::read(&zip).unwrap(), original_zip);
+    let before = sender.list().unwrap();
+    let jobs = sender.jobs().unwrap().len();
+    let history = preview_imports(&sender, &[zip], &AtomicBool::new(false), |_| {}).unwrap();
+    assert_eq!(history[0].duplicate_count, 1);
+    assert_eq!(sender.list().unwrap()[0].sources, before[0].sources);
+    assert_eq!(sender.jobs().unwrap().len(), jobs);
+}
+
+#[test]
+fn cancelling_zip_preview_creates_no_invoice_job_or_blob() {
+    let temp = TempDir::new().unwrap();
+    let zip = temp.path().join("preview.zip");
+    zip_file(
+        &zip,
+        vec![("first.pdf", pdf("first")), ("second.pdf", pdf("second"))],
+    );
+    let repo = Repository::open(temp.path().join("data")).unwrap();
+    let cancel = AtomicBool::new(false);
+    let result = preview_imports(&repo, &[zip], &cancel, |job| {
+        if job.processed_files > 0 {
+            cancel.store(true, Ordering::Release);
+        }
+    });
+    assert!(result.is_err());
+    assert!(repo.list().unwrap().is_empty());
+    assert!(repo.jobs().unwrap().is_empty());
+    assert!(fs::read_dir(repo.root.join("objects"))
+        .unwrap()
+        .next()
+        .is_none());
+}
+
+#[test]
 fn legacy_missing_entry_date_requires_review() {
     let temp = TempDir::new().unwrap();
     let source = temp.path().join("legacy.pdf");

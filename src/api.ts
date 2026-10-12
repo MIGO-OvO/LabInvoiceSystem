@@ -1,9 +1,10 @@
 import {invoke,isTauri} from '@tauri-apps/api/core';
 import {open,save} from '@tauri-apps/plugin-dialog';
-import type {Invoice,Snapshot,Category,Settings,ImportJob} from './types';
+import type {Invoice,Snapshot,Category,Settings,ImportJob,ImportPreviewSource} from './types';
 export {isTauri};
 export const api={
   snapshot:()=>invoke<Snapshot>('get_snapshot'),
+  previewImport:(paths:string[])=>invoke<ImportPreviewSource[]>('preview_import',{paths}),
   startImport:(paths:string[])=>invoke<string>('start_import',{paths}),
   job:(id:string)=>invoke<ImportJob>('get_job',{id}),
   cancel:()=>invoke<void>('cancel_operation'),

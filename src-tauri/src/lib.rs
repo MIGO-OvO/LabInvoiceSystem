@@ -1,6 +1,6 @@
 use invoice_core::{
     archive::{export_zip, ExportProgress},
-    importing::{import_paths, scan_legacy},
+    importing::{import_paths, preview_imports, scan_legacy},
     model::*,
     Repository,
 };
@@ -94,6 +94,38 @@ async fn get_snapshot(state: State<'_, Arc<Engine>>) -> AppResult<Snapshot> {
             credentials_configured: credentials().is_ok(),
             busy: engine.busy.load(Ordering::Acquire),
         })
+    })
+    .await
+    .map_err(error)?
+}
+
+#[tauri::command]
+async fn preview_import(
+    app: tauri::AppHandle,
+    state: State<'_, Arc<Engine>>,
+    paths: Vec<String>,
+) -> AppResult<Vec<ImportPreviewSource>> {
+    if paths.is_empty() || paths.len() > 128 {
+        return Err("请选择1至128个发票或压缩包".into());
+    }
+    let engine = state.inner().clone();
+    let operation = Operation::enter(engine.clone())?;
+    let cancel = Arc::new(AtomicBool::new(false));
+    *lock(&engine.cancel)? = Some(cancel.clone());
+    let paths = paths.into_iter().map(PathBuf::from).collect::<Vec<_>>();
+    tauri::async_runtime::spawn_blocking(move || {
+        let result = (|| -> AppResult<Vec<ImportPreviewSource>> {
+            let repo = lock(&engine.repo)?;
+            preview_imports(&repo, &paths, &cancel, |progress| {
+                let _ = app.emit("import-preview-progress", progress);
+            })
+            .map_err(error)
+        })();
+        if let Ok(mut flag) = engine.cancel.lock() {
+            *flag = None;
+        }
+        drop(operation);
+        result
     })
     .await
     .map_err(error)?
@@ -564,6 +596,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_snapshot,
+            preview_import,
             start_import,
             get_job,
             cancel_operation,

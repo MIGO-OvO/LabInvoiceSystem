@@ -196,6 +196,36 @@ pub struct Issue {
     pub message: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PreviewInvoice {
+    pub file_name: String,
+    pub member_name: String,
+    pub member_index: Option<usize>,
+    pub item_name: String,
+    pub category: Category,
+    pub entry_date: String,
+    pub purchase_date: String,
+    pub amount_cents: i64,
+    pub payment_method: String,
+    pub invoice_number: String,
+    pub metadata_kind: String,
+    pub duplicate: bool,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ImportPreviewSource {
+    pub container_name: String,
+    pub invoice_count: usize,
+    pub duplicate_count: usize,
+    pub unassigned_rows: usize,
+    pub categories: BTreeMap<Category, Totals>,
+    pub invoices: Vec<PreviewInvoice>,
+    pub issues: Vec<Issue>,
+    pub error: Option<String>,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ImportJob {

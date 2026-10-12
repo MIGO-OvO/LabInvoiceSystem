@@ -1,7 +1,7 @@
 import { chromium, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -120,8 +120,23 @@ try {
   });
   await step('restart retains local archives and settings',async()=>{await startApp(personal);assert.equal((await snapshot()).statistics.total.count,6);});
   const receiver=path.join(qa,'receiver');await startApp(receiver);const corrupt=path.join(qa,'corrupt.zip');await writeFile(corrupt,'synthetic invalid zip');
+  const dropSources = () => invoke('plugin:event|emit_to',{target:{kind:'AnyLabel',label:'main'},event:'tauri://drag-drop',payload:{paths:[labZip,officeZip,corrupt],position:{x:400,y:300}}});
+  await step('read-only ZIP preview, independent errors and cancel before writing',async()=>{
+    const preview=await invoke('preview_import',{paths:[labZip,officeZip,corrupt]});
+    assert.deepEqual(preview.map(source=>source.invoiceCount),[4,2,0]);assert.ok(preview[2].error);assert.equal(preview[0].categories.labSupplies.count,4);
+    await dropSources();const dialog=page.getByRole('dialog');await dialog.getByRole('heading',{name:'ZIP 导入前预览 · 3 个来源',exact:true}).waitFor();
+    await expect(dialog.getByRole('region',{name:'submission-lab.zip 导入明细预览',exact:true})).toBeVisible();
+    await dialog.locator('summary').filter({hasText:'corrupt.zip'}).click();await dialog.getByText(/ZIP 已损坏或格式无效/).waitFor();await accessibility('zip-preview-dark');
+    await expect(dialog.getByRole('button',{name:'确认导入',exact:true})).toBeInViewport();
+    await page.screenshot({path:path.join(output,'zip-preview.png')});
+    await dialog.getByRole('button',{name:'返回继续处理',exact:true}).click();
+    const empty=await snapshot();assert.equal(empty.invoices.length,0);assert.equal(empty.jobs.length,0);assert.deepEqual(await readdir(path.join(receiver,'objects')),[]);
+  });
   await step('multiple submission ZIPs: exact roundtrip, independent corrupt ZIP failure',async()=>{
-    const job=await completedImport([labZip,officeZip,corrupt]);assert.equal(job.success,6);assert.equal(job.failed,1);const received=(await snapshot()).invoices;
+    // Emit a real native drop event, then confirm the UI preview; no backend substitution.
+    await dropSources();const dialog=page.getByRole('dialog');await dialog.getByRole('heading',{name:'ZIP 导入前预览 · 3 个来源',exact:true}).waitFor();await dialog.getByRole('button',{name:'确认导入',exact:true}).click();
+    const job=await until(async()=>{const data=await snapshot();return data.jobs.find(job=>!['queued','running'].includes(job.state));});await until(async()=>!(await snapshot()).busy);
+    assert.equal(job.success,6);assert.equal(job.failed,1);const received=(await snapshot()).invoices;
     for(const original of all){const invoice=received.find(i=>i.blobHash===original.blobHash);for(const field of ['fileName','entryDate','purchaseDate','amountCents','category','itemName','paymentMethod','invoiceNumber','sellerName','sellerTaxId'])assert.equal(invoice[field],original[field],field);assert.ok(invoice.sources.length>original.sources.length);assert.equal(await invoke('read_invoice_bytes',{id:invoice.id}),await readFile(files[Number(original.invoiceNumber.slice(-4))-1]).then(b=>b.toString('base64')));}
     await screenshot('import');await accessibility('import-dark');
   });

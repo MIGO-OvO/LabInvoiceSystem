@@ -27,4 +27,4 @@
 
 ## 当前验证证据
 
-本地 Rust core 17 项、前端 5 项、fmt/Clippy、真实 Windows debug 构建与 13 项真实 Tauri 桌面场景通过；NSIS 实际安装/生产 IPC/导航/卸载4项及签名/版本/篡改拒绝通过。开发分支已运行三架构 CI，Apple Silicon DMG 安装与原生启动通过，Windows 运行器上的 WebView 启动正在诊断。最终 CI、公开资产升级与 Pages/Release 仍待完成。Apple 发行/公证和 Windows Authenticode 凭据尚缺，macOS 预览产物排除于生产更新清单。
+本地 Rust core 19 项、前端 5 项、fmt/Clippy、真实 Windows debug 构建与14项真实 Tauri 桌面场景通过；NSIS 实际安装/生产 IPC/导航/卸载4项及签名/版本/篡改拒绝通过。WebView2 环境参数问题已定位修复，上一完整提交的三架构 CI 全绿，Windows NSIS 与两个 macOS DMG 的安装/启动检查通过。最新增加的 ZIP 只读预览已完成本地确认/取消/无写入验收，进入对应的最终三架构 CI。公开资产升级与 Pages/Release 仍待完成。Apple 发行/公证和 Windows Authenticode 凭据尚缺，macOS 预览产物排除于生产更新清单。

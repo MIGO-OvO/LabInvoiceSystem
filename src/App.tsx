@@ -7,22 +7,24 @@ import {save} from '@tauri-apps/plugin-dialog';
 import {Upload,Download,BarChart3,Settings2,Sun,Moon,Menu,PanelLeftClose,Package,Archive,FileText,Check,Trash2,X,LoaderCircle,ShieldCheck,ExternalLink,RefreshCw} from 'lucide-react';
 import {api,chooseInvoices,chooseExport,isTauri} from './api';
 import {bytes,categories,categoryOrder,localToday,money,validateInvoice} from './domain';
-import type {Category,ExportProgress,ImportJob,Invoice,Page,Settings,Snapshot} from './types';
+import type {Category,ExportProgress,ImportJob,ImportPreviewSource,Invoice,Page,Settings,Snapshot} from './types';
 import {InvoiceEditor} from './InvoiceEditor';
 import {ImportQueue} from './ImportQueue';
+import {ImportPreview} from './ImportPreview';
 import {ArchiveView} from './ArchiveView';
 import {Dashboard} from './Dashboard';
 import {SettingsView} from './SettingsView';
 import {useUpdater} from './useUpdater';
 import brandImage from '../app-icon.svg';
 
-interface Confirmation {title:string;body:string;button:string;action:()=>Promise<unknown>}
+interface Confirmation {title:string;body:string;button:string;action:()=>Promise<unknown>;preview?:ImportPreviewSource[];disabled?:boolean}
 const pageNames:Record<Page,string>={import:'发票录入',export:'导出与归档',statistics:'统计仪表盘',settings:'设置'};
 const navIcons={import:Upload,export:Download,statistics:BarChart3,settings:Settings2};
 export default function App(){
   const [snapshot,setSnapshot]=useState<Snapshot|null>(null);const [page,setPage]=useState<Page>('import');const [collapsed,setCollapsed]=useState(false);const [selected,setSelected]=useState<Set<string>>(new Set());const [current,setCurrent]=useState<string|null>(null);const [edits,setEdits]=useState<Record<string,Invoice>>({});const editsRef=useRef(edits);editsRef.current=edits;
   const [busy,setBusy]=useState(false);const [error,setError]=useState('');const [status,setStatus]=useState('正在读取本地归档…');const [confirmation,setConfirmation]=useState<Confirmation|null>(null);const [uniformDate,setUniformDate]=useState(localToday());const [uniformPayment,setUniformPayment]=useState('公务卡');const [classification,setClassification]=useState<Category>('officeLiving');const [editorEpoch,setEditorEpoch]=useState(0);const [exportProgress,setExportProgress]=useState<ExportProgress|null>(null);const [dragging,setDragging]=useState(false);
   const previouslySeen=useRef<Set<string>>(new Set());const flushing=useRef<Promise<void>|null>(null);const jobActive=!!snapshot?.jobs.some(j=>['running','queued'].includes(j.state));const disabled=busy||jobActive;
+  const [previewProgress,setPreviewProgress]=useState<ImportJob|null>(null);
   const report=useCallback((reason:unknown)=>{setError(reason instanceof Error?reason.message:String(reason));},[]);
   const refresh=useCallback(async()=>{const next=await api.snapshot();setSnapshot(next);setSelected(previous=>{const result=new Set(previous);for(const invoice of next.invoices){if(invoice.state!=='deleted'&&!previouslySeen.current.has(invoice.id))result.add(invoice.id);}previouslySeen.current=new Set(next.invoices.map(i=>i.id));return result;});setCurrent(previous=>previous&&next.invoices.some(i=>i.id===previous&&i.state!=='deleted')?previous:next.invoices.find(i=>i.state==='draft')?.id??null);},[]);
   const flush=useCallback(async():Promise<void>=>{if(flushing.current){await flushing.current;return flush();}if(!Object.keys(editsRef.current).length)return;
@@ -35,6 +37,7 @@ export default function App(){
   useEffect(()=>{if(!isTauri()){setError('请在 LabInvoiceSystem 桌面应用中使用发票功能。网页开发预览不会模拟或写入发票数据。');setStatus('桌面原生服务未连接');return;}void refresh().then(()=>setStatus('准备就绪 · 原件保留在本机')).catch(report);
     const subscriptions:UnlistenFn[]=[];let active=true;const retain=(unlisten:UnlistenFn)=>{if(active)subscriptions.push(unlisten);else unlisten();};
     void listen<ImportJob>('import-progress',event=>{setSnapshot(previous=>previous?{...previous,jobs:[event.payload,...previous.jobs.filter(j=>j.id!==event.payload.id)]}:previous);setStatus(`接收 ${event.payload.processedContainers}/${event.payload.totalContainers} 个来源，新增 ${event.payload.success}，重复 ${event.payload.duplicates}`);}).then(retain);
+    void listen<ImportJob>('import-preview-progress',event=>setPreviewProgress(current=>current?event.payload:null)).then(retain);
     void listen<ExportProgress>('export-progress',event=>setExportProgress(event.payload)).then(retain);
     void listen('data-changed',()=>void refresh().catch(report)).then(retain);
     void getCurrentWindow().onDragDropEvent(event=>{if(event.payload.type==='over'){setDragging(true);}else if(event.payload.type==='leave'){setDragging(false);}else if(event.payload.type==='drop'){setDragging(false);void startRef.current(event.payload.paths);}}).then(retain);
@@ -45,6 +48,10 @@ export default function App(){
   useEffect(()=>{if(blocked||!Object.keys(edits).length)return;const timer=setTimeout(()=>{void flush().then(()=>{setStatus('核对信息已保存');return refresh();}).catch(report);},1200);return()=>clearTimeout(timer);},[edits,blocked,flush,refresh,report]);
   useEffect(()=>{const keyboard=(event:KeyboardEvent)=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='o'){event.preventDefault();if(!blocked)void chooseInvoices().then(paths=>startRef.current(paths)).catch(report);}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='f'&&page==='export'){event.preventDefault();document.getElementById('archive-search')?.focus();}};document.addEventListener('keydown',keyboard);return()=>document.removeEventListener('keydown',keyboard);},[blocked,page,report]);
   const start=async(paths:string[])=>{if(!paths.length)return;if(blocked){setError('请先完成或取消当前发票操作，再添加新来源。');return;}
+    if(paths.some(path=>/\.zip$/i.test(path))){
+      setPage('import');setPreviewProgress({id:'',state:'preview',totalContainers:paths.length,processedContainers:0,totalFiles:0,processedFiles:0,bytesRead:0,totalBytes:0,success:0,duplicates:0,failed:0,issues:[],unassignedRows:[],invoiceIds:[]});
+      try{await run(async()=>{const preview=await api.previewImport(paths);setConfirmation({title:`ZIP 导入前预览 · ${paths.length} 个来源`,body:'预览只读取本地资料。确认后会复制原件并建立待核对草稿，重新校验所有来源与重复。云端 OCR 仍需明确同意。',button:'确认导入',preview,disabled:preview.every(source=>!!source.error),action:async()=>{setPage('import');await api.startImport(paths);}});},'导入预览已就绪，确认后开始接收');}finally{setPreviewProgress(null);}return;
+    }
     await run(async()=>{setPage('import');const id=await api.startImport(paths);const job=await api.job(id);setSnapshot(previous=>previous?{...previous,jobs:[job,...previous.jobs.filter(j=>j.id!==id)]}:previous);},'导入队列已开始，归档前请核对');
   };startRef.current=start;
   closeRef.current=async()=>{if(blocked){setConfirmation({title:'发票操作正在执行',body:'请先取消并等待操作安全结束，再关闭软件。已提交的草稿和归档会保留。',button:'取消当前操作',action:()=>api.cancel()});return;}try{await flush();await getCurrentWindow().destroy();}catch(reason){report(reason);}};
@@ -77,6 +84,7 @@ export default function App(){
       <footer className="status-bar" role="status"><div>{blocked?<LoaderCircle size={14} className="spinner"/>:<Check size={14}/>}<span>{status}</span></div><span>{Object.keys(edits).length?'有核对信息待保存':snapshot?`${snapshot.statistics.total.count} 张已归档 · ${money(snapshot.statistics.total.amountCents)}`:'本地优先'}</span></footer>
       {exportProgress&&<div className="export-progress" role="status"><strong>导出 {exportProgress.completed}/{exportProgress.total} 张</strong><progress aria-label="ZIP 导出进度" value={exportProgress.bytesWritten} max={Math.max(1,exportProgress.totalBytes)}/><span>{bytes(exportProgress.bytesWritten)}</span><button onClick={()=>void api.cancel().catch(report)}>取消导出</button></div>}
     </main>
-    <Dialog.Root open={!!confirmation} onOpenChange={open=>{if(!open&&!busy)setConfirmation(null);}}><Dialog.Portal><Dialog.Overlay className="dialog-overlay"/><Dialog.Content className="dialog-content"><Dialog.Title>{confirmation?.title}</Dialog.Title><Dialog.Description>{confirmation?.body}</Dialog.Description><div className="button-row"><Dialog.Close asChild><button disabled={busy}>返回继续处理</button></Dialog.Close><button className="primary" disabled={busy} onClick={()=>{const action=confirmation?.action;if(action){setConfirmation(null);void run(action,'操作已完成');}}}>{confirmation?.button}</button></div><Dialog.Close asChild><button className="dialog-close icon-button" aria-label="关闭对话框" disabled={busy}><X size={18}/></button></Dialog.Close></Dialog.Content></Dialog.Portal></Dialog.Root>
+    {previewProgress&&<section className="export-progress" aria-label="正在生成导入预览"><strong>正在生成本地预览</strong><progress aria-label="导入预览进度" value={previewProgress.processedContainers} max={previewProgress.totalContainers}/><span>{previewProgress.processedContainers}/{previewProgress.totalContainers} 个来源 · 已读 {previewProgress.processedFiles} 张 · {bytes(previewProgress.bytesRead)}</span><button onClick={()=>void api.cancel().catch(report)}>取消预览</button></section>}
+    <Dialog.Root open={!!confirmation} onOpenChange={open=>{if(!open&&!busy)setConfirmation(null);}}><Dialog.Portal><Dialog.Overlay className="dialog-overlay"/><Dialog.Content className={`dialog-content ${confirmation?.preview?'import-preview-dialog':''}`}><Dialog.Title>{confirmation?.title}</Dialog.Title><Dialog.Description>{confirmation?.body}</Dialog.Description>{confirmation?.preview&&<ImportPreview sources={confirmation.preview}/>}<div className="button-row"><Dialog.Close asChild><button disabled={busy}>返回继续处理</button></Dialog.Close><button className="primary" disabled={busy||updating||confirmation?.disabled} onClick={()=>{const action=confirmation?.action;if(action){setConfirmation(null);void run(action,'操作已完成');}}}>{confirmation?.button}</button></div><Dialog.Close asChild><button className="dialog-close icon-button" aria-label="关闭对话框" disabled={busy}><X size={18}/></button></Dialog.Close></Dialog.Content></Dialog.Portal></Dialog.Root>
   </div>;
 }
