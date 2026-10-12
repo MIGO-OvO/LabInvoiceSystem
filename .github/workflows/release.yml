@@ -39,6 +39,7 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
         with:
           shared-key: ${{ matrix.target }}
+          cache-on-failure: true
       - run: cargo test -p invoice-core --locked
       - run: npm test
       - name: Build and sign update artifacts
@@ -70,6 +71,9 @@ jobs:
             echo "::warning::Apple distribution credentials absent: macOS preview artifacts are not notarized; excluded from production updater manifest."
           fi
       - run: node scripts/prepare-assets.mjs ${{ matrix.platform }} ${{ matrix.target }} target/${{ matrix.target }}/release/bundle .cache/release-assets
+      - name: Install and launch Windows NSIS
+        if: runner.os == 'Windows'
+        run: node scripts/windows-installed-check.mjs (Get-Item .cache/release-assets/*-setup.exe).FullName
       - name: Install and launch macOS DMG
         if: runner.os == 'macOS'
         shell: bash

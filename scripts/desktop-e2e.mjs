@@ -31,7 +31,7 @@ async function startApp(directory) {
   app.stdout.on('data',bytes=>{report.launchOutput=(report.launchOutput??'')+bytes.toString();});
   app.stderr.on('data',bytes=>{report.launchOutput=(report.launchOutput??'')+bytes.toString();});
   app.on('exit',(code,signal)=>{report.lastExit={code,signal};});
-  browser = await until(async()=>{try{return await chromium.connectOverCDP('http://127.0.0.1:9223');}catch{return null;}},45000);
+  browser = await until(async()=>{try{return await chromium.connectOverCDP('http://127.0.0.1:9223');}catch(error){report.cdpConnectionError=error.message;return null;}},45000);
   page = await until(()=>browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().includes(':1420')));
   page.on('pageerror',error=>report.consoleErrors.push(error.message));
   await page.waitForFunction(()=>!!window.__TAURI_INTERNALS__?.invoke);

@@ -18,6 +18,7 @@ try{
   await access(installer);await run(installer,['/S',`/D=${directory}`]);
   const executable=path.join(directory,'lab-invoice-system.exe');await access(executable);report.cases.push('NSIS silent installation into isolated application directory');
   app=spawn(executable,[],{windowsHide:true,env:{...process.env,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:'--remote-debugging-port=9224'}});
+  app.on('exit',(code,signal)=>{report.exit={code,signal};});app.on('error',error=>{report.launchError=error.message;});
   for(let retry=0;retry<120&&!browser;retry++){browser=await chromium.connectOverCDP('http://127.0.0.1:9224').catch(()=>null);if(!browser)await pause(250);}
   assert.ok(browser,'Installed production WebView did not start');
   let page;for(let retry=0;retry<100&&!page;retry++){page=browser.contexts().flatMap(c=>c.pages()).find(p=>/tauri\.localhost|tauri:\/\//.test(p.url()));if(!page)await pause(100);}
@@ -25,6 +26,7 @@ try{
   await page.getByRole('heading',{name:'发票录入',exact:true}).waitFor();
   const snapshot=await page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('get_snapshot'));
   assert.equal(snapshot.version,'3.0.0');assert.equal(snapshot.busy,false);
+  assert.equal(snapshot.invoices.length,0,'Installed CI smoke test requires an empty generated data directory; never screenshot existing invoices');
   report.cases.push('Installed production executable and embedded React/Rust IPC start successfully');
   await page.getByRole('button',{name:'导出与归档',exact:true}).click();await expect(page.getByRole('heading',{name:'发票导出与归档管理',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'统计仪表盘',exact:true}).click();await expect(page.getByRole('heading',{name:'统计仪表盘',exact:true})).toBeVisible();
