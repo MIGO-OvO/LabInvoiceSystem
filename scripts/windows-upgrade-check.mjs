@@ -5,13 +5,14 @@ import {mkdir,copyFile,writeFile,readFile,access,rename} from 'node:fs/promises'
 import path from 'node:path';
 import assert from 'node:assert/strict';
 
-// Uses an unpublished 3.0.0-qa.0 bootstrap and the REAL public 3.0.0 Release.
+// Uses an unpublished 3.0.0-qa.0 bootstrap and the REAL current public Release.
 // No test update server, fake manifest or alternate signature key.
 assert.equal(process.platform,'win32');
+const {version}=JSON.parse(await readFile('package.json','utf8'));
 const installer=path.resolve(process.argv[2]);const bootstrap=path.resolve(process.argv[3]??'.cache/updater-bootstrap/lab-invoice-system.exe');
 const directory=path.resolve('.cache/windows-upgrade-acceptance'),output=path.resolve('test-results/windows-upgrade');
 await mkdir(directory,{recursive:true});await mkdir(output,{recursive:true});
-const report={startedAt:new Date().toISOString(),bootstrapVersion:'3.0.0-qa.0',endpoint:'https://github.com/MIGO-OvO/LabInvoiceSystem/releases/latest/download/latest.json',cases:[],result:'running'};
+const report={startedAt:new Date().toISOString(),bootstrapVersion:'3.0.0-qa.0',targetVersion:version,endpoint:'https://github.com/MIGO-OvO/LabInvoiceSystem/releases/latest/download/latest.json',cases:[],result:'running'};
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const run=(exe,args=[])=>new Promise((resolve,reject)=>{const p=spawn(exe,args,{stdio:'ignore',windowsHide:true});p.on('error',reject);p.on('exit',code=>code===0?resolve():reject(new Error(`Exit ${code}: ${path.basename(exe)}`)));});
 async function until(action,timeout=90000){const end=Date.now()+timeout;let last;while(Date.now()<end){try{const result=await action();if(result)return result;}catch(error){last=error;}await pause(200);}throw last??new Error('Upgrade acceptance timed out');}
@@ -26,17 +27,18 @@ try{
   const pdf=await PDFDocument.create();const font=await pdf.embedFont(StandardFonts.Helvetica);pdf.addPage().drawText('SYNTHETIC UPDATE QA - NO REAL INVOICE',{x:40,y:730,font,size:18});const original=path.join(directory,'synthetic-update.pdf');await writeFile(original,await pdf.save());
   const jobId=await invoke('start_import',{paths:[original]});await until(async()=>{const job=await invoke('get_job',{id:jobId});return !['queued','running'].includes(job.state);});
   let invoice=(await invoke('get_snapshot')).invoices[0];Object.assign(invoice,{category:'labSupplies',entryDate:'2026-10-12',purchaseDate:'2026-10-10',amountCents:12345,itemName:'更新验收（合成发票）',paymentMethod:'公务卡',invoiceNumber:'SYNTHETIC-UPDATER-QA-001',reviewed:true});invoice=await invoke('save_invoice',{invoice});testId=invoice.id;await invoke('archive_invoices',{ids:[testId]});
+  await invoke('save_settings',{settings:{...initial.settings,theme:'light',monthlyQuota:321,itemCorrections:{'SYNTHETIC-UPDATER-QA':'合成项目修正'}}});await page.reload();await page.getByRole('heading',{name:'发票录入',exact:true}).waitFor();
   const before=await invoke('get_snapshot');assert.equal(before.statistics.total.amountCents,12345);const originalBytes=await invoke('read_invoice_bytes',{id:testId});report.cases.push('Real synthetic invoice archived before upgrade');
   await page.getByRole('button',{name:'设置与辅助操作',exact:true}).click();await page.getByRole('button',{name:'手动检查更新',exact:true}).click();await page.getByRole('button',{name:'立即更新',exact:true}).waitFor({timeout:45000});
-  const metadata=await invoke('plugin:updater|check',{timeout:15000});assert.equal(metadata.currentVersion,'3.0.0-qa.0');assert.equal(metadata.version,'3.0.0');report.cases.push('Official updater discovers authenticated public v3.0.0 manifest');
+  const metadata=await invoke('plugin:updater|check',{timeout:15000});assert.equal(metadata.currentVersion,'3.0.0-qa.0');assert.equal(metadata.version,version);report.cases.push(`Official updater discovers the real public v${version} manifest`);
   await page.getByRole('button',{name:'稍后提醒',exact:true}).click();await until(async()=>(await invoke('get_snapshot')).settings.remindAfter>Date.now()/1000);report.cases.push('Later reminder persists');
-  await page.getByRole('button',{name:'手动检查更新',exact:true}).click();await page.getByRole('button',{name:'跳过此版本',exact:true}).click();await until(async()=>(await invoke('get_snapshot')).settings.skippedVersion==='3.0.0');report.cases.push('Skip version persists and manual check can override it');
-  await page.getByRole('button',{name:'手动检查更新',exact:true}).click();await page.getByRole('button',{name:'立即更新',exact:true}).waitFor();await page.screenshot({path:path.join(output,'before-upgrade.png')});
+  await page.getByRole('button',{name:'手动检查更新',exact:true}).click();await page.getByRole('button',{name:'跳过此版本',exact:true}).click();await until(async()=>(await invoke('get_snapshot')).settings.skippedVersion===version);report.cases.push('Skip version persists and manual check can override it');
+  await page.getByRole('button',{name:'手动检查更新',exact:true}).click();await page.getByRole('button',{name:'立即更新',exact:true}).waitFor();const expectedSettings=(await invoke('get_snapshot')).settings;await page.screenshot({path:path.join(output,'before-upgrade.png')});
   await page.getByRole('button',{name:'立即更新',exact:true}).click().catch(()=>{});
   await until(()=>app.exitCode!==null,180000);await browser.close().catch(()=>{});browser=null;
   await until(async()=>{browser=await chromium.connectOverCDP('http://127.0.0.1:9225').catch(()=>null);return browser;},120000);
   page=await until(()=>browser.contexts().flatMap(c=>c.pages()).find(p=>/tauri\.localhost|tauri:\/\//.test(p.url())));await page.getByRole('heading',{name:'发票录入',exact:true}).waitFor();
-  const after=await invoke('get_snapshot');assert.equal(after.invoices.length,1);assert.equal(after.invoices[0].id,testId);assert.equal(after.invoices[0].state,'archived');assert.equal(after.statistics.total.amountCents,12345);assert.equal(await invoke('read_invoice_bytes',{id:testId}),originalBytes);await invoke('verify_archive');
+  const after=await invoke('get_snapshot');assert.equal(after.invoices.length,1);assert.deepEqual(after.invoices[0],before.invoices[0],'All archived metadata and provenance must survive');assert.equal(after.statistics.total.amountCents,12345);assert.deepEqual(after.settings,expectedSettings,'All saved settings must survive');assert.equal(await invoke('read_invoice_bytes',{id:testId}),originalBytes);await invoke('verify_archive');
   const installed=await invoke('plugin:updater|check',{timeout:15000});assert.equal(installed,null,'Updated production app should be current');report.cases.push('Official updater downloads, verifies signature, installs and restarts production release');report.cases.push('Archive identity, original bytes, category, amount and settings survive the real upgrade');
   const {readdir}=await import('node:fs/promises');assert.ok((await readdir(path.join(dataRoot,'backups'))).some(name=>name.includes('before-update')));report.cases.push('Update preparation creates an actual database backup');
   await page.getByRole('button',{name:'导出与归档',exact:true}).click();await page.screenshot({path:path.join(output,'after-upgrade.png')});
