@@ -109,11 +109,14 @@ jobs:
           pattern: release-*
           path: .cache/release-assets
           merge-multiple: true
-      - run: node scripts/create-release-manifest.mjs .cache/release-assets docs/releases/3.0.0.md
+      - name: Generate versioned update inventory
+        run: |
+          version=$(node -p 'JSON.parse(require("fs").readFileSync("package.json")).version')
+          node scripts/create-release-manifest.mjs .cache/release-assets "docs/releases/$version.md"
       - name: Publish versioned release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           version=$(node -p 'JSON.parse(require("fs").readFileSync("package.json")).version')
           test "$GITHUB_REF_NAME" = "v$version"
-          gh release create "v$version" --verify-tag --title "LabInvoiceSystem $version" --notes-file docs/releases/3.0.0.md .cache/release-assets/*
+          gh release create "v$version" --verify-tag --title "LabInvoiceSystem $version" --notes-file "docs/releases/$version.md" .cache/release-assets/*
