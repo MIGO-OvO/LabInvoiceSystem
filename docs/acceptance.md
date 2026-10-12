@@ -14,23 +14,30 @@
 | 无同意 OCR 上传被拒绝 | 实际 recognize_invoice 命令；用量保持0 | 通过 |
 | 实际百度 OCR 服务端识别 | 未提供可用于合成发票验收的百度凭据；解析、错误与同意门槛已测试 | 未执行外部识别 |
 | 更新排空、安全备份、拒绝写入与失败解锁 | 实际 Tauri 命令 | 通过 |
-| Windows NSIS | 本地实际生成安装包和 `.sig` | 已构建，待安装验收 |
-| Windows/macOS 跨平台 CI | 三架构工作流已实现 | 待远端执行 |
+| Windows NSIS | 本地真实安装、内嵌生产页面与 Rust IPC、导航、卸载，共4项 | 本地通过；CI 启动正在诊断 |
+| Windows/macOS 跨平台 CI | 三架构已实际构建；Intel 与 Apple Silicon DMG 安装、签名结构与 SQLite 启动各3项通过 | 最终 CI 尚未全绿 |
 | 正式 Release / 在线安装升级 | 发布工作流与验证器已实现 | 待执行 |
 | 门户桌面/移动、深浅、320/390/768/1440、200%文字、WCAG AA | Playwright/axe，无模拟桌面服务 | 通过首轮技术检查 |
 | 门户真实下载及 Pages 部署 | 从实际 Release 资产生成，未发布前无占位 URL | 待发布 |
-| macOS Apple 发行签名、公证和真实安装 | 无 Apple 证书/公证凭据，也无本地 macOS | 客观阻塞；不能宣称通过 |
+| macOS Apple 发行签名、公证 | 无 Apple 证书/公证凭据；预览包使用 ad-hoc 签名保持 bundle 完整性 | 正式分发客观阻塞 |
 
 ## 本地执行结果
 
 - Rust core：17项真实业务与安全测试通过。
 - Vitest：5项金额、日期、筛选与分组测试通过。
-- Windows 实际 WebView：12个业务场景通过，四个代表状态 axe WCAG AA 无违规，重启保留归档和配置。
+- Windows 实际 WebView：13个业务场景通过，四个代表状态 axe WCAG AA 无违规，重启保留归档和配置；更新准备取消正在运行的导入，保留已提交数据并可重试。
+- Windows 生产 NSIS：真实安装、内嵌界面与 Rust IPC、导航、卸载，共4项通过。
+- 真实 NSIS 的 `.sig`：正确原件及签名版本通过；单字节篡改和伪造版本被拒绝。
+- 四个桌面状态的 axe 检查固定为1024×768，覆盖热力图和原件区域实际产生滚动的窗口；滚动区域可键盘聚焦并有可读取名称。
 - 门户：7个视口/主题/文字缩放场景通过，axe WCAG AA 无违规，无横向溢出或未捕获脚本错误。下载资产待发布后再次检查。
 - Rustfmt、Clippy、TypeScript 与 Vite：已执行；以最终 CI 结果补充。
 
 验收只使用明确标记的合成发票，不读取用户真实归档。门户展示实际运行截图，内部 Impeccable 构图不冒充软件截图。
 
+## CI 问题定位
+
+Windows 运行器的 WebView2 153 已创建浏览器和渲染进程，但没有应用传到原生进程的 `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`。以进程参数、调试连接拒绝及临时原生布尔探针确认后，通过 Tauri 官方原生配置转交同一 opt-in 环境值，保留框架默认参数。临时 Rust 探针已移除；正常启动没有额外调试参数。修复后的 CI 已执行全部13个业务场景，随后暴露并修复热力图/原件滚动区域的键盘可达性问题；最终 CI 结果见发布记录。
+
 ## 发布限制
 
-缺少 Apple Developer 发行证书和公证凭据，macOS 只能提供未公证预览包；不加入生产更新清单。Windows 缺少 Authenticode 证书，不影响 Tauri Updater 的独立数字签名校验，但首次安装可能出现 SmartScreen 提示。
+缺少 Apple Developer 发行证书和公证凭据，macOS 只能提供未公证预览包；不加入生产更新清单。运行器上的 DMG 安装、原生存储初始化和持续运行检查不替代交互式 WKWebView 或用户机器的 Gatekeeper 验收。Windows 缺少 Authenticode 证书，不影响 Tauri Updater 的独立数字签名校验，但首次安装可能出现 SmartScreen 提示。

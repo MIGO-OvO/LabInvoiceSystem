@@ -52,8 +52,11 @@ async function screenshot(name) {
   report.screenshots.push(`portal/assets/desktop-${name}.png`);
 }
 async function accessibility(name) {
+  const viewport = await page.evaluate(()=>({width:innerWidth,height:innerHeight}));
+  await page.setViewportSize({width:1024,height:768});
   const scan = await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
-  report.accessibility.push({name,violations:scan.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});
+  report.accessibility.push({name,width:1024,height:768,violations:scan.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});
+  await page.setViewportSize(viewport);
 }
 
 try {
