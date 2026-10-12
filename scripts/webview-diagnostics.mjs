@@ -8,7 +8,7 @@ export function webviewArguments(port,output){
   return `--remote-debugging-port=${port} --enable-logging --log-file="${path.join(output,'webview2.log')}"`;
 }
 export async function collectWebviewDiagnostics(output,app){
-  const report={hostPid:app?.pid,hostExitCode:app?.exitCode};
+  const report={hostPid:app?.pid,hostExitCode:app?.exitCode,parentWebviewEnvironment:Object.fromEntries(Object.entries(process.env).filter(([name])=>name.toUpperCase().startsWith('WEBVIEW2_')))};
   try{
     const {stdout}=await promisify(execFile)('powershell.exe',['-NoProfile','-Command',"Get-CimInstance Win32_Process -Filter \"Name = 'lab-invoice-system.exe' OR Name = 'msedgewebview2.exe'\" | Select-Object Name,ProcessId,ParentProcessId,SessionId,CommandLine | ConvertTo-Json -Depth 3"],{windowsHide:true,timeout:10000});
     report.processes=stdout.trim()?JSON.parse(stdout):[];
