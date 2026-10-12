@@ -1,0 +1,103 @@
+name: Signed release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            platform: windows-x86_64
+            bundles: nsis
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            platform: darwin-x86_64
+            bundles: app,dmg
+          - os: macos-15
+            target: aarch64-apple-darwin
+            platform: darwin-aarch64
+            bundles: app,dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: rustup update stable --no-self-update
+      - run: rustup target add ${{ matrix.target }}
+      - run: cargo test -p invoice-core --locked
+      - run: npm test
+      - name: Build and sign update artifacts
+        run: node scripts/build-desktop.mjs --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - name: Verify macOS distribution
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          app="target/${{ matrix.target }}/release/bundle/macos/LabInvoiceSystem.app"
+          codesign --verify --deep --strict "$app"
+          if [ -n "$APPLE_SIGNING_IDENTITY" ] && [ -n "$APPLE_TEAM_ID" ]; then
+            xcrun stapler validate "$app"
+            spctl --assess --type execute --verbose "$app"
+            echo "APPLE_DISTRIBUTION_VERIFIED=true" >> "$GITHUB_ENV"
+          else
+            echo "APPLE_DISTRIBUTION_VERIFIED=false" >> "$GITHUB_ENV"
+            echo "::warning::Apple distribution credentials absent: macOS preview artifacts are not notarized; excluded from production updater manifest."
+          fi
+      - run: node scripts/prepare-assets.mjs ${{ matrix.platform }} ${{ matrix.target }} target/${{ matrix.target }}/release/bundle .cache/release-assets
+      - name: Verify updater signatures and tamper rejection
+        shell: bash
+        run: |
+          version=$(node -p 'JSON.parse(require("fs").readFileSync("package.json")).version')
+          files=()
+          for signature in .cache/release-assets/*.sig; do files+=("${signature%.sig}"); done
+          cargo run -p release-tools --locked -- src-tauri/tauri.conf.json "$version" "${files[@]}"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-${{ matrix.platform }}
+          path: .cache/release-assets/
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: release-*
+          path: .cache/release-assets
+          merge-multiple: true
+      - run: node scripts/create-release-manifest.mjs .cache/release-assets docs/releases/3.0.0.md
+      - name: Publish versioned release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p 'JSON.parse(require("fs").readFileSync("package.json")).version')
+          test "$GITHUB_REF_NAME" = "v$version"
+          gh release create "v$version" --verify-tag --title "LabInvoiceSystem $version" --notes-file docs/releases/3.0.0.md .cache/release-assets/*

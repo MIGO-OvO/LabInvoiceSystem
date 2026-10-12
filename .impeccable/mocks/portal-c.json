@@ -1,0 +1,6 @@
+{
+  "prompt": "Create a high-fidelity desktop website design comp, 1440x1000 landscape, for LabInvoiceSystem, Chinese local-first laboratory invoice workbench. INTERNAL DESIGN COMP ONLY, not a screenshot. Same incumbent brand Slate cool light neutral, charcoal type, modest Indigo #4f46e5 accent, mature matte restrained interface. Structure C: top compact nav logo name LabInvoiceSystem and 功能 使用说明 更新日志 源码; main first viewport arranged as asymmetric proof-first spread: large EMPTY rectangular product-image area labelled 实际运行截图 takes left 60%, right 40% headline 把发票整理成可核对的报账资料, readable support copy, stacked Windows macOS Intel macOS Apple Silicon actions. Lower fold two editorial columns: 个人整理 and 团队接收 containing concise action descriptions and a thin structured workflow graphic with labels ZIP导出 批量接收 分类汇总. Rigorous typography hierarchy and reading order, accessible contrast, no fake application chrome, no made-up testimonials, no fake downloads, no gradients or ornament.",
+  "approved": false,
+  "approval": "User explicitly delegated all design choices; A selected for product clarity, left-first Chinese reading order, visible platform actions and real screenshot proof.",
+  "seed": "7f532313"
+}
