@@ -36,6 +36,9 @@ jobs:
       - run: npm ci
       - run: rustup update stable --no-self-update
       - run: rustup target add ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          shared-key: ${{ matrix.target }}
       - run: cargo test -p invoice-core --locked
       - run: npm test
       - name: Build and sign update artifacts
@@ -67,6 +70,15 @@ jobs:
             echo "::warning::Apple distribution credentials absent: macOS preview artifacts are not notarized; excluded from production updater manifest."
           fi
       - run: node scripts/prepare-assets.mjs ${{ matrix.platform }} ${{ matrix.target }} target/${{ matrix.target }}/release/bundle .cache/release-assets
+      - name: Install and launch macOS DMG
+        if: runner.os == 'macOS'
+        shell: bash
+        run: node scripts/macos-installed-check.mjs .cache/release-assets/*.dmg
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && runner.os == 'macOS'
+        with:
+          name: macos-install-${{ matrix.platform }}
+          path: test-results/macos-install/
       - name: Verify updater signatures and tamper rejection
         shell: bash
         run: |

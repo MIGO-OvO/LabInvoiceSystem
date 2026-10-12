@@ -80,4 +80,3 @@ export default function App(){
     <Dialog.Root open={!!confirmation} onOpenChange={open=>{if(!open&&!busy)setConfirmation(null);}}><Dialog.Portal><Dialog.Overlay className="dialog-overlay"/><Dialog.Content className="dialog-content"><Dialog.Title>{confirmation?.title}</Dialog.Title><Dialog.Description>{confirmation?.body}</Dialog.Description><div className="button-row"><Dialog.Close asChild><button disabled={busy}>返回继续处理</button></Dialog.Close><button className="primary" disabled={busy} onClick={()=>{const action=confirmation?.action;if(action){setConfirmation(null);void run(action,'操作已完成');}}}>{confirmation?.button}</button></div><Dialog.Close asChild><button className="dialog-close icon-button" aria-label="关闭对话框" disabled={busy}><X size={18}/></button></Dialog.Close></Dialog.Content></Dialog.Portal></Dialog.Root>
   </div>;
 }
-

@@ -26,8 +26,11 @@ async function until(action, timeout = 30000) {
 async function stopApp() {await browser?.close().catch(()=>{});browser=null; if(app){app.kill();await pause(700);app=null;}}
 async function startApp(directory) {
   await stopApp();
-  app = spawn(executable, [], {cwd:root, windowsHide:true, env:{...process.env, LABINVOICE_DATA_DIR:directory, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:'--remote-debugging-port=9223'}});
+  app = spawn(executable, [], {cwd:root, windowsHide:true, stdio:['ignore','pipe','pipe'], env:{...process.env, LABINVOICE_DATA_DIR:directory, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:'--remote-debugging-port=9223'}});
   app.on('error', error => {report.launchError=error.message;});
+  app.stdout.on('data',bytes=>{report.launchOutput=(report.launchOutput??'')+bytes.toString();});
+  app.stderr.on('data',bytes=>{report.launchOutput=(report.launchOutput??'')+bytes.toString();});
+  app.on('exit',(code,signal)=>{report.lastExit={code,signal};});
   browser = await until(async()=>{try{return await chromium.connectOverCDP('http://127.0.0.1:9223');}catch{return null;}},45000);
   page = await until(()=>browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().includes(':1420')));
   page.on('pageerror',error=>report.consoleErrors.push(error.message));
@@ -119,6 +122,16 @@ try {
     await screenshot('import');await accessibility('import-dark');
   });
   await step('cross-batch duplicates, retry and persistent provenance',async()=>{const job=await completedImport([labZip,officeZip]);assert.equal(job.success,0);assert.equal(job.duplicates,6);await invoke('verify_archive');await startApp(receiver);assert.equal((await snapshot()).invoices.length,6);});
+  await step('update preparation cancels an active import and preserves committed data',async()=>{
+    const before=(await snapshot()).invoices.map(i=>i.blobHash).sort();
+    const id=await invoke('start_import',{paths:Array(128).fill(labZip)});
+    const active=await invoke('get_job',{id});assert.ok(['queued','running'].includes(active.state),'The import must actually be active before update preparation');
+    const backup=await invoke('prepare_for_update');assert.ok((await readFile(backup)).byteLength>0);
+    const finished=await invoke('get_job',{id});assert.equal(finished.state,'cancelled');
+    await invoke('cancel_update_preparation');await invoke('verify_archive');
+    assert.deepEqual((await snapshot()).invoices.map(i=>i.blobHash).sort(),before);
+    const retry=await completedImport([labZip]);assert.equal(retry.duplicates,4);
+  });
   const significant=report.accessibility.flatMap(a=>a.violations.filter(v=>['critical','serious'].includes(v.impact)));
   assert.deepEqual(significant,[],'Desktop WCAG AA violations');
   assert.deepEqual(report.consoleErrors,[],'Uncaught desktop JavaScript errors');report.result='passed';
