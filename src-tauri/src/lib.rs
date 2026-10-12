@@ -524,6 +524,24 @@ fn restart_after_update(app: tauri::AppHandle, state: State<'_, Arc<Engine>>) ->
 }
 
 pub fn run() {
+    let context = tauri::generate_context!();
+    #[cfg(windows)]
+    let context = {
+        let mut context = context;
+        // Some WebView2 hosts omit inherited browser arguments. Forward the
+        // official opt-in environment value through native options as well.
+        if let Ok(arguments) = std::env::var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS") {
+            if !arguments.trim().is_empty() {
+                for window in &mut context.config_mut().app.windows {
+                    let defaults = window.additional_browser_args.as_deref().unwrap_or(
+                        "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required",
+                    );
+                    window.additional_browser_args = Some(format!("{defaults} {arguments}"));
+                }
+            }
+        }
+        context
+    };
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
@@ -575,6 +593,6 @@ pub fn run() {
             cancel_update_preparation,
             restart_after_update
         ])
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("LabInvoiceSystem 启动失败");
 }
