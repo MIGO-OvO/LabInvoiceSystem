@@ -1,0 +1,104 @@
+name: Test and desktop build
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', 'README.md', 'DESIGN.md', 'PRODUCT.md', '.impeccable/**', 'portal/**']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      quality_only:
+        description: Run only the Windows quality and real desktop acceptance job
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.head_ref || github.ref_name }}-${{ inputs.quality_only }}
+  cancel-in-progress: true
+jobs:
+  quality:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: rustup update stable --no-self-update
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          shared-key: quality-windows
+          cache-on-failure: true
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings -A linker-messages
+      - run: cargo test --workspace --locked
+      - run: npm test
+      - run: npm run build
+      - run: cargo build -p lab-invoice-system --locked
+      - run: ./scripts/ensure-webview2.ps1
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: windows-desktop-acceptance
+          path: test-results/
+  bundles:
+    if: ${{ !inputs.quality_only }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            platform: windows-x86_64
+            bundles: nsis
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            platform: darwin-x86_64
+            bundles: app,dmg
+          - os: macos-15
+            target: aarch64-apple-darwin
+            platform: darwin-aarch64
+            bundles: app,dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: rustup update stable --no-self-update
+      - run: rustup target add ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          shared-key: ${{ matrix.target }}
+          cache-on-failure: true
+      - run: cargo test -p invoice-core --locked
+      - run: node scripts/build-desktop.mjs --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - run: node scripts/prepare-assets.mjs ${{ matrix.platform }} ${{ matrix.target }} target/${{ matrix.target }}/release/bundle .cache/ci-bundles
+      - name: Install and launch Windows NSIS
+        if: runner.os == 'Windows'
+        run: node scripts/windows-installed-check.mjs (Get-Item .cache/ci-bundles/*-setup.exe).FullName
+      - name: Install and launch macOS DMG
+        if: runner.os == 'macOS'
+        shell: bash
+        run: node scripts/macos-installed-check.mjs .cache/ci-bundles/*.dmg
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && runner.os == 'macOS'
+        with:
+          name: installation-${{ matrix.platform }}
+          path: test-results/macos-install/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && runner.os == 'Windows'
+        with:
+          name: installation-${{ matrix.platform }}
+          path: test-results/windows-install/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: preview-${{ matrix.platform }}
+          path: .cache/ci-bundles/

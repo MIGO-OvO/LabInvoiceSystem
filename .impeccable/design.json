@@ -1,0 +1,653 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-12T19:58:54.819Z",
+  "title": "Design System: LabInvoiceSystem",
+  "extensions": {
+    "colorMeta": {
+      "indigo": {
+        "role": "primary",
+        "displayName": "indigo",
+        "tonalRamp": [
+          "oklch(15.00% 0.23005 276.97)",
+          "oklch(26.43% 0.23005 276.97)",
+          "oklch(37.86% 0.23005 276.97)",
+          "oklch(49.29% 0.23005 276.97)",
+          "oklch(60.71% 0.23005 276.97)",
+          "oklch(72.14% 0.23005 276.97)",
+          "oklch(83.57% 0.23005 276.97)",
+          "oklch(95.00% 0.23005 276.97)"
+        ]
+      },
+      "indigo-hover": {
+        "role": "primary",
+        "displayName": "indigo-hover",
+        "tonalRamp": [
+          "oklch(15.00% 0.21458 277.02)",
+          "oklch(26.43% 0.21458 277.02)",
+          "oklch(37.86% 0.21458 277.02)",
+          "oklch(49.29% 0.21458 277.02)",
+          "oklch(60.71% 0.21458 277.02)",
+          "oklch(72.14% 0.21458 277.02)",
+          "oklch(83.57% 0.21458 277.02)",
+          "oklch(95.00% 0.21458 277.02)"
+        ]
+      },
+      "indigo-light": {
+        "role": "primary",
+        "displayName": "indigo-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.10413 274.71)",
+          "oklch(26.43% 0.10413 274.71)",
+          "oklch(37.86% 0.10413 274.71)",
+          "oklch(49.29% 0.10413 274.71)",
+          "oklch(60.71% 0.10413 274.71)",
+          "oklch(72.14% 0.10413 274.71)",
+          "oklch(83.57% 0.10413 274.71)",
+          "oklch(95.00% 0.10413 274.71)"
+        ]
+      },
+      "indigo-tint": {
+        "role": "primary",
+        "displayName": "indigo-tint",
+        "tonalRamp": [
+          "oklch(15.00% 0.03343 272.79)",
+          "oklch(26.43% 0.03343 272.79)",
+          "oklch(37.86% 0.03343 272.79)",
+          "oklch(49.29% 0.03343 272.79)",
+          "oklch(60.71% 0.03343 272.79)",
+          "oklch(72.14% 0.03343 272.79)",
+          "oklch(83.57% 0.03343 272.79)",
+          "oklch(95.00% 0.03343 272.79)"
+        ]
+      },
+      "desktop-hover-dark": {
+        "role": "primary",
+        "displayName": "desktop-hover-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.05490 269.26)",
+          "oklch(26.43% 0.05490 269.26)",
+          "oklch(37.86% 0.05490 269.26)",
+          "oklch(49.29% 0.05490 269.26)",
+          "oklch(60.71% 0.05490 269.26)",
+          "oklch(72.14% 0.05490 269.26)",
+          "oklch(83.57% 0.05490 269.26)",
+          "oklch(95.00% 0.05490 269.26)"
+        ]
+      },
+      "desktop-hover-light": {
+        "role": "primary",
+        "displayName": "desktop-hover-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.01793 272.31)",
+          "oklch(26.43% 0.01793 272.31)",
+          "oklch(37.86% 0.01793 272.31)",
+          "oklch(49.29% 0.01793 272.31)",
+          "oklch(60.71% 0.01793 272.31)",
+          "oklch(72.14% 0.01793 272.31)",
+          "oklch(83.57% 0.01793 272.31)",
+          "oklch(95.00% 0.01793 272.31)"
+        ]
+      },
+      "portal-tint-dark": {
+        "role": "primary",
+        "displayName": "portal-tint-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.06023 270.06)",
+          "oklch(26.43% 0.06023 270.06)",
+          "oklch(37.86% 0.06023 270.06)",
+          "oklch(49.29% 0.06023 270.06)",
+          "oklch(60.71% 0.06023 270.06)",
+          "oklch(72.14% 0.06023 270.06)",
+          "oklch(83.57% 0.06023 270.06)",
+          "oklch(95.00% 0.06023 270.06)"
+        ]
+      },
+      "canvas-light": {
+        "role": "neutral",
+        "displayName": "canvas-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.00341 247.86)",
+          "oklch(26.43% 0.00341 247.86)",
+          "oklch(37.86% 0.00341 247.86)",
+          "oklch(49.29% 0.00341 247.86)",
+          "oklch(60.71% 0.00341 247.86)",
+          "oklch(72.14% 0.00341 247.86)",
+          "oklch(83.57% 0.00341 247.86)",
+          "oklch(95.00% 0.00341 247.86)"
+        ]
+      },
+      "paper-light": {
+        "role": "neutral",
+        "displayName": "paper-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 89.88)",
+          "oklch(26.43% 0.00000 89.88)",
+          "oklch(37.86% 0.00000 89.88)",
+          "oklch(49.29% 0.00000 89.88)",
+          "oklch(60.71% 0.00000 89.88)",
+          "oklch(72.14% 0.00000 89.88)",
+          "oklch(83.57% 0.00000 89.88)",
+          "oklch(95.00% 0.00000 89.88)"
+        ]
+      },
+      "field-light": {
+        "role": "neutral",
+        "displayName": "field-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.00685 247.90)",
+          "oklch(26.43% 0.00685 247.90)",
+          "oklch(37.86% 0.00685 247.90)",
+          "oklch(49.29% 0.00685 247.90)",
+          "oklch(60.71% 0.00685 247.90)",
+          "oklch(72.14% 0.00685 247.90)",
+          "oklch(83.57% 0.00685 247.90)",
+          "oklch(95.00% 0.00685 247.90)"
+        ]
+      },
+      "ink-light": {
+        "role": "neutral",
+        "displayName": "ink-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.03982 265.75)",
+          "oklch(26.43% 0.03982 265.75)",
+          "oklch(37.86% 0.03982 265.75)",
+          "oklch(49.29% 0.03982 265.75)",
+          "oklch(60.71% 0.03982 265.75)",
+          "oklch(72.14% 0.03982 265.75)",
+          "oklch(83.57% 0.03982 265.75)",
+          "oklch(95.00% 0.03982 265.75)"
+        ]
+      },
+      "secondary-light": {
+        "role": "neutral",
+        "displayName": "secondary-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.03745 257.28)",
+          "oklch(26.43% 0.03745 257.28)",
+          "oklch(37.86% 0.03745 257.28)",
+          "oklch(49.29% 0.03745 257.28)",
+          "oklch(60.71% 0.03745 257.28)",
+          "oklch(72.14% 0.03745 257.28)",
+          "oklch(83.57% 0.03745 257.28)",
+          "oklch(95.00% 0.03745 257.28)"
+        ]
+      },
+      "line-light": {
+        "role": "neutral",
+        "displayName": "line-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.01985 252.89)",
+          "oklch(26.43% 0.01985 252.89)",
+          "oklch(37.86% 0.01985 252.89)",
+          "oklch(49.29% 0.01985 252.89)",
+          "oklch(60.71% 0.01985 252.89)",
+          "oklch(72.14% 0.01985 252.89)",
+          "oklch(83.57% 0.01985 252.89)",
+          "oklch(95.00% 0.01985 252.89)"
+        ]
+      },
+      "canvas-dark": {
+        "role": "neutral",
+        "displayName": "canvas-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.03982 265.75)",
+          "oklch(26.43% 0.03982 265.75)",
+          "oklch(37.86% 0.03982 265.75)",
+          "oklch(49.29% 0.03982 265.75)",
+          "oklch(60.71% 0.03982 265.75)",
+          "oklch(72.14% 0.03982 265.75)",
+          "oklch(83.57% 0.03982 265.75)",
+          "oklch(95.00% 0.03982 265.75)"
+        ]
+      },
+      "paper-dark": {
+        "role": "neutral",
+        "displayName": "paper-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.04110 261.83)",
+          "oklch(26.43% 0.04110 261.83)",
+          "oklch(37.86% 0.04110 261.83)",
+          "oklch(49.29% 0.04110 261.83)",
+          "oklch(60.71% 0.04110 261.83)",
+          "oklch(72.14% 0.04110 261.83)",
+          "oklch(83.57% 0.04110 261.83)",
+          "oklch(95.00% 0.04110 261.83)"
+        ]
+      },
+      "field-dark": {
+        "role": "neutral",
+        "displayName": "field-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.03685 260.03)",
+          "oklch(26.43% 0.03685 260.03)",
+          "oklch(37.86% 0.03685 260.03)",
+          "oklch(49.29% 0.03685 260.03)",
+          "oklch(60.71% 0.03685 260.03)",
+          "oklch(72.14% 0.03685 260.03)",
+          "oklch(83.57% 0.03685 260.03)",
+          "oklch(95.00% 0.03685 260.03)"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "ink-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.00685 247.90)",
+          "oklch(26.43% 0.00685 247.90)",
+          "oklch(37.86% 0.00685 247.90)",
+          "oklch(49.29% 0.00685 247.90)",
+          "oklch(60.71% 0.00685 247.90)",
+          "oklch(72.14% 0.00685 247.90)",
+          "oklch(83.57% 0.00685 247.90)",
+          "oklch(95.00% 0.00685 247.90)"
+        ]
+      },
+      "desktop-muted-dark": {
+        "role": "neutral",
+        "displayName": "desktop-muted-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.03435 256.78)",
+          "oklch(26.43% 0.03435 256.78)",
+          "oklch(37.86% 0.03435 256.78)",
+          "oklch(49.29% 0.03435 256.78)",
+          "oklch(60.71% 0.03435 256.78)",
+          "oklch(72.14% 0.03435 256.78)",
+          "oklch(83.57% 0.03435 256.78)",
+          "oklch(95.00% 0.03435 256.78)"
+        ]
+      },
+      "desktop-line-dark": {
+        "role": "neutral",
+        "displayName": "desktop-line-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.04800 257.90)",
+          "oklch(26.43% 0.04800 257.90)",
+          "oklch(37.86% 0.04800 257.90)",
+          "oklch(49.29% 0.04800 257.90)",
+          "oklch(60.71% 0.04800 257.90)",
+          "oklch(72.14% 0.04800 257.90)",
+          "oklch(83.57% 0.04800 257.90)",
+          "oklch(95.00% 0.04800 257.90)"
+        ]
+      },
+      "desktop-input-dark": {
+        "role": "neutral",
+        "displayName": "desktop-input-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.03833 261.59)",
+          "oklch(26.43% 0.03833 261.59)",
+          "oklch(37.86% 0.03833 261.59)",
+          "oklch(49.29% 0.03833 261.59)",
+          "oklch(60.71% 0.03833 261.59)",
+          "oklch(72.14% 0.03833 261.59)",
+          "oklch(83.57% 0.03833 261.59)",
+          "oklch(95.00% 0.03833 261.59)"
+        ]
+      },
+      "portal-secondary-dark": {
+        "role": "neutral",
+        "displayName": "portal-secondary-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.02864 258.37)",
+          "oklch(26.43% 0.02864 258.37)",
+          "oklch(37.86% 0.02864 258.37)",
+          "oklch(49.29% 0.02864 258.37)",
+          "oklch(60.71% 0.02864 258.37)",
+          "oklch(72.14% 0.02864 258.37)",
+          "oklch(83.57% 0.02864 258.37)",
+          "oklch(95.00% 0.02864 258.37)"
+        ]
+      },
+      "portal-line-dark": {
+        "role": "neutral",
+        "displayName": "portal-line-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.04632 259.18)",
+          "oklch(26.43% 0.04632 259.18)",
+          "oklch(37.86% 0.04632 259.18)",
+          "oklch(49.29% 0.04632 259.18)",
+          "oklch(60.71% 0.04632 259.18)",
+          "oklch(72.14% 0.04632 259.18)",
+          "oklch(83.57% 0.04632 259.18)",
+          "oklch(95.00% 0.04632 259.18)"
+        ]
+      },
+      "success-dark": {
+        "role": "secondary",
+        "displayName": "success-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.12995 164.98)",
+          "oklch(26.43% 0.12995 164.98)",
+          "oklch(37.86% 0.12995 164.98)",
+          "oklch(49.29% 0.12995 164.98)",
+          "oklch(60.71% 0.12995 164.98)",
+          "oklch(72.14% 0.12995 164.98)",
+          "oklch(83.57% 0.12995 164.98)",
+          "oklch(95.00% 0.12995 164.98)"
+        ]
+      },
+      "success-light": {
+        "role": "secondary",
+        "displayName": "success-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.10494 165.61)",
+          "oklch(26.43% 0.10494 165.61)",
+          "oklch(37.86% 0.10494 165.61)",
+          "oklch(49.29% 0.10494 165.61)",
+          "oklch(60.71% 0.10494 165.61)",
+          "oklch(72.14% 0.10494 165.61)",
+          "oklch(83.57% 0.10494 165.61)",
+          "oklch(95.00% 0.10494 165.61)"
+        ]
+      },
+      "error-dark": {
+        "role": "secondary",
+        "displayName": "error-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.10349 19.57)",
+          "oklch(26.43% 0.10349 19.57)",
+          "oklch(37.86% 0.10349 19.57)",
+          "oklch(49.29% 0.10349 19.57)",
+          "oklch(60.71% 0.10349 19.57)",
+          "oklch(72.14% 0.10349 19.57)",
+          "oklch(83.57% 0.10349 19.57)",
+          "oklch(95.00% 0.10349 19.57)"
+        ]
+      },
+      "error-light": {
+        "role": "secondary",
+        "displayName": "error-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.19049 27.52)",
+          "oklch(26.43% 0.19049 27.52)",
+          "oklch(37.86% 0.19049 27.52)",
+          "oklch(49.29% 0.19049 27.52)",
+          "oklch(60.71% 0.19049 27.52)",
+          "oklch(72.14% 0.19049 27.52)",
+          "oklch(83.57% 0.19049 27.52)",
+          "oklch(95.00% 0.19049 27.52)"
+        ]
+      },
+      "danger-dark": {
+        "role": "secondary",
+        "displayName": "danger-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.05401 353.88)",
+          "oklch(26.43% 0.05401 353.88)",
+          "oklch(37.86% 0.05401 353.88)",
+          "oklch(49.29% 0.05401 353.88)",
+          "oklch(60.71% 0.05401 353.88)",
+          "oklch(72.14% 0.05401 353.88)",
+          "oklch(83.57% 0.05401 353.88)",
+          "oklch(95.00% 0.05401 353.88)"
+        ]
+      },
+      "danger-light": {
+        "role": "secondary",
+        "displayName": "danger-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.01295 17.38)",
+          "oklch(26.43% 0.01295 17.38)",
+          "oklch(37.86% 0.01295 17.38)",
+          "oklch(49.29% 0.01295 17.38)",
+          "oklch(60.71% 0.01295 17.38)",
+          "oklch(72.14% 0.01295 17.38)",
+          "oklch(83.57% 0.01295 17.38)",
+          "oklch(95.00% 0.01295 17.38)"
+        ]
+      },
+      "warning-dark": {
+        "role": "secondary",
+        "displayName": "warning-dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.15342 91.61)",
+          "oklch(26.43% 0.15342 91.61)",
+          "oklch(37.86% 0.15342 91.61)",
+          "oklch(49.29% 0.15342 91.61)",
+          "oklch(60.71% 0.15342 91.61)",
+          "oklch(72.14% 0.15342 91.61)",
+          "oklch(83.57% 0.15342 91.61)",
+          "oklch(95.00% 0.15342 91.61)"
+        ]
+      },
+      "warning-light": {
+        "role": "secondary",
+        "displayName": "warning-light",
+        "tonalRamp": [
+          "oklch(15.00% 0.10337 61.91)",
+          "oklch(26.43% 0.10337 61.91)",
+          "oklch(37.86% 0.10337 61.91)",
+          "oklch(49.29% 0.10337 61.91)",
+          "oklch(60.71% 0.10337 61.91)",
+          "oklch(72.14% 0.10337 61.91)",
+          "oklch(83.57% 0.10337 61.91)",
+          "oklch(95.00% 0.10337 61.91)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "portal-display": {
+        "displayName": "portal-display",
+        "purpose": "门户阅读与行动层级。"
+      },
+      "portal-headline": {
+        "displayName": "portal-headline",
+        "purpose": "门户阅读与行动层级。"
+      },
+      "portal-title": {
+        "displayName": "portal-title",
+        "purpose": "门户阅读与行动层级。"
+      },
+      "portal-body": {
+        "displayName": "portal-body",
+        "purpose": "门户阅读与行动层级。"
+      },
+      "desktop-headline": {
+        "displayName": "desktop-headline",
+        "purpose": "桌面核对与财务数据层级。"
+      },
+      "desktop-title": {
+        "displayName": "desktop-title",
+        "purpose": "桌面核对与财务数据层级。"
+      },
+      "desktop-body": {
+        "displayName": "desktop-body",
+        "purpose": "桌面核对与财务数据层级。"
+      },
+      "desktop-label": {
+        "displayName": "desktop-label",
+        "purpose": "桌面核对与财务数据层级。"
+      }
+    },
+    "shadows": [
+      {
+        "name": "document-paper",
+        "value": "0 5px 16px #080f1926",
+        "purpose": "桌面原件预览。"
+      },
+      {
+        "name": "portal-evidence",
+        "value": "0 18px 48px #0f172a24",
+        "purpose": "真实截图承载层。"
+      },
+      {
+        "name": "confirmation-dialog",
+        "value": "0 20px 70px #030b194d",
+        "purpose": "模态确认层。"
+      }
+    ],
+    "motion": [
+      {
+        "name": "desktop-button-transition",
+        "value": "background-color .14s ease-out, border-color .14s ease-out",
+        "purpose": "桌面按钮状态过渡；减少动画时关闭。"
+      },
+      {
+        "name": "portal-download-transition",
+        "value": "background .18s ease-out",
+        "purpose": "门户下载状态过渡；减少动画时关闭。"
+      },
+      {
+        "name": "portal-proof-arrival",
+        "value": "proof-arrives .65s cubic-bezier(.16,1,.3,1) both",
+        "purpose": "真实截图进入；减少动画时关闭。"
+      },
+      {
+        "name": "working-spinner",
+        "value": "spin 1s linear infinite",
+        "purpose": "工作进行中；减少动画时关闭。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "desktop-compact",
+        "value": "1100px"
+      },
+      {
+        "name": "desktop-horizontal-navigation",
+        "value": "900px"
+      },
+      {
+        "name": "desktop-single-column",
+        "value": "720px"
+      },
+      {
+        "name": "portal-wide",
+        "value": "1550px"
+      },
+      {
+        "name": "portal-compact",
+        "value": "1100px"
+      },
+      {
+        "name": "portal-single-column",
+        "value": "800px"
+      },
+      {
+        "name": "portal-narrow",
+        "value": "520px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Desktop Primary Button",
+      "kind": "button",
+      "refersTo": "desktop-button-primary",
+      "description": "归档等已确认主要动作，紧凑文字与线性图标。",
+      "html": "<button class=\"ds-primary\" type=\"button\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"4\" rx=\"1\"/><path d=\"M5 7v14h14V7M10 12h4\"/></svg>归档这张</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 12px;border:1px solid var(--border,#35465f);border-radius:7px;cursor:pointer;transition:background-color .14s ease-out,border-color .14s ease-out;font-family:\"Segoe UI Variable\", \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-size:14px;background:var(--fill,#4f46e5);color:#fff;border-color:var(--fill,#4f46e5)}.ds-primary:hover:not(:disabled){background:#4338ca}.ds-primary:focus-visible{outline:3px solid var(--primary,#a5b4fc);outline-offset:3px}.ds-primary:disabled{cursor:not-allowed;opacity:.55}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}}"
+    },
+    {
+      "name": "Desktop Secondary Button",
+      "kind": "button",
+      "refersTo": "desktop-button-secondary-dark",
+      "description": "保存草稿、刷新和返回等常规工具动作。",
+      "html": "<button type=\"button\" class=\"ds-secondary\">保存草稿</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 12px;border:1px solid var(--border,#35465f);border-radius:7px;cursor:pointer;transition:background-color .14s ease-out,border-color .14s ease-out;font-family:\"Segoe UI Variable\", \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-size:14px;background:var(--surface,#182337);color:var(--text,#f1f5f9)}.ds-secondary:hover:not(:disabled){background:var(--hover,#2b3553);border-color:var(--primary,#a5b4fc)}.ds-secondary:focus-visible{outline:3px solid var(--primary,#a5b4fc);outline-offset:3px}.ds-secondary:disabled{cursor:not-allowed;opacity:.55}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}}"
+    },
+    {
+      "name": "Desktop Invoice Field",
+      "kind": "input",
+      "refersTo": "desktop-input-dark",
+      "description": "中文字段标签与可核对输入值。",
+      "html": "<label class=\"ds-field\">项目名称<input class=\"ds-input\" value=\"合成验收样本\" aria-label=\"项目名称\"></label>",
+      "css": ".ds-field{font-family:\"Segoe UI Variable\", \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-size:14px;display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:550;color:var(--muted,#a8b7cc);min-width:0}.ds-input{font-family:\"Segoe UI Variable\", \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-size:14px;background:var(--input,#111b2d);color:var(--text,#f1f5f9);border:1px solid var(--border,#35465f);border-radius:6px;min-height:36px;padding:7px 9px;max-width:100%;font-weight:400}.ds-input:focus-visible{outline:3px solid var(--primary,#a5b4fc);outline-offset:3px}.ds-input[aria-invalid=true]{border-color:var(--error,#fca5a5)}"
+    },
+    {
+      "name": "Desktop Navigation",
+      "kind": "nav",
+      "refersTo": "desktop-nav-active-dark",
+      "description": "旧版三入口的纸面侧栏，当前页用 Indigo 标识。",
+      "html": "<nav class=\"ds-nav\" aria-label=\"工作区\"><button class=\"ds-nav-item ds-active\" aria-current=\"page\">发票录入</button><button class=\"ds-nav-item\">导出与归档</button><button class=\"ds-nav-item\">统计仪表盘</button></nav>",
+      "css": ".ds-nav{display:grid;gap:6px;padding:12px;background:var(--surface,#182337);width:176px}.ds-nav-item{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 12px;border:1px solid var(--border,#35465f);border-radius:7px;cursor:pointer;transition:background-color .14s ease-out,border-color .14s ease-out;font-family:\"Segoe UI Variable\", \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-size:14px;width:100%;justify-content:flex-start;border-color:transparent;background:transparent;min-height:44px;padding:10px 12px;font-weight:550;color:var(--text,#f1f5f9)}.ds-nav-item:hover{background:var(--hover,#2b3553);border-color:var(--primary,#a5b4fc)}.ds-nav-item.ds-active{background:var(--hover,#2b3553);color:var(--primary,#a5b4fc)}.ds-nav-item:focus-visible{outline:3px solid var(--primary,#a5b4fc);outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-nav-item{transition:none}}"
+    },
+    {
+      "name": "Desktop Review Badge",
+      "kind": "chip",
+      "refersTo": "desktop-badge-dark",
+      "description": "文字表达核对或冲突状态，颜色辅助识别。",
+      "html": "<span class=\"ds-badge\">待核对</span> <span class=\"ds-badge ds-warning\">冲突</span>",
+      "css": ".ds-badge{font-family:\"Segoe UI Variable\", \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-size:14px;display:inline-flex;padding:4px 7px;background:var(--hover,#2b3553);color:var(--primary,#a5b4fc);border-radius:5px;font-size:11px;white-space:nowrap;line-height:1.4}.ds-warning{color:var(--warning,#fcd34d)}"
+    },
+    {
+      "name": "Desktop Metric",
+      "kind": "card",
+      "refersTo": "desktop-metric-dark",
+      "description": "统计指标以等宽数字和短标签提供扫描层级。",
+      "html": "<dl class=\"ds-metric\"><dt>累计报销金额</dt><dd>¥ 1,280.00</dd></dl>",
+      "css": ".ds-metric{font-family:\"Segoe UI Variable\", \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-size:14px;padding:16px 20px;border-radius:10px;background:var(--surface,#182337);border:1px solid var(--border,#35465f);margin:0}.ds-metric dt{font-size:12px;color:var(--muted,#a8b7cc);margin-bottom:10px}.ds-metric dd{margin:0;font-size:26px;font-weight:600;color:var(--primary,#a5b4fc);font-variant-numeric:tabular-nums;letter-spacing:-.025em}"
+    },
+    {
+      "name": "Desktop Review Container",
+      "kind": "card",
+      "refersTo": "desktop-review-dark",
+      "description": "原件与字段核对的实体轮廓容器。",
+      "html": "<section class=\"ds-review\"><header class=\"ds-review-heading\"><div><h2>发票核对</h2><p>合成验收样本.pdf</p></div><span class=\"ds-review-badge\">待核对</span></header><div class=\"ds-review-form\"><label class=\"ds-review-field\">金额（元）<input value=\"1280.00\" aria-label=\"金额（元）\"></label></div></section>",
+      "css": ".ds-review{font-family:\"Segoe UI Variable\", \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-size:14px;background:var(--surface,#182337);color:var(--text,#f1f5f9);border-radius:12px;border:1px solid var(--border,#35465f);overflow:hidden}.ds-review-heading{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:14px}.ds-review-heading h2{margin:0;font-size:15px;font-weight:650;line-height:1.5}.ds-review-heading p{font-size:11px;color:var(--muted,#a8b7cc);margin:4px 0 0}.ds-review-badge{display:inline-flex;padding:4px 7px;background:var(--hover,#2b3553);color:var(--primary,#a5b4fc);border-radius:5px;font-size:11px;white-space:nowrap;line-height:1.4}.ds-review-form{padding:16px}.ds-review-field{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:550;color:var(--muted,#a8b7cc)}.ds-review-field input{font-family:\"Segoe UI Variable\", \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-size:14px;background:var(--input,#111b2d);color:var(--text,#f1f5f9);border:1px solid var(--border,#35465f);border-radius:6px;min-height:36px;padding:7px 9px;font-weight:400}.ds-review-field input:focus-visible{outline:3px solid var(--primary,#a5b4fc);outline-offset:3px}"
+    },
+    {
+      "name": "Portal Primary Download",
+      "kind": "button",
+      "refersTo": "portal-download-primary",
+      "description": "真实安装包可用时的主链接动作。",
+      "html": "<a class=\"ds-download ds-download-primary\" href=\"#downloads\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M3 5.3 11 4v7H3V5.3Zm9-1.5 9-1.5V11h-9V3.8ZM3 12h8v7l-8-1.3V12Zm9 0h9v8.7l-9-1.5V12Z\"/></svg><span>Windows <small>x64 · NSIS 安装包</small></span></a>",
+      "css": ".ds-download{font-family:Portal Sans, \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;min-height:58px;padding:12px 15px;border:1px solid var(--line,#cbd5e1);border-radius:8px;text-decoration:none;font-weight:600;line-height:1.3;font-size:.9rem;transition:background .18s ease-out}.ds-download-primary{background:#4f46e5;border-color:#4f46e5;color:#fff}.ds-download small{display:block;font-weight:400;font-size:.72rem;margin-top:5px;color:#e0e7ff}.ds-download-primary:hover[href]{background:#4338ca;text-decoration:none}.ds-download:focus-visible{outline:3px solid var(--accent,#4f46e5);outline-offset:5px}.ds-download[aria-disabled=true]{cursor:default;color:var(--secondary,#475569);background:var(--paper,#fff);border-style:dashed}.ds-download[aria-disabled=true] small{color:var(--secondary,#475569)}@media(prefers-reduced-motion:reduce){.ds-download{transition:none}}"
+    },
+    {
+      "name": "Portal Secondary Download",
+      "kind": "button",
+      "refersTo": "portal-download-secondary",
+      "description": "次平台链接与无地址时的禁用状态共享组件。",
+      "html": "<a class=\"ds-download-secondary\" href=\"#downloads\"><span>macOS Apple Silicon <small>ARM64 · DMG</small></span></a><a class=\"ds-download-secondary\" aria-disabled=\"true\"><span>macOS Intel <small>安装包尚未发布</small></span></a>",
+      "css": ".ds-download-secondary{font-family:Portal Sans, \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;min-height:58px;padding:12px 15px;border:1px solid var(--line,#cbd5e1);border-radius:8px;background:var(--paper,#fff);color:var(--ink,#0f172a);text-decoration:none;font-weight:600;line-height:1.3;font-size:.9rem;transition:background .18s ease-out}.ds-download-secondary small{display:block;font-weight:400;font-size:.72rem;color:var(--secondary,#475569);margin-top:5px}.ds-download-secondary:hover[href]{background:var(--tint,#e0e7ff);text-decoration:none}.ds-download-secondary:focus-visible{outline:3px solid var(--accent,#4f46e5);outline-offset:5px}.ds-download-secondary[aria-disabled=true]{cursor:default;color:var(--secondary,#475569);background:var(--paper,#fff);border-style:dashed}@media(prefers-reduced-motion:reduce){.ds-download-secondary{transition:none}}"
+    },
+    {
+      "name": "Portal Help Disclosure",
+      "kind": "custom",
+      "refersTo": "portal-help",
+      "description": "原生展开的说明条目，阅读内容与键盘操作兼容。",
+      "html": "<details class=\"ds-help\"><summary>隐私、备份与错误恢复</summary><div><p>发票原件与元数据保存在本机。云端 OCR 需要明确同意。</p></div></details>",
+      "css": ".ds-help{font-family:Portal Sans, \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;color:var(--ink,#0f172a);border-top:1px solid var(--line,#cbd5e1);border-bottom:1px solid var(--line,#cbd5e1);padding:18px 0}.ds-help summary{cursor:pointer;font-weight:600;font-size:1rem;min-height:44px;padding:10px 0}.ds-help summary:focus-visible{outline:3px solid var(--accent,#4f46e5);outline-offset:5px}.ds-help>div{padding:10px 24px 16px;max-width:80ch}.ds-help p{margin:0;font-size:1rem;line-height:1.85;color:var(--secondary,#475569);max-width:70ch}"
+    }
+  ],
+  "narrative": {
+    "northStar": "可核对的本地工作台",
+    "overview": "以可核对的本地工作台为视觉中心：冷灰 Slate 承载原件、字段、表格和来源，Indigo 标记操作与选中状态。桌面延续已有导航习惯和紧凑的中文财务信息密度，默认深色；门户是同品牌的明亮办公室扩展，默认浅色，提供更宽的段落节奏和实际运行画面。\n\n这份系统来自 src/styles.css、portal/styles.css，以及 App、InvoiceEditor、Dashboard 和门户的已构建组件。两种表面共享色彩家族与清晰的轮廓，但字体、字号、边界色和断点按各自用途保留。门户的分栏首屏与五步交接顺序留在 surface brief，不定义所有新页面的构图。",
+    "keyCharacteristics": [
+      "冷灰底面与 Indigo 操作色，深浅主题均保留文字状态。",
+      "桌面系统中文字体与紧凑表格；门户自主部署 Noto Sans SC。",
+      "实体轮廓与柔和圆角；阴影用于原件、真实截图和模态层。",
+      "可见键盘焦点、减少动画、窄屏重排和可滚动数据。"
+    ],
+    "rules": [
+      {
+        "name": "Theme Roles",
+        "body": "切换主题时按表面映射背景、文字、边界和状态色；实心主按钮保持 Indigo 填充与白字。桌面与门户的相近角色不强行合并为同一个源变量。",
+        "section": "colors"
+      },
+      {
+        "name": "Read Before Ornament",
+        "body": "金额和身份字段使用等宽数字特性；辅助说明降为次级文字，但核对字段、状态和动作仍用文字表达。",
+        "section": "typography"
+      },
+      {
+        "name": "Evidence Depth",
+        "body": "常规信息容器靠底色与边界分层；柔和投影承载原件、实际截图和对话框。",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do 根据目标表面选择桌面或门户的真实字体、密度与主题变量。",
+      "Do 将原件、字段、分类和来源保持在可核对的信息层级中。",
+      "Do 保留可见焦点、文字状态、减少动画设置与窄屏重排。",
+      "Do 使用真实运行截图，并对合成验收数据明确标注。"
+    ],
+    "donts": [
+      "Don't 让门户的大标题、段落间距或首屏构图替代桌面的核对密度。",
+      "Don't 用颜色单独表示核对、冲突、错误或下载可用性。",
+      "Don't 将不可用的安装包表现为可下载的主动作。",
+      "Don't 将单个页面的布局或一次性的视觉数值推广为全项目规则。"
+    ]
+  }
+}

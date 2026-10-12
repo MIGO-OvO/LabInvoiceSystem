@@ -1,0 +1,28 @@
+[package]
+name = "invoice-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+sha2 = "0.10"
+hex = "0.4"
+rusqlite = { version = "0.40.2", features = ["bundled", "backup"] }
+zip = { version = "6", default-features = false, features = ["deflate"] }
+calamine = { version = "0.36.1", features = ["dates"] }
+rust_xlsxwriter = "0.99.1"
+regex = "1"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+base64 = "0.22"
+
+[dev-dependencies]
+tempfile = "3"
+
+[[bin]]
+name = "invoice-cli"
+path = "src/bin/cli.rs"

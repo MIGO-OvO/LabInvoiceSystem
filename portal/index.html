@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LabInvoiceSystem：在本机整理实验室发票，按办公/生活用品与实验用品分类，通过多 ZIP 接收完成团队报账汇总。Windows 与 macOS 桌面应用。">
+  <meta name="theme-color" content="#f1f5f9"><title>LabInvoiceSystem — 发票整理，从个人到团队</title>
+  <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/noto-sans-sc.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css"><script src="theme.js"></script><script src="app.js" defer></script>
+</head>
+<body>
+<!-- THESIS: Personal invoice preparation becomes a traceable team handoff; the real workbench proves the workflow.
+OWN-WORLD: Existing Slate/Indigo identity, matte cool surfaces, Noto Sans SC headings, precise rules and native desktop imagery.
+STORY: Understand local review and classified ZIP exchange, inspect actual screens, choose an available platform build, then follow migration guidance.
+FIRST VIEWPORT: Product navigation above a left headline and three platform actions; a large real archive screenshot leads on the right; the five-step handoff follows.
+FORM: Brand extension, split proof composition A; surface seed 7f532313, assigned structural direction 4; user delegated all design choices.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header"><div class="container header-inner">
+    <a class="brand" href="#" aria-label="LabInvoiceSystem 首页"><img src="assets/app-icon.svg" width="32" height="32" alt=""><span>LabInvoiceSystem</span></a>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换为深色主题"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.4 13.2A8.5 8.5 0 0 1 10.8 3.6 8.5 8.5 0 1 0 20.4 13.2Z"/></svg></button>
+    <nav aria-label="主导航"><a href="#features">功能</a><a href="#guide">使用说明</a><a href="#changelog">更新日志</a><a href="https://github.com/MIGO-OvO/LabInvoiceSystem">源码</a></nav>
+  </div></header>
+  <main id="main">
+    <section class="hero"><div class="container hero-layout">
+      <div class="hero-copy"><h1>发票整理，<br class="mobile-title-break">从个人到团队</h1><p>面向实验室的本地发票工作台。<br>整理原件、逐张核对，再把分类清楚的 ZIP<br class="wide-only"> 交给报账人员统一接收与汇总。</p>
+        <div id="downloads" class="downloads" aria-label="下载桌面应用">
+          <a class="download primary" data-platform="windows-x86_64" aria-disabled="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.3 11 4v7H3V5.3Zm9-1.5 9-1.5V11h-9V3.8ZM3 12h8v7l-8-1.3V12Zm9 0h9v8.7l-9-1.5V12Z"/></svg><span>Windows <small>x64 · NSIS 安装包</small></span></a>
+          <a class="download" data-platform="darwin-x86_64" aria-disabled="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 2c.2 1.7-.5 3-1.4 3.9-.9.9-2.1 1.4-3.3 1.3-.2-1.6.6-3.1 1.5-3.9A5.2 5.2 0 0 1 16.4 2ZM20.4 17c-.5 1.2-.8 1.8-1.5 2.9-.9 1.3-2.1 2.9-3.7 2.9-1.4 0-1.8-.9-3.6-.9-1.9 0-2.3.9-3.7.9-1.6 0-2.7-1.4-3.6-2.7C1.7 16.4 1 10.7 3.3 8.1c1.4-1.5 3.5-1.7 5.1-1.1 1.3.5 2.1.9 3.2.9 1 0 1.6-.4 3.1-.9 1.4-.4 3.5-.3 4.9 1.3-3.8 2-3.2 7.2.8 8.7Z"/></svg><span>macOS Intel <small>x64 · DMG</small></span></a>
+          <a class="download" data-platform="darwin-aarch64" aria-disabled="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 2c.2 1.7-.5 3-1.4 3.9-.9.9-2.1 1.4-3.3 1.3-.2-1.6.6-3.1 1.5-3.9A5.2 5.2 0 0 1 16.4 2ZM20.4 17c-.5 1.2-.8 1.8-1.5 2.9-.9 1.3-2.1 2.9-3.7 2.9-1.4 0-1.8-.9-3.6-.9-1.9 0-2.3.9-3.7.9-1.6 0-2.7-1.4-3.6-2.7C1.7 16.4 1 10.7 3.3 8.1c1.4-1.5 3.5-1.7 5.1-1.1 1.3.5 2.1.9 3.2.9 1 0 1.6-.4 3.1-.9 1.4-.4 3.5-.3 4.9 1.3-3.8 2-3.2 7.2.8 8.7Z"/></svg><span>macOS Apple Silicon <small>ARM64 · DMG</small></span></a>
+        </div>
+        <p class="release-status"><span id="release-status" role="status">正在读取已发布的安装包…</span> · <a href="https://github.com/MIGO-OvO/LabInvoiceSystem/releases">GitHub Releases</a></p>
+        <p id="distribution-note" class="distribution-note"><span id="macos-availability">macOS 发行签名与公证尚待配置，计划发布未公证预览构建，安装包尚未发布。</span><a href="#installation">查看安装与签名状态</a></p>
+      </div>
+      <figure class="hero-proof"><a href="assets/desktop-archive.png" aria-label="查看完整的实际归档界面截图"><img src="assets/desktop-archive.png" width="1280" height="850" alt="实际运行的 LabInvoiceSystem 3.0 归档页面，按办公/生活用品和实验用品分组，显示日期、金额、发票号码与来源" fetchpriority="high"></a><figcaption>Windows 实际运行截图 · 全部内容为合成验收数据</figcaption></figure>
+    </div></section>
+    <section class="handoff container" aria-labelledby="handoff-title"><h2 id="handoff-title" class="sr-only">从个人整理到团队汇总的完整流程</h2>
+      <ol><li><span class="step-number">1</span><h3>整理</h3><p>导入 PDF、图片，<br>核对字段与原件</p></li><li><span class="step-number">2</span><h3>导出</h3><p>原始发票、Excel<br>与版本化 Manifest</p></li><li><span class="step-number">3</span><h3>接收</h3><p>同时拖入多个 ZIP，<br>独立解析、检查重复</p></li><li><span class="step-number">4</span><h3>分类</h3><p>办公/生活用品<br>与实验用品独立整理</p></li><li><span class="step-number">5</span><h3>汇总</h3><p>核对后统一归档，<br>分类统计并再次导出</p></li></ol>
+      <p class="handoff-note">本地优先。原件可追溯，云端 OCR 由你明确授权。</p>
+    </section>
+    <section id="features" class="features container"><div class="section-heading"><h2>熟悉的工作台，<br>完整的报账闭环。</h2><p>保留录入、导出归档和统计的导航习惯，<br>让多人提交的资料也能在同一个本地工作区整理。</p></div>
+      <div class="feature-row"><div class="feature-copy"><h3>原件和信息，一起核对</h3><p>本地 PDF 分页、缩放与图片预览。可手工录入，也可按需调用百度 OCR；识别结果仍需人工确认。缺失或不确定的字段会留给你核对。</p><ul><li>金额以整数分保存，避免浮点误差</li><li>OCR 凭据保存在系统安全存储</li><li>草稿自动保存，归档前明确确认</li></ul></div><figure><a href="assets/desktop-import.png" aria-label="查看完整的实际发票核对界面"><img src="assets/desktop-import.png" width="1280" height="850" loading="lazy" alt="实际运行的发票录入和 ZIP 接收界面，左侧为待核对发票，右侧为原件预览和编辑信息"></a><figcaption>真实桌面界面 · 合成验收数据</figcaption></figure></div>
+      <div class="feature-detail"><h3>多个 ZIP，逐个有结果</h3><div><p>新版 Manifest 记录原件映射、分类、日期、金额、发票身份与 SHA-256。旧版八字段 Excel ZIP 与普通发票 ZIP 也可接收；模糊匹配交给人工处理。</p><p>接收队列提供进度、错误明细、取消、重试和批次撤销。跨包、跨批次和已有归档检查重复，保留来源压缩包与内部文件的关联。</p></div></div>
+      <div class="feature-row reverse"><div class="feature-copy"><h3>从分类看清报账情况</h3><p>办公/生活用品与实验用品分别汇总，再按录入日期、购买日期和支付方式组织归档。搜索项目、发票号、销售方或来源，批量调整分类、导出所选。</p><p>历史发票保留“未分类（历史数据）”，由你批量补充，迁移过程中不自动猜分类。</p></div><figure><a href="assets/desktop-dashboard.png" aria-label="查看完整的实际统计仪表盘"><img src="assets/desktop-dashboard.png" width="1280" height="850" loading="lazy" alt="实际运行的统计仪表盘，包括累计金额、发票数量、报账热力图、分类和支付方式汇总"></a><figcaption>真实桌面界面 · 合成验收数据</figcaption></figure></div>
+    </section>
+    <section id="guide" class="guide"><div class="container"><div class="section-heading"><h2>开始整理。</h2><p>个人提交与报账接收，使用同一个工作流程。</p></div><div class="guide-columns">
+      <article><h3>个人整理与提交</h3><ol><li>导入发票 PDF、JPG 或 PNG，或拖入 ZIP。</li><li>选择分类，核对日期、金额、项目和支付方式。可按需使用 OCR。</li><li>确认已核对原件后归档；在导出与归档中选中记录，导出 ZIP。</li><li>把完整 ZIP 交给报账人员，保留本地原件与归档。</li></ol></article>
+      <article><h3>报账人员批量接收</h3><ol><li>一次选择或拖入多个提交 ZIP。</li><li>查看队列结果；人工指定无法唯一匹配的 Excel 行，处理重复冲突。</li><li>逐张核对，或在确认原件后批量标记核对并归档。</li><li>查看分类统计，筛选需要报账的记录，统一导出。</li></ol></article>
+    </div><details class="help-detail"><summary>从旧版迁移，怎样保证可回滚？</summary><div><p>在设置中选择旧 <code>archive_data</code> 目录。新版本先备份原件和 JSON，再复制导入为待核对草稿；旧目录保持原样。建议分月迁移，核对数量、金额及原件完整性。</p><p>旧数据没有分类时保持未分类，没有录入日期时需要人工补充。旧配置只迁移非敏感字段，OCR 凭据需重新存入系统安全存储。旧版完整代码和 Releases 保留在 <a href="https://github.com/MIGO-OvO/LabInvoiceSystem-legacy">Legacy 仓库</a>。</p></div></details>
+    <details id="installation" class="help-detail"><summary>安装、在线更新与签名状态</summary><div><p>Windows：下载 x64 NSIS 安装包。需要 Windows 10/11 与 WebView2，安装程序会按需处理 WebView2。当前尚无 Authenticode 证书，可能出现 SmartScreen 提示。</p><p>macOS：按芯片选择 Intel 或 Apple Silicon 的 DMG（最低 macOS 11）。当前预览构建尚未完成 Apple 发行签名与公证，正式分发及 macOS 在线更新仍受此阻塞；请查看 Release 的签名状态。</p><p>Windows 在线更新使用官方 Tauri Updater，验证安装包数字签名和签名中的版本。启动后延迟检查、每 12 小时检查，也可手动检查；支持稍后和跳过版本。安装前安全结束发票操作并备份，失败后可继续使用。</p><p><a href="https://github.com/MIGO-OvO/LabInvoiceSystem/releases">查看全部 Releases 与校验文件</a> · <a href="https://github.com/MIGO-OvO/LabInvoiceSystem/blob/main/docs/acceptance.md">查看实际验收状态</a></p></div></details>
+    <details class="help-detail"><summary>隐私、备份与错误恢复</summary><div><p>发票原件与元数据保存在本机。程序不会自动把发票发送给 OCR 服务，调用云 OCR 前需要明确同意。系统凭据不写入导出的 ZIP。</p><p>关键归档修改和更新准备会创建数据库快照，原件按 SHA-256 保存且不覆盖。移出的记录可在“已删除”中恢复。导入失败或取消后可以重试；更新失败不会删除原件。</p><p>ZIP 导入会检查路径穿越、符号链接、异常文件名、文件数量、解压大小及压缩比。Manifest 校验和用于检查完整性，不等同于发票真实性认证。</p></div></details>
+    </div></section>
+    <section id="changelog" class="changelog container"><div class="section-heading"><h2>更新日志</h2><p><a id="release-link" href="https://github.com/MIGO-OvO/LabInvoiceSystem/releases">查看完整发布记录 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a></p></div><article><div class="release-label"><h3>3.0.0</h3><span>Rust / Tauri 2 重构</span></div><ul><li>新增最高层级业务分类与多人 ZIP 汇总。</li><li>保留旧 JSON、八字段 Excel 和原件导入；提供备份、复制迁移与批次撤销。</li><li>新增版本化 Manifest、完整性校验、跨批次去重与人工冲突处理。</li><li>本地 PDF 预览、系统凭据存储、深浅主题和安全更新准备。</li></ul><p id="changelog-macos">macOS 正式签名、公证与在线更新等待 Apple 发行凭据，计划发布未公证预览构建，安装包尚未发布。</p></article></section>
+    <section class="closing container"><h2>资料整理清楚，<br>交接就有依据。</h2><a class="text-action" href="#downloads">选择桌面版本 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 20V4m-7 7 7-7 7 7"/></svg></a></section>
+  </main>
+  <footer class="site-footer"><div class="container"><a class="brand" href="#">LabInvoiceSystem</a><p>开源 · 本地优先 · MIT License</p><nav aria-label="相关链接"><a href="https://github.com/MIGO-OvO/LabInvoiceSystem">GitHub 源码</a><a href="https://github.com/MIGO-OvO/LabInvoiceSystem/issues">反馈问题</a><a href="https://github.com/MIGO-OvO/LabInvoiceSystem-legacy">Legacy 存档</a></nav></div></footer>
+</body></html>

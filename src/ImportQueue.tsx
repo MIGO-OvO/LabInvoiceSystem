@@ -1,0 +1,14 @@
+import {useState} from 'react';
+import {Package,RotateCcw,XCircle,Undo2,Link2} from 'lucide-react';
+import type {ImportJob,Invoice} from './types';
+import {bytes,money} from './domain';
+export function ImportQueue({jobs,invoices,busy,onCancel,onRetry,onUndo,onMatch}:{jobs:ImportJob[];invoices:Invoice[];busy:boolean;onCancel:()=>void;onRetry:(id:string)=>void;onUndo:(id:string)=>void;onMatch:(job:string,row:string,invoice:string)=>void}){
+  const [assignments,setAssignments]=useState<Record<string,string>>({});
+  if(!jobs.length)return null;
+  const labels:Record<string,string>={queued:'排队中',running:'解析中',completed:'解析完成',completedWithErrors:'部分来源失败',cancelled:'已取消',failed:'导入失败',interrupted:'待恢复'};
+  return <section className="import-queue" aria-label="导入队列"><h2>接收与导入队列</h2>{jobs.slice(0,8).map(job=><details className="job" key={job.id} open={['running','queued'].includes(job.state)||job.unassignedRows.length>0}><summary><Package size={17}/><strong>{labels[job.state]??job.state}</strong><span>{job.processedContainers}/{job.totalContainers} 个来源 · 新增 {job.success} · 重复 {job.duplicates} · 失败来源 {job.failed}</span></summary>
+    <div className="job-details"><div className="progress-row"><progress aria-label="来源处理进度" value={job.processedContainers} max={Math.max(1,job.totalContainers)}/><span>已读 {job.processedFiles}/{job.totalFiles} 个文件，{bytes(job.bytesRead)}</span></div><div className="button-row">{['running','queued'].includes(job.state)?<button onClick={onCancel}><XCircle size={15}/>取消处理</button>:<><button disabled={busy} onClick={()=>onRetry(job.id)}><RotateCcw size={15}/>重试来源</button>{job.invoiceIds.length>0&&<button disabled={busy} onClick={()=>onUndo(job.id)}><Undo2 size={15}/>撤销此批次</button>}</>}</div>
+      {job.issues.length>0&&<details><summary>错误与重复明细（{job.issues.length}）</summary><ul className="issue-list">{job.issues.map((issue,index)=><li key={index}><strong>{issue.container}{issue.member&&` / ${issue.member}`}</strong><span>{issue.message}</span></li>)}</ul></details>}
+      {job.unassignedRows.length>0&&<div className="unassigned"><h3>Excel 行需要人工匹配</h3><p>原始文件对应关系无法唯一确认。选择原件后再逐张核对。</p>{job.unassignedRows.map(row=><div className="match-row" key={row.id}><span>{row.container} · 第{row.rowNumber}行<br/><strong>{row.itemName} · {money(row.amountCents)}</strong><br/>{row.invoiceNumber||'无发票号'}</span><label>对应原件<select value={assignments[row.id]??''} onChange={e=>setAssignments(a=>({...a,[row.id]:e.target.value}))}><option value="">请选择，不自动猜测</option>{invoices.filter(i=>i.state==='draft'&&i.batchId===job.id&&i.sources.some(s=>s.containerName===row.container&&s.containerHash===row.containerHash)).map(i=><option value={i.id} key={i.id}>{i.fileName} · {i.id.slice(0,6)}</option>)}</select></label><button disabled={busy||!assignments[row.id]} onClick={()=>onMatch(job.id,row.id,assignments[row.id])}><Link2 size={15}/>匹配</button></div>)}</div>}
+    </div></details>)}</section>;
+}
