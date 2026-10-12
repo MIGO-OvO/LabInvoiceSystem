@@ -12,6 +12,11 @@
 | [public-release.json](public-release.json) | 本机，下载公开 Release：13 项 SHA256、3 平台清单映射与正式 latest.json 一致 |
 | [signatures.txt](signatures.txt) | 本机实际 release-tools 命令与输出：三平台更新包签名、认证版本、单字节篡改及伪造版本拒绝 |
 | [portal-local.json](portal-local.json) | 当前门户：6 个视口/主题、200%文字与 3 个真实下载地址，共 10 项通过 |
+| [pages-live.json](pages-live.json) | [最终 Pages 部署](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38318012765)后对正式域名执行：真实元数据、3.0.1 更新日志、6 个视口/主题、200%文字、3 个下载地址，共 12 项通过 |
+
+公开页面检查仅对 Chromium 的瞬时 `ERR_NETWORK_CHANGED` 导航错误作最多两次重试，并在报告中保留次数；最终报告记录两次重试。失败诊断与完整截图保留于外部备份，没有忽略页面脚本错误或无障碍违规。
+
+![公开更新后实际运行的 3.0.1，发票为明确标记的合成验收数据](windows-after-upgrade.png)
 
 ## 公开资源
 
@@ -20,5 +25,6 @@
 - [release-security.json](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.0.1/release-security.json)
 - [SHA256SUMS.txt](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.0.1/SHA256SUMS.txt)
 - [正式 Pages](https://migo-ovo.github.io/LabInvoiceSystem/)
+- [最终 Pages 部署工作流](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38318012765)
 
 截图完整证据与失败诊断保存在本地外部备份；生产门户的截图在 portal/assets。macOS 未公证预览排除于生产更新清单，Windows 未配置 Authenticode。实际百度 OCR 因测试凭据缺失未执行。详细边界见 [验收记录](../../acceptance.md)。

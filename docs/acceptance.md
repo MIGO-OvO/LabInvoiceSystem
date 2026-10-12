@@ -23,7 +23,7 @@
 | Windows 正式端点在线升级 | QA 引导程序 → 公开 3.0.1；真实下载、签名、安装、重启与数据保留，共 7 项 | 通过 |
 | Windows/macOS 跨平台构建 | Windows x64、macOS Intel / ARM 实际构建；两个 DMG 安装、签名结构与 SQLite 启动各 3 项 | 通过；macOS 为预览 |
 | 公开 Release 资产 | 13 项 SHA256、三平台 inventory、签名版本与篡改拒绝 | 通过 |
-| 门户响应式、深浅主题、文字放大与下载 | 320/390/768/1440px、axe AA、200%文字、实际安装包 URL | 已部署；最终部署证据见下 |
+| 门户响应式、深浅主题、文字放大与下载 | 320/390/768/1440px、axe AA、200%文字、当前更新日志、实际安装包 URL | 正式域名 12 项通过 |
 | macOS Apple 发行签名、公证与在线更新 | 无 Apple 凭据；ad-hoc 预览包排除于生产 latest.json | 正式分发客观阻塞 |
 
 ## 自动化与实际安装证据
@@ -57,7 +57,7 @@
 
 ## 门户与仓库
 
-[正式门户](https://migo-ovo.github.io/LabInvoiceSystem/)已由[发布后 Pages 工作流](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38316897619)部署 3.0.1 的三个真实安装包。最终更新日志部署与公开域名验收报告见 [evidence/3.0.1](evidence/3.0.1/README.md)。本地和部署工作流检查包含六个视口/主题、200%文字、键盘焦点、主题持久化和实际下载 URL；无障碍自动检查不替代完整人工屏幕阅读器测试。
+[正式门户](https://migo-ovo.github.io/LabInvoiceSystem/)的[最终 Pages 工作流](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38318012765)通过，三个真实安装包与 3.0.1 更新日志已上线。公开域名 12 项验收通过：实际 Release 元数据、当前更新日志、六个视口/主题的 axe AA 零违规、200%文字和三个实际下载 URL；键盘焦点、主题持久化及安装说明深链同时验证。原始结果见 [pages-live.json](evidence/3.0.1/pages-live.json)。本机 Chromium 两次瞬时 `ERR_NETWORK_CHANGED` 导航重试明确记录在报告中；其余页面和网络检查无错误。自动无障碍检查不替代完整人工屏幕阅读器测试。
 
 [新仓库](https://github.com/MIGO-OvO/LabInvoiceSystem)与[Legacy](https://github.com/MIGO-OvO/LabInvoiceSystem-legacy)独立。重命名前后核对旧仓库 ID、refs、Tags、Release ID 和资产，另保留 mirror、bundle、Release 资产及原工作区改动备份。原工作区用户已有改动未清理。
 

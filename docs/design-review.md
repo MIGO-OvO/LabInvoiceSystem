@@ -45,7 +45,7 @@ Method: dual-agent（A: `/root/portal_critique_a` · B: `/root/portal_critique_b
 
 ## Run Notes
 
-目标 slug：`portal-index-html`。无 ignore list，A/B 保持独立。B 的浏览器始终 hidden；API 明示 evaluate 只读、无 DOM mutation，因此未注入 overlay、未启动 live-server；采用一次 CLI、原生截图、只读 DOM、键盘和日志作为明确 fallback。独立临时浏览器页已关闭、视口/主题状态已恢复，无临时源码修改。技术自动化截图与报告留在 ignored `test-results/`，正式产品图保存在 `portal/assets/`。
+目标 slug：`portal-index-html`。无 ignore list，A/B 保持独立。B 的浏览器始终 hidden；API 明示 evaluate 只读、无 DOM mutation，因此未注入 overlay、未启动 live-server；采用一次 CLI、原生截图、只读 DOM、键盘和日志作为明确 fallback。独立临时浏览器页已关闭、视口/主题状态已恢复，无临时源码修改。完整技术自动化截图与报告归档到本地外部备份，精简永久证据见 `docs/evidence/3.0.1/`，正式产品图保存在 `portal/assets/`。
 
 发布/签名事实继续以 Release inventory 与 acceptance.md 为准；设计结论不替代软件安全、安装或更新验收。
 
