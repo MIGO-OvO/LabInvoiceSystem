@@ -41,4 +41,3 @@ macOS 完整组通过官方 Tauri bundler 导入证书、签名和公证；工�
 本次使用未发布的 `3.0.0-qa.0` 引导程序，连接正式 GitHub Releases 的 `latest.json` 与实际签名 NSIS，验证稍后、跳过、下载、安装、重启及合成归档保留。测试不会启动自定义更新服务器或替换生产公钥。
 
 在 ignored `.cache/updater-bootstrap/version.json` 写入 `{"version":"3.0.0-qa.0"}`，通过 `node scripts/build-desktop.mjs --no-bundle --config .cache/updater-bootstrap/version.json` 构建并复制可执行文件。发布后下载实际 NSIS，运行 `node scripts/windows-upgrade-check.mjs <实际安装包路径> <引导程序路径>`。测试要求默认数据目录没有任何现有发票；已有数据时拒绝运行。测试数据明确为合成内容，完成后将其完整移入本地备份目录，并卸载测试安装。
-

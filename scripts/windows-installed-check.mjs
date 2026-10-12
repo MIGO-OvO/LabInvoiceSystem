@@ -3,6 +3,7 @@ import {spawn} from 'node:child_process';
 import {access,readFile,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import {webviewArguments,collectWebviewDiagnostics} from './webview-diagnostics.mjs';
 
 // Installs the real NSIS artifact, opens its embedded production frontend,
 // verifies Rust IPC and PDF-independent screens, then uninstalls the QA copy.
@@ -17,7 +18,7 @@ let browser,app;
 try{
   await access(installer);await run(installer,['/S',`/D=${directory}`]);
   const executable=path.join(directory,'lab-invoice-system.exe');await access(executable);report.cases.push('NSIS silent installation into isolated application directory');
-  app=spawn(executable,[],{windowsHide:true,env:{...process.env,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:'--remote-debugging-port=9224'}});
+  app=spawn(executable,[],{windowsHide:true,env:{...process.env,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:webviewArguments(9224,output)}});
   app.on('exit',(code,signal)=>{report.exit={code,signal};});app.on('error',error=>{report.launchError=error.message;});
   for(let retry=0;retry<120&&!browser;retry++){browser=await chromium.connectOverCDP('http://127.0.0.1:9224').catch(()=>null);if(!browser)await pause(250);}
   assert.ok(browser,'Installed production WebView did not start');
@@ -36,5 +37,5 @@ try{
   await run(path.join(directory,'uninstall.exe'),['/S']);report.cases.push('NSIS uninstall completes');
   for(let retry=0;retry<100;retry++){if(!await access(executable).then(()=>true,()=>false))break;await pause(100);}
   await assert.rejects(access(executable));report.result='passed';
-}catch(error){report.result='failed';report.error=error.stack??String(error);console.error(report.error);process.exitCode=1;}
+}catch(error){report.result='failed';report.error=error.stack??String(error);await collectWebviewDiagnostics(output,app);console.error(report.error);process.exitCode=1;}
 finally{await browser?.close().catch(()=>{});app?.kill();report.finishedAt=new Date().toISOString();await writeFile(path.join(output,'report.json'),JSON.stringify(report,null,2)+'\n');console.log(`Windows install: ${report.result}, ${report.cases.length} checks`);}

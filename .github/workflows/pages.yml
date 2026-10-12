@@ -5,6 +5,9 @@ on:
     paths: ['portal/**', 'scripts/portal-check.mjs', 'scripts/sync-portal-release.mjs', '.github/workflows/pages.yml']
   release:
     types: [published]
+  workflow_run:
+    workflows: ['Signed release']
+    types: [completed]
   workflow_dispatch:
 permissions:
   contents: read
@@ -15,6 +18,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   deploy:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages

@@ -6,6 +6,7 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import {webviewArguments,collectWebviewDiagnostics} from './webview-diagnostics.mjs';
 
 // This drives the actual Tauri WebView and Rust commands. No injected backend.
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -26,7 +27,7 @@ async function until(action, timeout = 30000) {
 async function stopApp() {await browser?.close().catch(()=>{});browser=null; if(app){app.kill();await pause(700);app=null;}}
 async function startApp(directory) {
   await stopApp();
-  app = spawn(executable, [], {cwd:root, windowsHide:true, stdio:['ignore','pipe','pipe'], env:{...process.env, LABINVOICE_DATA_DIR:directory, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:'--remote-debugging-port=9223'}});
+  app = spawn(executable, [], {cwd:root, windowsHide:true, stdio:['ignore','pipe','pipe'], env:{...process.env, LABINVOICE_DATA_DIR:directory, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:webviewArguments(9223,output)}});
   app.on('error', error => {report.launchError=error.message;});
   app.stdout.on('data',bytes=>{report.launchOutput=(report.launchOutput??'')+bytes.toString();});
   app.stderr.on('data',bytes=>{report.launchOutput=(report.launchOutput??'')+bytes.toString();});
@@ -135,5 +136,5 @@ try {
   const significant=report.accessibility.flatMap(a=>a.violations.filter(v=>['critical','serious'].includes(v.impact)));
   assert.deepEqual(significant,[],'Desktop WCAG AA violations');
   assert.deepEqual(report.consoleErrors,[],'Uncaught desktop JavaScript errors');report.result='passed';
-}catch(error){report.result='failed';report.error=error.stack??String(error);if(page)await page.screenshot({path:path.join(output,'failure.png')}).catch(()=>{});console.error(report.error);process.exitCode=1;}
+}catch(error){report.result='failed';report.error=error.stack??String(error);if(process.platform==='win32')await collectWebviewDiagnostics(output,app);if(page)await page.screenshot({path:path.join(output,'failure.png')}).catch(()=>{});console.error(report.error);process.exitCode=1;}
 finally {await stopApp();vite?.kill();report.finishedAt=new Date().toISOString();await writeFile(path.join(output,'report.json'),JSON.stringify(report,null,2));console.log(`Report: ${path.join(output,'report.json')}`);}
