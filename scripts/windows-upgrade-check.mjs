@@ -2,7 +2,7 @@ import {chromium,expect} from '@playwright/test';
 import {PDFDocument,StandardFonts} from 'pdf-lib';
 import {spawn,execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {mkdir,copyFile,writeFile,readFile,access,rename} from 'node:fs/promises';
+import {mkdir,copyFile,writeFile,readFile,access,rename,cp} from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {collectWebviewDiagnostics,webviewArguments} from './webview-diagnostics.mjs';
@@ -65,7 +65,14 @@ try{
   await page.getByRole('button',{name:'导出与归档',exact:true}).click();await page.screenshot({path:path.join(output,'after-upgrade.png')});
   await invoke('plugin:window|close',{label:'main'}).catch(()=>{});await browser.close().catch(()=>{});browser=null;await pause(1000);await run(path.join(directory,'uninstall.exe'),['/S']);await until(()=>access(executable).then(()=>false,()=>true));
   // Only the dataset proven empty before this test, populated by this test, is moved.
-  const archiveRoot=path.resolve('../.labinvoice-backups/20261013-v3');const destination=path.resolve(archiveRoot,`windows-upgrade-generated-data-${Date.now()}`);assert.ok(destination.startsWith(archiveRoot+path.sep));await rename(dataRoot,destination);
+  if(process.env.GITHUB_ACTIONS==='true'){
+    // CI checks out on D:, while its synthetic application data is on C:.
+    // Preserve the proven QA-only dataset in the artifact without a cross-volume rename.
+    const destination=path.resolve(output,'synthetic-data');assert.ok(destination.startsWith(output+path.sep));
+    await cp(dataRoot,destination,{recursive:true,errorOnExist:true,force:false});report.syntheticDataArchive='synthetic-data/';
+  }else{
+    const archiveRoot=path.resolve('../.labinvoice-backups/20261013-v3');const destination=path.resolve(archiveRoot,`windows-upgrade-generated-data-${Date.now()}`);assert.ok(destination.startsWith(archiveRoot+path.sep));await mkdir(archiveRoot,{recursive:true});await rename(dataRoot,destination);
+  }
   report.result='passed';
 }catch(error){report.result='failed';report.error=error.stack??String(error);await collectWebviewDiagnostics(output,app);if(page)await page.screenshot({path:path.join(output,'failure.png')}).catch(()=>{});console.error(report.error);process.exitCode=1;}
 finally{await browser?.close().catch(()=>{});app?.kill();report.finishedAt=new Date().toISOString();await writeFile(path.join(output,'report.json'),JSON.stringify(report,null,2)+'\n');console.log(`Windows public update: ${report.result}, ${report.cases.length} checks`);}
