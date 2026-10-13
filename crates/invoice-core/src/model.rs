@@ -245,6 +245,8 @@ pub struct ImportJob {
     #[serde(default)]
     pub invoice_ids: Vec<String>,
     #[serde(default)]
+    pub ocr_pending: bool,
+    #[serde(default)]
     pub ocr_total: usize,
     #[serde(default)]
     pub ocr_processed: usize,

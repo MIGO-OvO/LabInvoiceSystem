@@ -36,15 +36,14 @@ async function startApp(directory) {
   page = await until(()=>browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().includes(':1420')));
   page.on('pageerror',error=>report.consoleErrors.push(error.message));
   await page.waitForFunction(()=>!!window.__TAURI_INTERNALS__?.invoke);
-  await page.getByRole('heading',{name:'发票录入',exact:true}).waitFor();
+  await page.getByRole('heading',{name:/^发票录入/}).waitFor();
 }
 async function nativeWindow(width,height,restore=true) {
   if(process.platform!=='win32')return;
   const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.clearDeviceMetricsOverride');await cdp.detach();
-  const scale=await page.evaluate(()=>devicePixelRatio);
-  const script=`Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class QaWindow { [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr a, int x, int y, int w, int v, uint f); [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c); }'; $qaProcess = Get-Process -Id ${app.pid}; $qaHandle = $qaProcess.MainWindowHandle; if ($qaHandle -eq 0) { throw 'Owned QA window not found' }; ${restore?'[QaWindow]::ShowWindow($qaHandle,9) | Out-Null;':''} [QaWindow]::SetWindowPos($qaHandle,[IntPtr]::Zero,40,40,${Math.round(width*scale)},${Math.round(height*scale)},20) | Out-Null`;
+  const script=`$ErrorActionPreference='Stop'; Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class QaWindow { [DllImport("user32.dll",SetLastError=true)] public static extern bool SetWindowPos(IntPtr h, IntPtr a, int x, int y, int w, int v, uint f); [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c); [DllImport("user32.dll")] public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr v); [DllImport("user32.dll")] public static extern uint GetDpiForWindow(IntPtr h); }'; [QaWindow]::SetThreadDpiAwarenessContext([IntPtr](-4)) | Out-Null; $qaProcess = Get-Process -Id ${app.pid}; $qaHandle = $qaProcess.MainWindowHandle; if ($qaHandle -eq 0) { throw 'Owned QA window not found' }; ${restore?'[QaWindow]::ShowWindow($qaHandle,9) | Out-Null;':''} $qaScale = [QaWindow]::GetDpiForWindow($qaHandle) / 96.0; if (-not [QaWindow]::SetWindowPos($qaHandle,[IntPtr]::Zero,40,40,[int](${width}*$qaScale),[int](${height}*$qaScale),20)) { throw ('QA resize failed: '+[Runtime.InteropServices.Marshal]::GetLastWin32Error()) }`;
   await new Promise((resolve,reject)=>execFile('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{windowsHide:true,timeout:10000},error=>error?reject(error):resolve()));
-  await pause(200);
+  await until(async()=>{const size=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));return Math.abs(size.width-width)<=16&&Math.abs(size.height-height)<=16;},10000);
 }
 async function assertLayout(name) {
   const geometry=await page.evaluate(()=>{
@@ -70,11 +69,9 @@ async function screenshot(name) {
   report.screenshots.push(`portal/assets/desktop-${name}.png`);
 }
 async function accessibility(name) {
-  const viewport = await page.evaluate(()=>({width:innerWidth,height:innerHeight}));
-  await page.setViewportSize({width:1024,height:768});
-  const scan = await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
-  report.accessibility.push({name,width:1024,height:768,violations:scan.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});
-  await page.setViewportSize(viewport);
+  const viewport=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));
+  const scan=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
+  report.accessibility.push({name,...viewport,violations:scan.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});
 }
 
 try {
@@ -116,7 +113,7 @@ try {
     await until(async()=>(await snapshot()).settings.automaticOcr);await accessibility('settings-dark');
     await page.getByLabel('切换明暗主题').click();await expect(page.locator('html')).toHaveAttribute('data-theme','light');await accessibility('settings-light');
     await page.getByLabel('切换明暗主题').click();await expect(page.getByLabel('切换明暗主题')).toBeEnabled();
-    await page.getByRole('button',{name:'发票录入',exact:true}).click();
+    await page.getByRole('button',{name:/^发票录入/}).click();
   });
   await step('legacy JSON import retains dates and historical category',async()=>{
     const job=await completedImport(files);assert.equal(job.success,6);const data=await snapshot();assert.equal(data.invoices.length,6);assert.ok(data.invoices.every(i=>i.category==='uncategorized'&&i.entryDate==='2026-10-12'&&!i.reviewed));
@@ -138,7 +135,7 @@ try {
     await page.emulateMedia({reducedMotion:'reduce'});
     await page.getByRole('button',{name:'设置与辅助操作',exact:true}).click();
     assert.equal(await page.locator('.page-content').evaluate(element=>getComputedStyle(element).animationName),'none');
-    await page.getByRole('button',{name:'发票录入',exact:true}).click();await page.emulateMedia({reducedMotion:'no-preference'});
+    await page.getByRole('button',{name:/^发票录入/}).click();await page.emulateMedia({reducedMotion:'no-preference'});
     await nativeWindow(1280,850);
     await page.getByLabel('业务分类').scrollIntoViewIfNeeded();
   });

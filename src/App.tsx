@@ -47,6 +47,7 @@ export default function App(){
   },[refresh,report]);
   useEffect(()=>{const mode=snapshot?.settings.theme??'dark';const media=matchMedia('(prefers-color-scheme: dark)');const apply=()=>{document.documentElement.dataset.theme=mode==='system'?(media.matches?'dark':'light'):mode;};apply();media.addEventListener('change',apply);return()=>media.removeEventListener('change',apply);},[snapshot?.settings.theme]);
   useEffect(()=>{if(blocked||!Object.keys(edits).length)return;const timer=setTimeout(()=>{void flush().then(()=>{setStatus('核对信息已保存');return refresh();}).catch(report);},1200);return()=>clearTimeout(timer);},[edits,blocked,flush,refresh,report]);
+  useEffect(()=>{document.getElementById('main-content')?.scrollTo({top:0});},[page]);
   useEffect(()=>{const keyboard=(event:KeyboardEvent)=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='o'){event.preventDefault();if(!blocked)void chooseInvoices().then(paths=>startRef.current(paths)).catch(report);}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='f'&&page==='export'){event.preventDefault();document.getElementById('archive-search')?.focus();}};document.addEventListener('keydown',keyboard);return()=>document.removeEventListener('keydown',keyboard);},[blocked,page,report]);
   const launch=async(paths:string[])=>{setPage('import');const id=await api.startImport(paths);const job=await api.job(id);setSnapshot(previous=>previous?{...previous,busy:true,jobs:[job,...previous.jobs.filter(j=>j.id!==id)]}:previous);};
   const requestAutomaticConsent=(paths:string[],preview?:ImportPreviewSource[])=>{
@@ -62,7 +63,7 @@ export default function App(){
   };
   const start=async(paths:string[])=>{if(!paths.length)return;if(blocked){setError('请先完成或取消当前发票操作，再添加新来源。');return;}
     if(paths.some(path=>/\.zip$/i.test(path))){
-      setPage('import');setPreviewProgress({id:'',state:'preview',totalContainers:paths.length,processedContainers:0,totalFiles:0,processedFiles:0,bytesRead:0,totalBytes:0,success:0,duplicates:0,failed:0,issues:[],unassignedRows:[],invoiceIds:[],ocrTotal:0,ocrProcessed:0,ocrSuccess:0,ocrFailed:0,ocrSkipped:0,ocrCurrentFile:'',ocrMessage:'',ocrRetryIds:[]});
+      setPage('import');setPreviewProgress({id:'',state:'preview',totalContainers:paths.length,processedContainers:0,totalFiles:0,processedFiles:0,bytesRead:0,totalBytes:0,success:0,duplicates:0,failed:0,issues:[],unassignedRows:[],invoiceIds:[],ocrPending:false,ocrTotal:0,ocrProcessed:0,ocrSuccess:0,ocrFailed:0,ocrSkipped:0,ocrCurrentFile:'',ocrMessage:'',ocrRetryIds:[]});
       try{await run(async()=>{const preview=await api.previewImport(paths);requestAutomaticConsent(paths,preview);},'导入预览已就绪，确认后开始接收');}finally{setPreviewProgress(null);}return;
     }
     if(requestAutomaticConsent(paths))return;

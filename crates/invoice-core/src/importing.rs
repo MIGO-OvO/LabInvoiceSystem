@@ -763,6 +763,8 @@ pub fn import_paths(
     }
     job.state = if cancel.load(std::sync::atomic::Ordering::Acquire) {
         "cancelled"
+    } else if job.ocr_pending {
+        "recognizing"
     } else if job.failed > 0 {
         "completedWithErrors"
     } else {

@@ -159,6 +159,7 @@ fn start_import(
         state: "queued".into(),
         total_containers: paths.len(),
         input_paths: paths.clone(),
+        ocr_pending: true,
         ..Default::default()
     };
     launch_import(app, state.inner().clone(), Some(paths), job)
@@ -303,7 +304,7 @@ fn retry_ocr(
         .into_iter()
         .find(|job| job.id == id)
         .ok_or("任务不存在")?;
-    if job.ocr_retry_ids.is_empty() {
+    if job.ocr_retry_ids.is_empty() && (!job.ocr_pending || job.invoice_ids.is_empty()) {
         return Err("此批次没有待重试的自动识别草稿".into());
     }
     launch_import(app, state.inner().clone(), None, job)

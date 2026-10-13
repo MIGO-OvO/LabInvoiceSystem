@@ -113,7 +113,7 @@ where
     if job.state == "cancelled" {
         return Ok(job);
     }
-    if job.state == "queued" {
+    if matches!(job.state.as_str(), "queued" | "recognizing") {
         job.state = if job.failed > 0 {
             "completedWithErrors"
         } else {
@@ -167,6 +167,7 @@ where
     };
     if let Some(reason) = blocked {
         job.ocr_message = reason.into();
+        job.ocr_pending = false;
         // Keep eligible IDs so authorization/configuration can be followed by a queue retry.
         publish(&engine, &job, &mut notify)?;
         return Ok(job);
@@ -224,6 +225,7 @@ where
         publish(&engine, &job, &mut notify)?;
     }
     job.ocr_current_file.clear();
+    job.ocr_pending = false;
     job.state = if cancel.load(Ordering::Acquire) {
         "cancelled"
     } else if job.failed > 0 || !job.ocr_retry_ids.is_empty() {
@@ -263,6 +265,7 @@ mod tests {
             &paths,
             ImportJob {
                 id: new_id(),
+                ocr_pending: true,
                 ..Default::default()
             },
             &AtomicBool::new(false),
@@ -518,5 +521,20 @@ mod tests {
         assert_eq!(recovered[0].ocr_retry_ids.len(), 2);
         repo.integrity().unwrap();
         assert_eq!(repo.list().unwrap().len(), 2);
+    }
+
+    #[test]
+    fn crash_between_parsing_and_ocr_recovers_as_unfinished() {
+        let (directory, engine, job) = fixture(1);
+        assert_eq!(job.state, "recognizing");
+        assert!(job.ocr_pending);
+        assert!(job.ocr_retry_ids.is_empty());
+        drop(engine);
+        let repo = Repository::open(directory.path().join("data")).unwrap();
+        let recovered = &repo.jobs().unwrap()[0];
+        assert_eq!(recovered.state, "interrupted");
+        assert!(recovered.ocr_pending);
+        assert_eq!(recovered.invoice_ids.len(), 1);
+        repo.integrity().unwrap();
     }
 }
