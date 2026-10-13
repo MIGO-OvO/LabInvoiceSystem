@@ -129,6 +129,11 @@ try {
     for(const [width,height] of [[640,480],[800,600],[1024,768],[1440,960]]){
       await nativeWindow(width,height);await assertLayout(`${width}x${height}`);
       if(width<=1024)assert.equal((await page.evaluate(()=>getComputedStyle(document.querySelector('.import-layout')).gridTemplateColumns)).split(' ').length,1);
+      if(width===1024){
+        await page.getByLabel('折叠导航',{exact:true}).click();
+        assert.equal(await page.locator('main').evaluate(element=>element.getBoundingClientRect().left),0,'Collapsed navigation must free the workspace width');
+        await page.getByLabel('打开导航栏',{exact:true}).click();
+      }
       await page.getByLabel('业务分类').scrollIntoViewIfNeeded();await expect(page.getByLabel('业务分类')).toBeVisible();
       await page.getByRole('button',{name:'归档这张',exact:true}).scrollIntoViewIfNeeded();await expect(page.getByRole('button',{name:'归档这张',exact:true})).toBeInViewport();
     }
