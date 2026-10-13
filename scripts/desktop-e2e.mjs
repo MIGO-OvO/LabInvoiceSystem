@@ -154,7 +154,7 @@ try {
       await page.getByLabel('业务分类').scrollIntoViewIfNeeded();await expect(page.getByLabel('业务分类')).toBeVisible();
       await page.getByRole('button',{name:'归档这张',exact:true}).scrollIntoViewIfNeeded();await expect(page.getByRole('button',{name:'归档这张',exact:true})).toBeInViewport();
       const frame=await page.locator('.titlebar').evaluate(element=>({top:element.getBoundingClientRect().top,height:element.getBoundingClientRect().height,rootScroll:document.scrollingElement.scrollTop,ancestors:['html','body','#root','.app-shell','main'].map(selector=>{const node=document.querySelector(selector);return {selector,top:node.getBoundingClientRect().top,height:node.getBoundingClientRect().height,scrollTop:node.scrollTop,overflow:getComputedStyle(node).overflow};})}));
-      report.windowFrames??=[];report.windowFrames.push({width,height,...frame});
+      report.windowFrames??=[];report.windowFrames.push({requested:{width,height},...frame});
       assert.equal(frame.top,0,'Scrolling the review must keep the titlebar at the top');assert.equal(frame.height,40);assert.equal(frame.rootScroll,0);
       await page.screenshot({path:path.join(output,`adapt-${width}x${height}.png`)});
     }
@@ -218,7 +218,14 @@ try {
     const job=await until(async()=>{const data=await snapshot();return data.jobs.find(job=>!['queued','running','recognizing'].includes(job.state));});await until(async()=>!(await snapshot()).busy);
     assert.equal(job.success,6);assert.equal(job.failed,1);const received=(await snapshot()).invoices;
     for(const original of all){const invoice=received.find(i=>i.blobHash===original.blobHash);for(const field of ['fileName','entryDate','purchaseDate','amountCents','category','itemName','paymentMethod','invoiceNumber','sellerName','sellerTaxId'])assert.equal(invoice[field],original[field],field);assert.ok(invoice.sources.length>original.sources.length);assert.equal(await invoke('read_invoice_bytes',{id:invoice.id}),await readFile(files[Number(original.invoiceNumber.slice(-4))-1]).then(b=>b.toString('base64')));}
-    await nativeWindow(1280,850);await screenshot('import');await accessibility('import-dark');
+    await nativeWindow(1280,850);await page.getByLabel('PDF 原件第1页').waitFor();
+    await until(()=>page.getByLabel('PDF 原件第1页').evaluate(canvas=>{
+      const context=canvas.getContext('2d');if(!context||canvas.width<=300)return false;
+      const pixels=context.getImageData(0,0,canvas.width,Math.min(canvas.height,400)).data;
+      for(let i=0;i<pixels.length;i+=4)if(pixels[i+3]>0&&pixels[i]<200)return true;
+      return false;
+    }));
+    await screenshot('import');await accessibility('import-dark');
   });
   await step('cross-batch duplicates, retry and persistent provenance',async()=>{const job=await completedImport([labZip,officeZip]);assert.equal(job.success,0);assert.equal(job.duplicates,6);await invoke('verify_archive');await startApp(receiver);assert.equal((await snapshot()).invoices.length,6);});
   await step('update preparation cancels an active import and preserves committed data',async()=>{
