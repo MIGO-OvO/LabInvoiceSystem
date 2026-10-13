@@ -2,7 +2,7 @@ name: Product portal
 on:
   push:
     branches: [main]
-    paths: ['portal/**', 'scripts/portal-check.mjs', 'scripts/sync-portal-release.mjs', '.github/workflows/pages.yml']
+    paths: ['portal/**', 'scripts/portal-check.mjs', 'scripts/fixtures/portal-release-3.0.1.json', 'scripts/sync-portal-release.mjs', '.github/workflows/pages.yml']
   release:
     types: [published]
   workflow_run:

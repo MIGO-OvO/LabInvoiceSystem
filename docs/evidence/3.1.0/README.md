@@ -16,6 +16,7 @@
 | [after-upgrade.png](after-upgrade.png) | 同一升级 CI 的实际 3.1.0 窗口，原归档合成发票与自定义标题栏 |
 | [portal-local.json](portal-local.json) | 3.1.0 门户本地 10 项通过：六种视口/主题、200% 文字与三个真实下载 URL |
 | [pages-live.json](pages-live.json) | 正式域名 11 项通过，含当前版本元数据；axe AA 零违规，无横向溢出、控制台或网络错误 |
+| [portal-download-refresh.json](portal-download-refresh.json) | 用户反馈后修复下载缓存：14 项通过，含旧 HTTP 缓存刷新、禁用脚本、旧响应拒绝与刷新失败恢复；三平台实际下载 URL 返回 200 |
 
 [定版 CI](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38349163930)、[合并后 CI](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38350165574)、[签名 Release](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38350327350)、[Pages 部署](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38351360073)及[公开在线升级](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38353351606)均成功。
 

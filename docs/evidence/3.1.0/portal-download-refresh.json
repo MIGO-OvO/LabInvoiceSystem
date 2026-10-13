@@ -1,0 +1,110 @@
+{
+  "startedAt": "2026-10-13T07:01:46.827Z",
+  "cases": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 1000,
+      "theme": "light",
+      "accessibilityViolations": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "accessibilityViolations": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "desktop-dark",
+      "width": 1440,
+      "height": 1000,
+      "theme": "dark",
+      "accessibilityViolations": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "mobile-dark",
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "accessibilityViolations": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "narrow",
+      "width": 320,
+      "height": 760,
+      "theme": "light",
+      "accessibilityViolations": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024,
+      "theme": "light",
+      "accessibilityViolations": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "200-percent-text",
+      "horizontalOverflow": false
+    },
+    {
+      "name": "download windows-x86_64",
+      "status": 200,
+      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_windows_x64-setup.exe"
+    },
+    {
+      "name": "download darwin-x86_64",
+      "status": 200,
+      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_x64.dmg"
+    },
+    {
+      "name": "download darwin-aarch64",
+      "status": 200,
+      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_arm64.dmg"
+    },
+    {
+      "name": "cached previous release refreshes to current download URLs",
+      "cachedVersion": "3.0.1",
+      "currentVersion": "3.1.0",
+      "metadataNetworkRequests": 1
+    },
+    {
+      "name": "published downloads available without JavaScript",
+      "version": "3.1.0"
+    },
+    {
+      "name": "stale network metadata cannot downgrade published download links",
+      "receivedVersion": "3.0.1",
+      "publishedVersion": "3.1.0"
+    },
+    {
+      "name": "published downloads survive metadata refresh failure",
+      "metadataStatus": 503,
+      "version": "3.1.0"
+    }
+  ],
+  "consoleErrors": [],
+  "networkErrors": [],
+  "cacheObservedLinks": [
+    {
+      "platform": "windows-x86_64",
+      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_windows_x64-setup.exe"
+    },
+    {
+      "platform": "darwin-x86_64",
+      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_x64.dmg"
+    },
+    {
+      "platform": "darwin-aarch64",
+      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_arm64.dmg"
+    }
+  ],
+  "result": "passed",
+  "finishedAt": "2026-10-13T07:02:00.878Z"
+}
