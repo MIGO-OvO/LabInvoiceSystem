@@ -1,6 +1,8 @@
 import { chromium, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { LogicalSize, Size } from '@tauri-apps/api/dpi';
+import { SERIALIZE_TO_IPC_FN } from '@tauri-apps/api/core';
 import { mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -42,12 +44,22 @@ async function nativeWindow(width,height,restore=true) {
   const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.clearDeviceMetricsOverride');await cdp.detach();
   await invoke('plugin:window|unminimize',{label:'main'});
   if(restore&&await invoke('plugin:window|is_maximized',{label:'main'}))await invoke('plugin:window|toggle_maximize',{label:'main'});
-  await invoke('plugin:window|set_size',{label:'main',value:{type:'Logical',data:{width,height}}});
+  const value=new Size(new LogicalSize(width,height))[SERIALIZE_TO_IPC_FN]();
+  await invoke('plugin:window|set_size',{label:'main',value});
   const available=await page.evaluate(()=>({width:screen.availWidth,height:screen.availHeight}));
-  const target={width:Math.min(width,available.width),height:Math.min(height,available.height)};
-  await until(async()=>{const size=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));return Math.abs(size.width-target.width)<=16&&Math.abs(size.height-target.height)<=16;},10000);
-  const actual=await page.evaluate(()=>({width:innerWidth,height:innerHeight,scale:devicePixelRatio}));
-  report.nativeWindows??=[];report.nativeWindows.push({requested:{width,height},available,actual});
+  const scale=await invoke('plugin:window|scale_factor',{label:'main'});
+  const fitsScreen=width<=available.width&&height<=available.height;
+  const actual=await until(async()=>{
+    const physical=await invoke('plugin:window|inner_size',{label:'main'});
+    const native={width:physical.width/scale,height:physical.height/scale};
+    const viewport=await page.evaluate(()=>({width:innerWidth,height:innerHeight,scale:devicePixelRatio}));
+    if(Math.abs(viewport.width-native.width)>2||Math.abs(viewport.height-native.height)>2)return null;
+    if(fitsScreen&&(Math.abs(native.width-width)>2||Math.abs(native.height-height)>2))return null;
+    return {native,physical,viewport,scale};
+  },10000);
+  // Narrow-window acceptance must use the requested size, never a metrics override.
+  if(width<=800){assert.ok(Math.abs(actual.native.width-width)<=2);assert.ok(Math.abs(actual.native.height-height)<=2);}
+  report.nativeWindows??=[];report.nativeWindows.push({requested:{width,height},available,...actual});
 }
 
 async function assertLayout(name) {
