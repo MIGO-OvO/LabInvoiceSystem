@@ -1,0 +1,87 @@
+{
+  "startedAt": "2026-10-13T05:28:18.698Z",
+  "version": "3.1.0",
+  "checksums": [
+    {
+      "name": "LabInvoiceSystem_3.1.0_macos_arm64.app.tar.gz",
+      "sha256": "0a6b531b25efcb0dae64bf48759cf486d23e114b65c3cc3be0343ff20b75df72"
+    },
+    {
+      "name": "LabInvoiceSystem_3.1.0_macos_arm64.app.tar.gz.sig",
+      "sha256": "858cec4f172980c135399fd0488de4342066b5053c8732f7a88f860e2762bd63"
+    },
+    {
+      "name": "LabInvoiceSystem_3.1.0_macos_arm64.dmg",
+      "sha256": "abfd94b893185dfc525a8644363472ff6c9aa466a85d59c5f7406900d5b597cd"
+    },
+    {
+      "name": "LabInvoiceSystem_3.1.0_macos_x64.app.tar.gz",
+      "sha256": "3099cc6b8266947a73ef1acf29860689706828a47da2cb1e9cb2d1ca9147af13"
+    },
+    {
+      "name": "LabInvoiceSystem_3.1.0_macos_x64.app.tar.gz.sig",
+      "sha256": "cad2a796c12818badfc77bf79f6844f1aca76eb5523301fa7227816c375b5407"
+    },
+    {
+      "name": "LabInvoiceSystem_3.1.0_macos_x64.dmg",
+      "sha256": "d64915fd261a1b78cf8caf56a4dd19613b098fddc3331d99acbad75baff95117"
+    },
+    {
+      "name": "LabInvoiceSystem_3.1.0_windows_x64-setup.exe",
+      "sha256": "c042826037a665b95eb662c56b46919c5b0b1ccfd746731c0b0c2fd9985ecfb4"
+    },
+    {
+      "name": "LabInvoiceSystem_3.1.0_windows_x64-setup.exe.sig",
+      "sha256": "7b6f58d6ce32c83866d478ec2f353235aa755c403cb030dce6773d3bbd4b6ecd"
+    },
+    {
+      "name": "build-darwin-aarch64.json",
+      "sha256": "48a620703bc895c9e4ac28b4a4a89992bd96a9dcc3da0af2fc62787ddae5d725"
+    },
+    {
+      "name": "build-darwin-x86_64.json",
+      "sha256": "2ab0ffb59e65f4d53ffe9c3383b893ac3c8b3f9a2d431ecc29f62bc6aa7e885b"
+    },
+    {
+      "name": "build-windows-x86_64.json",
+      "sha256": "ddcb3afe649d71aed2edc8e9ff98ae14fafc736cd2afb236961c880ea2dd5567"
+    },
+    {
+      "name": "latest.json",
+      "sha256": "7af5fe377557d34c3969df74b9b74bda40fd48331279a7439bb876959ee95551"
+    },
+    {
+      "name": "release-security.json",
+      "sha256": "852c40f9e5bb399fcbccb0d7ec837f64307f676639640ef89fe3c57fdc70b1ad"
+    }
+  ],
+  "platforms": [
+    {
+      "platform": "windows-x86_64",
+      "updaterSigned": true,
+      "osSigned": false,
+      "notarized": false,
+      "advertised": true
+    },
+    {
+      "platform": "darwin-x86_64",
+      "updaterSigned": true,
+      "osSigned": false,
+      "notarized": false,
+      "advertised": false
+    },
+    {
+      "platform": "darwin-aarch64",
+      "updaterSigned": true,
+      "osSigned": false,
+      "notarized": false,
+      "advertised": false
+    }
+  ],
+  "result": "passed",
+  "releaseUrl": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/tag/v3.1.0",
+  "productionPlatforms": [
+    "windows-x86_64"
+  ],
+  "finishedAt": "2026-10-13T05:28:33.057Z"
+}

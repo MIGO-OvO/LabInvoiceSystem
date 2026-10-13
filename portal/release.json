@@ -1,33 +1,33 @@
 {
-  "version": "3.0.1",
-  "releaseUrl": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/tag/v3.0.1",
-  "publishedAt": "2026-10-12T22:28:50Z",
+  "version": "3.1.0",
+  "releaseUrl": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/tag/v3.1.0",
+  "publishedAt": "2026-10-13T05:26:03Z",
   "macosProductionReady": false,
   "downloads": [
     {
       "platform": "windows-x86_64",
-      "name": "LabInvoiceSystem_3.0.1_windows_x64-setup.exe",
-      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.0.1/LabInvoiceSystem_3.0.1_windows_x64-setup.exe",
-      "size": 5417533,
-      "sha256": "94ba011b5c3fa637c35a294f8eaba3434e98888d0dc742070e6bcf9b92a2b422",
+      "name": "LabInvoiceSystem_3.1.0_windows_x64-setup.exe",
+      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_windows_x64-setup.exe",
+      "size": 5448853,
+      "sha256": "c042826037a665b95eb662c56b46919c5b0b1ccfd746731c0b0c2fd9985ecfb4",
       "notarized": false,
       "osSigned": false
     },
     {
       "platform": "darwin-x86_64",
-      "name": "LabInvoiceSystem_3.0.1_macos_x64.dmg",
-      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.0.1/LabInvoiceSystem_3.0.1_macos_x64.dmg",
-      "size": 6978405,
-      "sha256": "96946a3c1f4e9a6d67b397dac1201602dfa9b3d18d17826446c3a15a5f82781b",
+      "name": "LabInvoiceSystem_3.1.0_macos_x64.dmg",
+      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_x64.dmg",
+      "size": 7016496,
+      "sha256": "d64915fd261a1b78cf8caf56a4dd19613b098fddc3331d99acbad75baff95117",
       "notarized": false,
       "osSigned": false
     },
     {
       "platform": "darwin-aarch64",
-      "name": "LabInvoiceSystem_3.0.1_macos_arm64.dmg",
-      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.0.1/LabInvoiceSystem_3.0.1_macos_arm64.dmg",
-      "size": 6518986,
-      "sha256": "042bde0c1b11c6ec1894cc77cb3f61bd3f34d0049e310a5b698070d3b6ae9792",
+      "name": "LabInvoiceSystem_3.1.0_macos_arm64.dmg",
+      "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_arm64.dmg",
+      "size": 6547387,
+      "sha256": "abfd94b893185dfc525a8644363472ff6c9aa466a85d59c5f7406900d5b597cd",
       "notarized": false,
       "osSigned": false
     }

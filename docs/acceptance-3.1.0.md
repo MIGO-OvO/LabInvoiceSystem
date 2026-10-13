@@ -1,6 +1,6 @@
 # 3.1.0 验收记录
 
-2026-10-13，本轮自定义标题栏、自适应、隐藏滚动条、状态动画和默认自动 OCR 的 Windows 实际桌面验收通过。Windows x64、macOS Intel / Apple Silicon 构建与安装检查全部通过。发行与公开端点验证继续执行，结果将记录在本文。
+2026-10-13，本轮自定义标题栏、自适应、隐藏滚动条、状态动画和默认自动 OCR 的 Windows 实际桌面验收通过。[3.1.0 已公开发布](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/tag/v3.1.0)，Windows x64、macOS Intel / Apple Silicon 构建与安装检查全部通过。Windows 正式端点在线升级、公开安装包签名与校验和、门户正式域名验收通过；macOS 继续为未公证预览。
 
 ## 实现与验证
 
@@ -29,7 +29,41 @@
 
 ## 发行与在线更新
 
-签名 Release、3.0.1 → 3.1.0 正式端点升级及 Pages 验收完成后补充公开执行证据。升级检查使用全新 Windows CI runner，保留用户本机正在运行的应用和归档。
+本轮使用独立开发分支，验证后通过 [PR #3](https://github.com/MIGO-OvO/LabInvoiceSystem/pull/3) 合并。`v3.1.0` 指向 `a7b324a56b5901335517c3b74eecdc7bbd1b15ed`；[合并后完整 CI](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38350165574) 与 [三架构签名 Release](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38350327350) 全部通过。
+
+公开下载后的 13 项 SHA256、三平台资产映射与正式 `latest.json` 一致性通过。Windows NSIS 和两个 macOS 更新包的原件签名、认证版本、篡改拒绝及伪造版本拒绝均通过。生产更新清单只包含 Windows x64，macOS 包的 Updater 签名不代表 Apple 发行签名或公证。
+
+| 平台 | 公开安装包 | 分发状态 |
+| --- | --- | --- |
+| Windows x64 | [NSIS 安装包](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_windows_x64-setup.exe) | Tauri Updater 签名与真实在线升级通过；无 Authenticode |
+| macOS Intel | [DMG](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_x64.dmg) | ad-hoc 未公证预览，不加入生产更新清单 |
+| macOS Apple Silicon | [DMG](https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_arm64.dmg) | ad-hoc 未公证预览，不加入生产更新清单 |
+
+### Windows 公开 3.0.1 → 3.1.0 升级
+
+[正式端点升级 CI](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38353351606) 在全新 Windows runner 上安装公开 3.0.1，再使用官方插件、生产公钥与公开 GitHub `latest.json` 升级，未使用替代密钥或测试更新服务器。9 项通过：
+
+1. 旧版创建并归档真实合成发票。
+2. 官方插件发现公开 3.1.0。
+3. 稍后提醒持久化。
+4. 跳过版本持久化，手动检查可以覆盖跳过。
+5. 安装完成后，新版原生进程自动启动；精确核对安装路径与 ProductVersion 为 3.1.0。
+6. 旧设置迁移后自动 OCR 默认为开启，原有上传授权保持关闭。
+7. 实际下载、签名校验、安装与生产版本重启。
+8. 原件字节、发票身份、来源关联、分类、金额和原有设置完整保留。
+9. 更新前真实数据库备份存在。
+
+检查边界：NSIS 经 Explorer 自动启动的新版进程没有继承 WebView2 CDP 诊断参数。脚本先确认该原生进程自动启动，再仅重启远程 CI 中自己安装的 QA 程序，附带诊断参数检查持久数据；此步骤明确记录在报告的 `nativeAutoRestart` 和 `diagnosticRestart` 中。自动重启结论来自原生进程证据，重启后的数据结论来自诊断连接。用户本机正在运行的应用与真实归档未参与此次升级检查。
+
+原始报告见 [windows-public-upgrade.json](evidence/3.1.0/windows-public-upgrade.json)。下图为实际升级后窗口，仅含明确标记的合成发票。
+
+![实际升级后的 3.1.0，自定义标题栏与原归档数据](evidence/3.1.0/after-upgrade.png)
+
+### 产品门户
+
+[正式门户](https://migo-ovo.github.io/LabInvoiceSystem/)已部署 3.1.0，[Pages 工作流](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38351360073)通过。正式域名 11 项验收通过：当前公开版本元数据、六种视口/主题、200% 文字放大和三个真实下载 URL；六个代表状态 axe WCAG AA 零违规，无横向溢出、控制台或网络错误。键盘焦点、主题持久化、安装说明深链及当前更新日志同时检查。门户三张产品图为真实 3.1.0 Tauri 截图，均使用合成数据。
+
+证据见 [pages-live.json](evidence/3.1.0/pages-live.json)、[portal-local.json](evidence/3.1.0/portal-local.json) 和 [公开发行报告](evidence/3.1.0/public-release.json)。自动无障碍检查不替代完整人工屏幕阅读器测试。
 
 ## 验收边界
 

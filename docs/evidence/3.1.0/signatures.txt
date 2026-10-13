@@ -1,0 +1,5 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.84s
+     Running `target\debug\release-tools.exe src-tauri/tauri.conf.json 3.1.0 C:\Users\AKiya\source\repos\LabInvoiceSystem-v3\.cache\public-release-3.1\LabInvoiceSystem_3.1.0_macos_arm64.app.tar.gz C:\Users\AKiya\source\repos\LabInvoiceSystem-v3\.cache\public-release-3.1\LabInvoiceSystem_3.1.0_macos_x64.app.tar.gz C:\Users\AKiya\source\repos\LabInvoiceSystem-v3\.cache\public-release-3.1\LabInvoiceSystem_3.1.0_windows_x64-setup.exe`
+Verified artifact, authenticated version, tamper rejection: LabInvoiceSystem_3.1.0_macos_arm64.app.tar.gz
+Verified artifact, authenticated version, tamper rejection: LabInvoiceSystem_3.1.0_macos_x64.app.tar.gz
+Verified artifact, authenticated version, tamper rejection: LabInvoiceSystem_3.1.0_windows_x64-setup.exe

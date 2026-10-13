@@ -1,0 +1,75 @@
+{
+  "version": "3.1.0",
+  "platforms": [
+    {
+      "version": "3.1.0",
+      "platform": "windows-x86_64",
+      "target": "x86_64-pc-windows-msvc",
+      "updaterSigned": true,
+      "osSigned": false,
+      "notarized": false,
+      "artifacts": [
+        {
+          "kind": "installer",
+          "name": "LabInvoiceSystem_3.1.0_windows_x64-setup.exe",
+          "size": 5448853,
+          "sha256": "c042826037a665b95eb662c56b46919c5b0b1ccfd746731c0b0c2fd9985ecfb4",
+          "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSa1pkTFNQZTdzQkVPUzV0dVl0OHhrSXFnWWhxdW5aYkh5c1ZsYU5IR3p4ZkZERTNsTWRFSGVvTndIc05rbGpXY0hPR0RNS0JjSzUzTE9TOHNuY0duUEIzZFN6VTZzZXdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkxODY4ODY3CWZpbGU6TGFiSW52b2ljZVN5c3RlbV8zLjEuMF94NjQtc2V0dXAuZXhlCXZlcnNpb246My4xLjAKRitYLzhhV3pwSS9GRWlaQ2dORHJRaUNRVWZWUmVlR1A2VS9LLzMwbW5XQjhIeUt2MWcvemtzaGRUWkxZc0tscUNsWVhZdnRTdTU2WnA5N2ZWNGxPQ2c9PQo=",
+          "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_windows_x64-setup.exe"
+        }
+      ]
+    },
+    {
+      "version": "3.1.0",
+      "platform": "darwin-x86_64",
+      "target": "x86_64-apple-darwin",
+      "updaterSigned": true,
+      "osSigned": false,
+      "notarized": false,
+      "artifacts": [
+        {
+          "kind": "installer",
+          "name": "LabInvoiceSystem_3.1.0_macos_x64.dmg",
+          "size": 7016496,
+          "sha256": "d64915fd261a1b78cf8caf56a4dd19613b098fddc3331d99acbad75baff95117",
+          "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_x64.dmg"
+        },
+        {
+          "kind": "updater",
+          "name": "LabInvoiceSystem_3.1.0_macos_x64.app.tar.gz",
+          "size": 7151944,
+          "sha256": "3099cc6b8266947a73ef1acf29860689706828a47da2cb1e9cb2d1ca9147af13",
+          "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSa1pkTFNQZTdzQkcyVVBmRzlsM0VqQWppcEJSNFkweWlBZ3ZTNXFYZmhkUmpvQ01KSzFGY3NYYVlNUzFBRlhFRTluT2NyaHJ5UDJQSUhpZHJrd3FNVnQwQ0hqU3E2SWdnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkxODY5MDEyCWZpbGU6TGFiSW52b2ljZVN5c3RlbS5hcHAudGFyLmd6CXZlcnNpb246My4xLjAKY3Nadmo4MGZucXp3Q0xTZlpYM0VnWGtOMDM1Z3JZL3E0d01tMklzZ0d4RjN6bGpvSHJBVW0xeFdBeUlWNm14U1BQcDZIOWcwVHlta3lkaGFTVTByQ3c9PQo=",
+          "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_x64.app.tar.gz"
+        }
+      ]
+    },
+    {
+      "version": "3.1.0",
+      "platform": "darwin-aarch64",
+      "target": "aarch64-apple-darwin",
+      "updaterSigned": true,
+      "osSigned": false,
+      "notarized": false,
+      "artifacts": [
+        {
+          "kind": "installer",
+          "name": "LabInvoiceSystem_3.1.0_macos_arm64.dmg",
+          "size": 6547387,
+          "sha256": "abfd94b893185dfc525a8644363472ff6c9aa466a85d59c5f7406900d5b597cd",
+          "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_arm64.dmg"
+        },
+        {
+          "kind": "updater",
+          "name": "LabInvoiceSystem_3.1.0_macos_arm64.app.tar.gz",
+          "size": 6752105,
+          "sha256": "0a6b531b25efcb0dae64bf48759cf486d23e114b65c3cc3be0343ff20b75df72",
+          "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSa1pkTFNQZTdzQk5Od0xMQVlON2ZVd3JrTnBKQy9pZFp0NGZvVDB0TlJQTU1FUDAyNXVXV2g4bFJsVVZ1b3pXQW82QVpQZzdILzQvMGxwUnoybFgvNFFITDN2S1d0M0FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkxODY4NzQyCWZpbGU6TGFiSW52b2ljZVN5c3RlbS5hcHAudGFyLmd6CXZlcnNpb246My4xLjAKMWZUbk51VVhGTTAxSFJSV1gySnlKSHZ4emZrWVhVVDNFNTF4V1dBUHNOMjE0V0hLQ0JMZk83UUF3OURkSzB0UStWNjdWVWo2VktSSzErVUZ4elVkQnc9PQo=",
+          "url": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/download/v3.1.0/LabInvoiceSystem_3.1.0_macos_arm64.app.tar.gz"
+        }
+      ]
+    }
+  ],
+  "macosProductionReady": false,
+  "windowsAuthenticodeSigned": false
+}

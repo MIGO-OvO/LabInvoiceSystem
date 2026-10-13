@@ -1,0 +1,26 @@
+{
+  "startedAt": "2026-10-13T05:49:53.511Z",
+  "bootstrapVersion": "3.0.1",
+  "targetVersion": "3.1.0",
+  "endpoint": "https://github.com/MIGO-OvO/LabInvoiceSystem/releases/latest/download/latest.json",
+  "cases": [
+    "Real synthetic invoice archived before upgrade",
+    "Official updater discovers the real public v3.1.0 manifest",
+    "Later reminder persists",
+    "Skip version persists and manual check can override it",
+    "Official public update automatically starts the installed target-version native executable",
+    "Old settings migrate to automatic OCR enabled without expanding upload consent",
+    "Official updater downloads, verifies signature, installs and restarts production release",
+    "Archive identity, original bytes, category, amount and settings survive the real upgrade",
+    "Update preparation creates an actual database backup"
+  ],
+  "result": "passed",
+  "nativeAutoRestart": {
+    "pid": 8032,
+    "path": "D:\\a\\LabInvoiceSystem\\LabInvoiceSystem\\.cache\\windows-upgrade-acceptance\\lab-invoice-system.exe",
+    "version": "3.1.0"
+  },
+  "diagnosticRestart": "Automatic native restart verified; Explorer did not inherit WebView2 diagnostic flags. The owned QA executable was restarted to inspect its persisted data.",
+  "syntheticDataArchive": "synthetic-data/",
+  "finishedAt": "2026-10-13T05:50:19.829Z"
+}
