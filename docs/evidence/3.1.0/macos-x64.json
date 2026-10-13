@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-13T04:56:06.189Z",
+  "startedAt": "2026-10-13T05:07:53.604Z",
   "architecture": "x64",
   "artifact": "LabInvoiceSystem_3.1.0_macos_x64.dmg",
   "cases": [
@@ -9,5 +9,5 @@
   ],
   "result": "passed",
   "limitation": "Runner smoke test does not verify interactive WKWebView behavior or end-user Gatekeeper acceptance.",
-  "finishedAt": "2026-10-13T04:56:17.909Z"
+  "finishedAt": "2026-10-13T05:08:04.916Z"
 }

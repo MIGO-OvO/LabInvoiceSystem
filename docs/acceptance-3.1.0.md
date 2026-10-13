@@ -21,7 +21,7 @@
 - 本地 Rustfmt、Clippy、TypeScript/Vite 生产构建通过。
 - Rust：19 项原有业务/安全工作流、5 项自动 OCR 元数据/设置测试、8 项 Tauri OCR 队列测试，共 32 项通过。
 - Vitest：5 项通过。
-- [真实桌面 CI](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38348138509) 的 quality 任务通过，19 个实际 Tauri 场景和 7 个代表状态的 axe AA 检查通过。截图只使用明确标记的合成验收数据。
+- [定版完整 CI](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38349163930) 的 quality 任务通过，19 个实际 Tauri 场景和 7 个代表状态的 axe AA 检查通过。录入截图等待合成 PDF 实际绘制完成，截图只使用明确标记的合成验收数据。
 - [桌面原始报告](evidence/3.1.0/desktop.json)包含实际窗口尺寸、外层/主区滚动位置及所有场景结果。
 - 同一完整 CI 四个任务全部通过；Windows NSIS 安装、生产 IPC/导航、官方被动更新和卸载 5 项通过；macOS 两架构的 DMG 安装、签名结构、原生程序运行与 SQLite 初始化各 3 项通过。
 

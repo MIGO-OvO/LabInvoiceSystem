@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-13T04:50:17.094Z",
+  "startedAt": "2026-10-13T05:03:09.315Z",
   "platform": "win32",
   "cases": [
     {
@@ -317,9 +317,12 @@
   ],
   "windowFrames": [
     {
-      "width": 640,
-      "height": 40,
+      "requested": {
+        "width": 640,
+        "height": 480
+      },
       "top": 0,
+      "height": 40,
       "rootScroll": 0,
       "ancestors": [
         {
@@ -360,9 +363,12 @@
       ]
     },
     {
-      "width": 800,
-      "height": 40,
+      "requested": {
+        "width": 800,
+        "height": 600
+      },
       "top": 0,
+      "height": 40,
       "rootScroll": 0,
       "ancestors": [
         {
@@ -403,9 +409,12 @@
       ]
     },
     {
-      "width": 1024,
-      "height": 40,
+      "requested": {
+        "width": 1024,
+        "height": 768
+      },
       "top": 0,
+      "height": 40,
       "rootScroll": 0,
       "ancestors": [
         {
@@ -440,12 +449,12 @@
           "selector": "main",
           "top": 40,
           "height": 728,
-          "scrollTop": 1177,
+          "scrollTop": 1108,
           "overflow": "auto"
         }
       ]
     }
   ],
   "result": "passed",
-  "finishedAt": "2026-10-13T04:50:56.874Z"
+  "finishedAt": "2026-10-13T05:03:41.186Z"
 }

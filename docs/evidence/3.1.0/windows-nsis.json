@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-13T04:53:00.620Z",
+  "startedAt": "2026-10-13T05:04:12.181Z",
   "installer": "LabInvoiceSystem_3.1.0_windows_x64-setup.exe",
   "cases": [
     "NSIS silent installation into isolated application directory",
@@ -13,5 +13,5 @@
     "code": null,
     "signal": "SIGTERM"
   },
-  "finishedAt": "2026-10-13T04:53:26.516Z"
+  "finishedAt": "2026-10-13T05:04:33.272Z"
 }

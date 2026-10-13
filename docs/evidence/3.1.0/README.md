@@ -4,7 +4,7 @@
 
 | 文件 | 来源 |
 | --- | --- |
-| [desktop.json](desktop.json) | [实际 Tauri CI](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38348138509)：19 场景、7 状态 axe AA 零违规；原生窗口尺寸、固定标题栏和内部滚动的实际测量 |
+| [desktop.json](desktop.json) | [定版实际 Tauri CI](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38349163930)：19 场景、7 状态 axe AA 零违规；原生窗口尺寸、固定标题栏和内部滚动的实际测量 |
 | [adapt-640x480.png](adapt-640x480.png) | 同一 CI 的真实 640×480 Windows WebView，滚动至核对操作；原件和文字为合成验收内容 |
 | [windows-nsis.json](windows-nsis.json) | 同一 CI：NSIS 安装、生产 IPC/导航、官方被动更新及自动启动、卸载 5 项通过 |
 | [macos-x64.json](macos-x64.json) | 同一 CI：Intel DMG 安装、签名结构和原生启动/SQLite 3 项通过 |
