@@ -153,9 +153,9 @@ try {
       }
       await page.getByLabel('业务分类').scrollIntoViewIfNeeded();await expect(page.getByLabel('业务分类')).toBeVisible();
       await page.getByRole('button',{name:'归档这张',exact:true}).scrollIntoViewIfNeeded();await expect(page.getByRole('button',{name:'归档这张',exact:true})).toBeInViewport();
-      const frame=await page.locator('.titlebar').evaluate(element=>({top:element.getBoundingClientRect().top,height:element.getBoundingClientRect().height,rootScroll:document.scrollingElement.scrollTop}));
-      assert.equal(frame.top,0,'Scrolling the review must keep the titlebar at the top');assert.equal(frame.height,40);assert.equal(frame.rootScroll,0);
+      const frame=await page.locator('.titlebar').evaluate(element=>({top:element.getBoundingClientRect().top,height:element.getBoundingClientRect().height,rootScroll:document.scrollingElement.scrollTop,ancestors:['html','body','#root','.app-shell','main'].map(selector=>{const node=document.querySelector(selector);return {selector,top:node.getBoundingClientRect().top,height:node.getBoundingClientRect().height,scrollTop:node.scrollTop,overflow:getComputedStyle(node).overflow};})}));
       report.windowFrames??=[];report.windowFrames.push({width,height,...frame});
+      assert.equal(frame.top,0,'Scrolling the review must keep the titlebar at the top');assert.equal(frame.height,40);assert.equal(frame.rootScroll,0);
       await page.screenshot({path:path.join(output,`adapt-${width}x${height}.png`)});
     }
     await page.emulateMedia({reducedMotion:'reduce'});
