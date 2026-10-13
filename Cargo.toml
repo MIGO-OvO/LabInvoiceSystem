@@ -4,7 +4,7 @@ default-members = ["crates/invoice-core"]
 resolver = "2"
 
 [workspace.package]
-version = "3.0.1"
+version = "3.1.0"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/MIGO-OvO/LabInvoiceSystem"

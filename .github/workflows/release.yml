@@ -40,7 +40,7 @@ jobs:
         with:
           shared-key: ${{ matrix.target }}
           cache-on-failure: true
-      - run: cargo test -p invoice-core --locked
+      - run: cargo test -p invoice-core -p lab-invoice-system --lib --tests --locked
       - run: npm test
       - name: Build and sign update artifacts
         run: node scripts/build-desktop.mjs --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}

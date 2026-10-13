@@ -1,0 +1,451 @@
+{
+  "startedAt": "2026-10-13T04:50:17.094Z",
+  "platform": "win32",
+  "cases": [
+    {
+      "name": "custom titlebar maximizes, restores and minimizes the actual native window",
+      "result": "passed"
+    },
+    {
+      "name": "automatic OCR defaults on; settings switch persists and leaves batch consent explicit",
+      "result": "passed"
+    },
+    {
+      "name": "legacy JSON import retains dates and historical category",
+      "result": "passed"
+    },
+    {
+      "name": "cloud OCR refuses upload before consent",
+      "result": "passed"
+    },
+    {
+      "name": "local PDF preview, pagination and zoom use real original",
+      "result": "passed"
+    },
+    {
+      "name": "adapt supports narrow and short native windows, scroll access and reduced motion",
+      "result": "passed"
+    },
+    {
+      "name": "manual field editing, explicit review, validation and archive",
+      "result": "passed"
+    },
+    {
+      "name": "batch category, manual review and transaction archive",
+      "result": "passed"
+    },
+    {
+      "name": "search, archive editing, category totals and themes",
+      "result": "passed"
+    },
+    {
+      "name": "soft delete and UI restore preserve original and totals",
+      "result": "passed"
+    },
+    {
+      "name": "real ZIP + XLSX + versioned Manifest export",
+      "result": "passed"
+    },
+    {
+      "name": "updater drains operations, backs up, rejects edits, then unlocks",
+      "result": "passed"
+    },
+    {
+      "name": "restart retains local archives and settings",
+      "result": "passed"
+    },
+    {
+      "name": "read-only ZIP preview, independent errors and cancel before writing",
+      "result": "passed"
+    },
+    {
+      "name": "multiple submission ZIPs: exact roundtrip, independent corrupt ZIP failure",
+      "result": "passed"
+    },
+    {
+      "name": "cross-batch duplicates, retry and persistent provenance",
+      "result": "passed"
+    },
+    {
+      "name": "update preparation cancels an active import and preserves committed data",
+      "result": "passed"
+    },
+    {
+      "name": "automatic OCR disabled and missing consent keep actual imported originals local",
+      "result": "passed"
+    },
+    {
+      "name": "custom close preserves active import and uses the existing safe cancellation dialog",
+      "result": "passed"
+    }
+  ],
+  "accessibility": [
+    {
+      "name": "settings-dark",
+      "width": 1028,
+      "height": 779,
+      "violations": []
+    },
+    {
+      "name": "settings-light",
+      "width": 1028,
+      "height": 779,
+      "violations": []
+    },
+    {
+      "name": "archive-dark",
+      "width": 1280,
+      "height": 850,
+      "violations": []
+    },
+    {
+      "name": "dashboard-dark",
+      "width": 1280,
+      "height": 850,
+      "violations": []
+    },
+    {
+      "name": "dashboard-light",
+      "width": 1280,
+      "height": 850,
+      "violations": []
+    },
+    {
+      "name": "zip-preview-dark",
+      "width": 1028,
+      "height": 779,
+      "violations": []
+    },
+    {
+      "name": "import-dark",
+      "width": 1280,
+      "height": 850,
+      "violations": []
+    }
+  ],
+  "consoleErrors": [],
+  "screenshots": [
+    "portal/assets/desktop-archive.png",
+    "portal/assets/desktop-dashboard.png",
+    "portal/assets/desktop-import.png"
+  ],
+  "cdpConnectionError": "browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9223\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://127.0.0.1:9223\u001b[22m\n",
+  "nativeWindows": [
+    {
+      "requested": {
+        "width": 1280,
+        "height": 850
+      },
+      "available": {
+        "width": 1024,
+        "height": 720
+      },
+      "native": {
+        "width": 1280,
+        "height": 850
+      },
+      "physical": {
+        "width": 1280,
+        "height": 850
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 850,
+        "scale": 1
+      },
+      "scale": 1
+    },
+    {
+      "requested": {
+        "width": 640,
+        "height": 480
+      },
+      "available": {
+        "width": 1024,
+        "height": 720
+      },
+      "native": {
+        "width": 640,
+        "height": 480
+      },
+      "physical": {
+        "width": 640,
+        "height": 480
+      },
+      "viewport": {
+        "width": 640,
+        "height": 480,
+        "scale": 1
+      },
+      "scale": 1
+    },
+    {
+      "requested": {
+        "width": 800,
+        "height": 600
+      },
+      "available": {
+        "width": 1024,
+        "height": 720
+      },
+      "native": {
+        "width": 800,
+        "height": 600
+      },
+      "physical": {
+        "width": 800,
+        "height": 600
+      },
+      "viewport": {
+        "width": 800,
+        "height": 600,
+        "scale": 1
+      },
+      "scale": 1
+    },
+    {
+      "requested": {
+        "width": 1024,
+        "height": 768
+      },
+      "available": {
+        "width": 1024,
+        "height": 720
+      },
+      "native": {
+        "width": 1024,
+        "height": 768
+      },
+      "physical": {
+        "width": 1024,
+        "height": 768
+      },
+      "viewport": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1
+      },
+      "scale": 1
+    },
+    {
+      "requested": {
+        "width": 1280,
+        "height": 850
+      },
+      "available": {
+        "width": 1024,
+        "height": 720
+      },
+      "native": {
+        "width": 1280,
+        "height": 850
+      },
+      "physical": {
+        "width": 1280,
+        "height": 850
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 850,
+        "scale": 1
+      },
+      "scale": 1
+    },
+    {
+      "requested": {
+        "width": 1280,
+        "height": 850
+      },
+      "available": {
+        "width": 1024,
+        "height": 720
+      },
+      "native": {
+        "width": 1280,
+        "height": 850
+      },
+      "physical": {
+        "width": 1280,
+        "height": 850
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 850,
+        "scale": 1
+      },
+      "scale": 1
+    }
+  ],
+  "lastExit": {
+    "code": null,
+    "signal": "SIGTERM"
+  },
+  "layout": [
+    {
+      "name": "640x480",
+      "width": 640,
+      "height": 480,
+      "pageOverflow": false,
+      "mainOverflow": false,
+      "scrollbars": "none",
+      "sidebarScrollbars": "none",
+      "columns": "608px",
+      "formColumns": "286px 286px"
+    },
+    {
+      "name": "800x600",
+      "width": 800,
+      "height": 600,
+      "pageOverflow": false,
+      "mainOverflow": false,
+      "scrollbars": "none",
+      "sidebarScrollbars": "none",
+      "columns": "768px",
+      "formColumns": "366px 366px"
+    },
+    {
+      "name": "1024x768",
+      "width": 1024,
+      "height": 768,
+      "pageOverflow": false,
+      "mainOverflow": false,
+      "scrollbars": "none",
+      "sidebarScrollbars": "none",
+      "columns": "810px",
+      "formColumns": "382px 382px"
+    }
+  ],
+  "windowFrames": [
+    {
+      "width": 640,
+      "height": 40,
+      "top": 0,
+      "rootScroll": 0,
+      "ancestors": [
+        {
+          "selector": "html",
+          "top": 0,
+          "height": 480,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": "body",
+          "top": 0,
+          "height": 480,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": "#root",
+          "top": 0,
+          "height": 480,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": ".app-shell",
+          "top": 0,
+          "height": 480,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": "main",
+          "top": 103,
+          "height": 377,
+          "scrollTop": 1273,
+          "overflow": "auto"
+        }
+      ]
+    },
+    {
+      "width": 800,
+      "height": 40,
+      "top": 0,
+      "rootScroll": 0,
+      "ancestors": [
+        {
+          "selector": "html",
+          "top": 0,
+          "height": 600,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": "body",
+          "top": 0,
+          "height": 600,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": "#root",
+          "top": 0,
+          "height": 600,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": ".app-shell",
+          "top": 0,
+          "height": 600,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": "main",
+          "top": 105,
+          "height": 495,
+          "scrollTop": 1168,
+          "overflow": "auto"
+        }
+      ]
+    },
+    {
+      "width": 1024,
+      "height": 40,
+      "top": 0,
+      "rootScroll": 0,
+      "ancestors": [
+        {
+          "selector": "html",
+          "top": 0,
+          "height": 768,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": "body",
+          "top": 0,
+          "height": 768,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": "#root",
+          "top": 0,
+          "height": 768,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": ".app-shell",
+          "top": 0,
+          "height": 768,
+          "scrollTop": 0,
+          "overflow": "clip"
+        },
+        {
+          "selector": "main",
+          "top": 40,
+          "height": 728,
+          "scrollTop": 1177,
+          "overflow": "auto"
+        }
+      ]
+    }
+  ],
+  "result": "passed",
+  "finishedAt": "2026-10-13T04:50:56.874Z"
+}

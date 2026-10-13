@@ -244,6 +244,24 @@ pub struct ImportJob {
     pub unassigned_rows: Vec<SpreadsheetRow>,
     #[serde(default)]
     pub invoice_ids: Vec<String>,
+    #[serde(default)]
+    pub ocr_pending: bool,
+    #[serde(default)]
+    pub ocr_total: usize,
+    #[serde(default)]
+    pub ocr_processed: usize,
+    #[serde(default)]
+    pub ocr_success: usize,
+    #[serde(default)]
+    pub ocr_failed: usize,
+    #[serde(default)]
+    pub ocr_skipped: usize,
+    #[serde(default)]
+    pub ocr_current_file: String,
+    #[serde(default)]
+    pub ocr_message: String,
+    #[serde(default)]
+    pub ocr_retry_ids: Vec<String>,
     #[serde(default, skip_serializing)]
     pub input_paths: Vec<String>,
 }
@@ -287,6 +305,11 @@ pub struct Settings {
     pub theme: String,
     pub export_directory: String,
     pub cloud_ocr_consent: bool,
+    #[serde(default = "default_automatic_ocr")]
+    pub automatic_ocr: bool,
+    // Earlier releases granted consent for individual requests only.
+    #[serde(default)]
+    pub automatic_ocr_consent: bool,
     pub monthly_usage: u32,
     pub monthly_quota: u32,
     pub usage_month: String,
@@ -294,12 +317,17 @@ pub struct Settings {
     pub remind_after: i64,
     pub item_corrections: BTreeMap<String, String>,
 }
+fn default_automatic_ocr() -> bool {
+    true
+}
 impl Default for Settings {
     fn default() -> Self {
         Self {
             theme: "dark".into(),
             export_directory: String::new(),
             cloud_ocr_consent: false,
+            automatic_ocr: true,
+            automatic_ocr_consent: false,
             monthly_usage: 0,
             monthly_quota: 1000,
             usage_month: String::new(),

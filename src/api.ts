@@ -9,6 +9,7 @@ export const api={
   job:(id:string)=>invoke<ImportJob>('get_job',{id}),
   cancel:()=>invoke<void>('cancel_operation'),
   retry:(id:string)=>invoke<string>('retry_import',{id}),
+  retryOcr:(id:string)=>invoke<string>('retry_ocr',{id}),
   save:(invoice:Invoice)=>invoke<Invoice>('save_invoice',{invoice}),
   archive:(ids:string[])=>invoke<number>('archive_invoices',{ids}),
   classify:(ids:string[],category:Category)=>invoke<number>('classify_invoices',{ids,category}),

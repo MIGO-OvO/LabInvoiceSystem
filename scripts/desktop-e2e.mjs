@@ -1,6 +1,8 @@
 import { chromium, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { LogicalSize, Size } from '@tauri-apps/api/dpi';
+import { SERIALIZE_TO_IPC_FN } from '@tauri-apps/api/core';
 import { mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -36,13 +38,45 @@ async function startApp(directory) {
   page = await until(()=>browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().includes(':1420')));
   page.on('pageerror',error=>report.consoleErrors.push(error.message));
   await page.waitForFunction(()=>!!window.__TAURI_INTERNALS__?.invoke);
-  await page.getByRole('heading',{name:'发票录入',exact:true}).waitFor();
+  await page.getByRole('heading',{name:/^发票录入/}).waitFor();
 }
+async function nativeWindow(width,height,restore=true) {
+  const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.clearDeviceMetricsOverride');await cdp.detach();
+  await invoke('plugin:window|unminimize',{label:'main'});
+  if(restore&&await invoke('plugin:window|is_maximized',{label:'main'}))await invoke('plugin:window|toggle_maximize',{label:'main'});
+  const value=new Size(new LogicalSize(width,height))[SERIALIZE_TO_IPC_FN]();
+  await invoke('plugin:window|set_size',{label:'main',value});
+  const available=await page.evaluate(()=>({width:screen.availWidth,height:screen.availHeight}));
+  const scale=await invoke('plugin:window|scale_factor',{label:'main'});
+  const fitsScreen=width<=available.width&&height<=available.height;
+  const actual=await until(async()=>{
+    const physical=await invoke('plugin:window|inner_size',{label:'main'});
+    const native={width:physical.width/scale,height:physical.height/scale};
+    const viewport=await page.evaluate(()=>({width:innerWidth,height:innerHeight,scale:devicePixelRatio}));
+    if(Math.abs(viewport.width-native.width)>2||Math.abs(viewport.height-native.height)>2)return null;
+    if(fitsScreen&&(Math.abs(native.width-width)>2||Math.abs(native.height-height)>2))return null;
+    return {native,physical,viewport,scale};
+  },10000);
+  // Narrow-window acceptance must use the requested size, never a metrics override.
+  if(width<=800){assert.ok(Math.abs(actual.native.width-width)<=2);assert.ok(Math.abs(actual.native.height-height)<=2);}
+  report.nativeWindows??=[];report.nativeWindows.push({requested:{width,height},available,...actual});
+}
+
+async function assertLayout(name) {
+  const geometry=await page.evaluate(()=>{
+    const main=document.querySelector('main');const sidebar=document.querySelector('.sidebar');const form=document.querySelector('.invoice-form');
+    return {width:innerWidth,height:innerHeight,pageOverflow:document.documentElement.scrollWidth>innerWidth,mainOverflow:main.scrollWidth>main.clientWidth,scrollbars:getComputedStyle(main).scrollbarWidth,sidebarScrollbars:getComputedStyle(sidebar).scrollbarWidth,columns:getComputedStyle(document.querySelector('.import-layout')??main).gridTemplateColumns,formColumns:form?getComputedStyle(form.querySelector('.form-grid')).gridTemplateColumns:null};
+  });
+  assert.equal(geometry.pageOverflow,false,`${name}: page overflow`);assert.equal(geometry.mainOverflow,false,`${name}: workspace overflow`);
+  assert.equal(geometry.scrollbars,'none');assert.equal(geometry.sidebarScrollbars,'none');
+  report.layout??=[];report.layout.push({name,...geometry});
+}
+
 const invoke = (command,args={}) => page.evaluate(({command,args})=>window.__TAURI_INTERNALS__.invoke(command,args),{command,args});
 const snapshot = () => invoke('get_snapshot');
 async function completedImport(paths) {
   const id = await invoke('start_import',{paths});
-  const job = await until(async()=>{const job=await invoke('get_job',{id});return ['queued','running'].includes(job.state)?null:job;});
+  const job = await until(async()=>{const job=await invoke('get_job',{id});return ['queued','running','recognizing'].includes(job.state)?null:job;});
   await until(async()=>!(await snapshot()).busy);
   return job;
 }
@@ -52,11 +86,9 @@ async function screenshot(name) {
   report.screenshots.push(`portal/assets/desktop-${name}.png`);
 }
 async function accessibility(name) {
-  const viewport = await page.evaluate(()=>({width:innerWidth,height:innerHeight}));
-  await page.setViewportSize({width:1024,height:768});
-  const scan = await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
-  report.accessibility.push({name,width:1024,height:768,violations:scan.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});
-  await page.setViewportSize(viewport);
+  const viewport=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));
+  const scan=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
+  report.accessibility.push({name,...viewport,violations:scan.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});
 }
 
 try {
@@ -77,6 +109,29 @@ try {
     await writeFile(file.replace(/\.pdf$/,'.json'),JSON.stringify({EntryDate:'2026-10-12',InvoiceDate:`2026-10-${String(5+i).padStart(2,'0')}`,Amount:100+i*23.5,ItemName:names[i],PaymentMethod:i%2?'微信':'公务卡',InvoiceNumber:`QA-${String(i+1).padStart(4,'0')}`,SellerName:'合成验收销售方',SellerTaxId:'QA-NO-REAL-TAX-ID'}));
   }
   const personal=path.join(qa,'personal');await startApp(personal);
+  await step('custom titlebar maximizes, restores and minimizes the actual native window',async()=>{
+    await expect(page.getByLabel('应用标题栏')).toBeVisible();
+    if(process.platform==='win32'){
+      await page.getByLabel('最大化窗口',{exact:true}).click();await page.getByLabel('还原窗口',{exact:true}).waitFor();
+      await page.getByLabel('还原窗口',{exact:true}).click();await page.getByLabel('最大化窗口',{exact:true}).waitFor();
+      await page.locator('.titlebar-drag').dblclick();await page.getByLabel('还原窗口',{exact:true}).waitFor();
+      await page.locator('.titlebar-drag').dblclick();await page.getByLabel('最大化窗口',{exact:true}).waitFor();
+      await page.getByLabel('最小化窗口',{exact:true}).click();await until(()=>invoke('plugin:window|is_minimized',{label:'main'}));
+      await nativeWindow(1280,850);
+    }
+  });
+  await step('automatic OCR defaults on; settings switch persists and leaves batch consent explicit',async()=>{
+    assert.equal((await snapshot()).settings.automaticOcr,true);assert.equal((await snapshot()).settings.automaticOcrConsent,false);
+    await page.getByRole('button',{name:'设置与辅助操作',exact:true}).click();
+    const control=page.getByRole('switch',{name:/导入后自动 OCR/});await expect(control).toHaveAttribute('aria-checked','true');
+    await control.click();await until(async()=>!(await snapshot()).settings.automaticOcr);await expect(control).toBeEnabled();
+    await startApp(personal);assert.equal((await snapshot()).settings.automaticOcr,false);
+    await page.getByRole('button',{name:'设置与辅助操作',exact:true}).click();await page.getByRole('switch',{name:/导入后自动 OCR/}).click();
+    await until(async()=>(await snapshot()).settings.automaticOcr);await accessibility('settings-dark');
+    await page.getByLabel('切换明暗主题').click();await expect(page.locator('html')).toHaveAttribute('data-theme','light');await accessibility('settings-light');
+    await page.getByLabel('切换明暗主题').click();await expect(page.getByLabel('切换明暗主题')).toBeEnabled();
+    await page.getByRole('button',{name:/^发票录入/}).click();
+  });
   await step('legacy JSON import retains dates and historical category',async()=>{
     const job=await completedImport(files);assert.equal(job.success,6);const data=await snapshot();assert.equal(data.invoices.length,6);assert.ok(data.invoices.every(i=>i.category==='uncategorized'&&i.entryDate==='2026-10-12'&&!i.reviewed));
   });
@@ -86,6 +141,31 @@ try {
   await step('local PDF preview, pagination and zoom use real original',async()=>{
     const item=page.getByRole('button').filter({hasText:names[0]}).first();await item.click();
     await page.getByLabel('PDF 原件第1页').waitFor();await page.getByLabel('PDF 下一页').click();await page.getByLabel('PDF 原件第2页').waitFor();await page.getByLabel('PDF 上一页').click();await page.getByLabel('放大原件').click();await expect(page.locator('output')).toHaveText('120%');await page.getByLabel('适应窗口').click();
+  });
+  await step('adapt supports narrow and short native windows, scroll access and reduced motion',async()=>{
+    for(const [width,height] of [[640,480],[800,600],[1024,768]]){
+      await nativeWindow(width,height);await assertLayout(`${width}x${height}`);
+      if(width<=1024)assert.equal((await page.evaluate(()=>getComputedStyle(document.querySelector('.import-layout')).gridTemplateColumns)).split(' ').length,1);
+      if(width===1024){
+        await page.getByLabel('折叠导航',{exact:true}).click();
+        assert.equal(await page.locator('main').evaluate(element=>element.getBoundingClientRect().left),0,'Collapsed navigation must free the workspace width');
+        await page.getByLabel('打开导航栏',{exact:true}).click();
+      }
+      await page.getByLabel('业务分类').scrollIntoViewIfNeeded();await expect(page.getByLabel('业务分类')).toBeVisible();
+      await page.getByRole('button',{name:'归档这张',exact:true}).scrollIntoViewIfNeeded();await expect(page.getByRole('button',{name:'归档这张',exact:true})).toBeInViewport();
+      const frame=await page.locator('.titlebar').evaluate(element=>({top:element.getBoundingClientRect().top,height:element.getBoundingClientRect().height,rootScroll:document.scrollingElement.scrollTop,ancestors:['html','body','#root','.app-shell','main'].map(selector=>{const node=document.querySelector(selector);return {selector,top:node.getBoundingClientRect().top,height:node.getBoundingClientRect().height,scrollTop:node.scrollTop,overflow:getComputedStyle(node).overflow};})}));
+      report.windowFrames??=[];report.windowFrames.push({requested:{width,height},...frame});
+      assert.equal(frame.top,0,'Scrolling the review must keep the titlebar at the top');assert.equal(frame.height,40);assert.equal(frame.rootScroll,0);
+      await page.screenshot({path:path.join(output,`adapt-${width}x${height}.png`)});
+    }
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.getByRole('button',{name:'设置与辅助操作',exact:true}).click();
+    assert.equal(await page.locator('.page-content').evaluate(element=>getComputedStyle(element).animationName),'none');
+    await page.getByRole('button',{name:/^发票录入/}).click();await page.emulateMedia({reducedMotion:'no-preference'});
+    // Settings clears the editor selection; returning to import requires a row selection.
+    await page.getByRole('button').filter({hasText:names[0]}).first().click();
+    await nativeWindow(1280,850);
+    await page.getByLabel('业务分类').scrollIntoViewIfNeeded();
   });
   await step('manual field editing, explicit review, validation and archive',async()=>{
     await page.getByLabel('业务分类').selectOption('labSupplies');
@@ -135,21 +215,46 @@ try {
   await step('multiple submission ZIPs: exact roundtrip, independent corrupt ZIP failure',async()=>{
     // Emit a real native drop event, then confirm the UI preview; no backend substitution.
     await dropSources();const dialog=page.getByRole('dialog');await dialog.getByRole('heading',{name:'ZIP 导入前预览 · 3 个来源',exact:true}).waitFor();await dialog.getByRole('button',{name:'确认导入',exact:true}).click();
-    const job=await until(async()=>{const data=await snapshot();return data.jobs.find(job=>!['queued','running'].includes(job.state));});await until(async()=>!(await snapshot()).busy);
+    const job=await until(async()=>{const data=await snapshot();return data.jobs.find(job=>!['queued','running','recognizing'].includes(job.state));});await until(async()=>!(await snapshot()).busy);
     assert.equal(job.success,6);assert.equal(job.failed,1);const received=(await snapshot()).invoices;
     for(const original of all){const invoice=received.find(i=>i.blobHash===original.blobHash);for(const field of ['fileName','entryDate','purchaseDate','amountCents','category','itemName','paymentMethod','invoiceNumber','sellerName','sellerTaxId'])assert.equal(invoice[field],original[field],field);assert.ok(invoice.sources.length>original.sources.length);assert.equal(await invoke('read_invoice_bytes',{id:invoice.id}),await readFile(files[Number(original.invoiceNumber.slice(-4))-1]).then(b=>b.toString('base64')));}
+    await nativeWindow(1280,850);await page.getByLabel('PDF 原件第1页').waitFor();
+    await until(()=>page.getByLabel('PDF 原件第1页').evaluate(canvas=>{
+      const context=canvas.getContext('2d');if(!context||canvas.width<=300)return false;
+      const pixels=context.getImageData(0,0,canvas.width,Math.min(canvas.height,400)).data;
+      for(let i=0;i<pixels.length;i+=4)if(pixels[i+3]>0&&pixels[i]<200)return true;
+      return false;
+    }));
     await screenshot('import');await accessibility('import-dark');
   });
   await step('cross-batch duplicates, retry and persistent provenance',async()=>{const job=await completedImport([labZip,officeZip]);assert.equal(job.success,0);assert.equal(job.duplicates,6);await invoke('verify_archive');await startApp(receiver);assert.equal((await snapshot()).invoices.length,6);});
   await step('update preparation cancels an active import and preserves committed data',async()=>{
     const before=(await snapshot()).invoices.map(i=>i.blobHash).sort();
     const id=await invoke('start_import',{paths:Array(128).fill(labZip)});
-    const active=await invoke('get_job',{id});assert.ok(['queued','running'].includes(active.state),'The import must actually be active before update preparation');
+    const active=await invoke('get_job',{id});assert.ok(['queued','running','recognizing'].includes(active.state),'The import must actually be active before update preparation');
     const backup=await invoke('prepare_for_update');assert.ok((await readFile(backup)).byteLength>0);
     const finished=await invoke('get_job',{id});assert.equal(finished.state,'cancelled');
     await invoke('cancel_update_preparation');await invoke('verify_archive');
     assert.deepEqual((await snapshot()).invoices.map(i=>i.blobHash).sort(),before);
     const retry=await completedImport([labZip]);assert.equal(retry.duplicates,4);
+  });
+  await step('automatic OCR disabled and missing consent keep actual imported originals local',async()=>{
+    const local=path.join(qa,'automatic-local');await startApp(local);
+    const raw=path.join(qa,'automatic-local.pdf');await writeFile(raw,await readFile(files[0]));
+    let settings=(await snapshot()).settings;await invoke('save_settings',{settings:{...settings,automaticOcr:false}});
+    const off=await completedImport([raw]);assert.equal(off.ocrSuccess,0);assert.match(off.ocrMessage,/已关闭/);
+    settings=(await snapshot()).settings;await invoke('save_settings',{settings:{...settings,automaticOcr:true}});
+    const id=await invoke('retry_ocr',{id:off.id});await until(async()=>!(await snapshot()).busy);
+    const pending=await invoke('get_job',{id});assert.equal(pending.ocrSuccess,0);assert.match(pending.ocrMessage,/尚未授权/);
+    assert.equal((await snapshot()).settings.monthlyUsage,0);await invoke('verify_archive');
+    await startApp(receiver);
+  });
+  await step('custom close preserves active import and uses the existing safe cancellation dialog',async()=>{
+    await invoke('start_import',{paths:Array(128).fill(labZip)});
+    await page.getByLabel('关闭窗口',{exact:true}).click();
+    const dialog=page.getByRole('dialog');await dialog.getByRole('heading',{name:'发票操作正在执行',exact:true}).waitFor();
+    await dialog.getByRole('button',{name:'取消当前操作',exact:true}).click();await until(async()=>!(await snapshot()).busy);
+    await invoke('verify_archive');assert.equal((await snapshot()).invoices.length,6);
   });
   const significant=report.accessibility.flatMap(a=>a.violations.filter(v=>['critical','serious'].includes(v.impact)));
   assert.deepEqual(significant,[],'Desktop WCAG AA violations');

@@ -1,6 +1,38 @@
 {
-  "name": "lab-invoice-system", "version": "3.0.1", "private": true, "type": "module",
-  "scripts": { "dev": "vite --host 127.0.0.1 --port 1420 --strictPort", "build": "tsc -b && vite build", "typecheck": "tsc -b", "test": "vitest run", "tauri": "tauri", "test:e2e": "node scripts/desktop-e2e.mjs", "test:portal": "node scripts/portal-check.mjs" },
-  "dependencies": { "react": "^19.3.0", "react-dom": "^19.3.0", "@tauri-apps/api": "^2.12.3", "@tauri-apps/plugin-dialog": "^2.7.1", "@tauri-apps/plugin-opener": "^2.5.3", "@tauri-apps/plugin-updater": "^2.13.3", "lucide-react": "^0.577.0", "pdfjs-dist": "^5.4.296", "@radix-ui/react-dialog": "^1.1.15" },
-  "devDependencies": { "@tauri-apps/cli": "^2.10.0", "@vitejs/plugin-react": "^6.0.0", "vite": "^8.3.4", "typescript": "^6.0.2", "@types/react": "^19.2.14", "@types/react-dom": "^19.2.3", "vitest": "^4.1.0", "@playwright/test": "^1.58.2", "@axe-core/playwright": "^4.11.1", "pdf-lib": "^1.17.1" }
+  "name": "lab-invoice-system",
+  "version": "3.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 1420 --strictPort",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "tauri": "tauri",
+    "test:e2e": "node scripts/desktop-e2e.mjs",
+    "test:portal": "node scripts/portal-check.mjs"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "@tauri-apps/api": "^2.12.3",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-opener": "^2.5.3",
+    "@tauri-apps/plugin-updater": "^2.13.3",
+    "lucide-react": "^0.577.0",
+    "pdfjs-dist": "^5.4.296",
+    "@radix-ui/react-dialog": "^1.1.15"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.10.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "vite": "^8.3.4",
+    "typescript": "^6.0.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "vitest": "^4.1.0",
+    "@playwright/test": "^1.58.2",
+    "@axe-core/playwright": "^4.11.1",
+    "pdf-lib": "^1.17.1"
+  }
 }

@@ -1,0 +1,57 @@
+name: Public Windows upgrade acceptance
+on:
+  workflow_dispatch:
+    inputs:
+      base_version:
+        description: Published older version to upgrade from
+        type: string
+        default: '3.0.1'
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: public-upgrade-acceptance
+  cancel-in-progress: false
+jobs:
+  upgrade:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: ./scripts/ensure-webview2.ps1
+      - name: Download actual published installers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_VERSION: ${{ inputs.base_version }}
+        run: |
+          if ($env:BASE_VERSION -notmatch '^\d+\.\d+\.\d+$') { throw 'Expected a stable SemVer base version' }
+          $releaseVersion = (Get-Content package.json | ConvertFrom-Json).version
+          if ($releaseVersion -eq $env:BASE_VERSION) { throw 'Base version must be older than the current release' }
+          gh release download "v$env:BASE_VERSION" --pattern '*-setup.exe' --dir .cache/update-base
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          gh release download "v$releaseVersion" --pattern '*-setup.exe' --dir .cache/update-current
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Install older application as the upgrade source
+        run: |
+          $bootstrapDir = Join-Path $PWD '.cache/updater-bootstrap'
+          $installerFiles = @(Get-ChildItem -LiteralPath .cache/update-base -Filter '*-setup.exe')
+          if ($installerFiles.Count -ne 1) { throw 'Expected exactly one older installer' }
+          $process = Start-Process -FilePath $installerFiles[0].FullName -ArgumentList @('/S', "/D=$bootstrapDir") -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Older installer failed: $($process.ExitCode)" }
+          if (-not (Test-Path -LiteralPath (Join-Path $bootstrapDir 'lab-invoice-system.exe'))) { throw 'Older executable is missing' }
+      - name: Upgrade through the official public updater
+        env:
+          BASE_VERSION: ${{ inputs.base_version }}
+        run: |
+          $installerFiles = @(Get-ChildItem -LiteralPath .cache/update-current -Filter '*-setup.exe')
+          if ($installerFiles.Count -ne 1) { throw 'Expected exactly one current installer' }
+          node scripts/windows-upgrade-check.mjs $installerFiles[0].FullName .cache/updater-bootstrap/lab-invoice-system.exe $env:BASE_VERSION
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: windows-public-upgrade
+          path: test-results/windows-upgrade/

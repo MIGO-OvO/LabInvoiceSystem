@@ -1,3 +1,5 @@
+mod ocr_queue;
+
 use invoice_core::{
     archive::{export_zip, ExportProgress},
     importing::{import_paths, preview_imports, scan_legacy},
@@ -51,6 +53,9 @@ impl Operation {
 }
 impl Drop for Operation {
     fn drop(&mut self) {
+        if let Ok(mut flag) = self.0.cancel.lock() {
+            *flag = None;
+        }
         self.0.busy.store(false, Ordering::Release);
     }
 }
@@ -86,7 +91,16 @@ async fn get_snapshot(state: State<'_, Arc<Engine>>) -> AppResult<Snapshot> {
         let statistics = statistics(&invoices, chrono::Local::now().date_naive());
         Ok(Snapshot {
             invoices,
-            jobs: repo.jobs().map_err(error)?,
+            jobs: {
+                let mut jobs = repo.jobs().map_err(error)?;
+                for active in lock(&engine.jobs)?.values().filter(|job| {
+                    matches!(job.state.as_str(), "queued" | "running" | "recognizing")
+                }) {
+                    jobs.retain(|job| job.id != active.id);
+                    jobs.insert(0, active.clone());
+                }
+                jobs
+            },
             settings: repo.settings().map_err(error)?,
             statistics,
             data_directory: repo.root.to_string_lossy().into(),
@@ -140,49 +154,95 @@ fn start_import(
     if paths.is_empty() || paths.len() > 128 {
         return Err("请选择1至128个发票或压缩包".into());
     }
-    let operation = Operation::enter(state.inner().clone())?;
-    let cancel = Arc::new(AtomicBool::new(false));
-    *lock(&state.cancel)? = Some(cancel.clone());
     let job = ImportJob {
         id: new_id(),
         state: "queued".into(),
         total_containers: paths.len(),
+        input_paths: paths.clone(),
+        ocr_pending: true,
         ..Default::default()
     };
+    launch_import(app, state.inner().clone(), Some(paths), job)
+}
+
+fn launch_import(
+    app: tauri::AppHandle,
+    engine: Arc<Engine>,
+    paths: Option<Vec<String>>,
+    mut job: ImportJob,
+) -> AppResult<String> {
+    let operation = Operation::enter(engine.clone())?;
+    let cancel = Arc::new(AtomicBool::new(false));
+    *lock(&engine.cancel)? = Some(cancel.clone());
+    job.state = "queued".into();
     let id = job.id.clone();
-    lock(&state.jobs)?.insert(id.clone(), job.clone());
-    let engine = state.inner().clone();
-    let paths = paths.into_iter().map(PathBuf::from).collect::<Vec<_>>();
-    tauri::async_runtime::spawn_blocking(move || {
-        let result = (|| -> AppResult<ImportJob> {
-            let mut repo = lock(&engine.repo)?;
-            import_paths(&mut repo, &paths, job.clone(), &cancel, |progress| {
-                if let Ok(mut jobs) = engine.jobs.lock() {
-                    jobs.insert(progress.id.clone(), progress.clone());
-                }
-                let _ = app.emit("import-progress", progress);
-            })
-            .map_err(error)
-        })();
+    ocr_queue::publish(&engine, &job, &mut |progress| {
+        let _ = app.emit("import-progress", progress);
+    })?;
+    tauri::async_runtime::spawn(async move {
+        let result = async {
+            let imported = if let Some(paths) = paths {
+                let worker = engine.clone();
+                let worker_cancel = cancel.clone();
+                let worker_app = app.clone();
+                let queued = job.clone();
+                tauri::async_runtime::spawn_blocking(move || {
+                    let mut repo = lock(&worker.repo)?;
+                    import_paths(
+                        &mut repo,
+                        &paths.into_iter().map(PathBuf::from).collect::<Vec<_>>(),
+                        queued,
+                        &worker_cancel,
+                        |progress| {
+                            // The queue remains active between parsing and the OCR stage.
+                            let mut visible = progress.clone();
+                            if matches!(visible.state.as_str(), "completed" | "completedWithErrors")
+                            {
+                                visible.state = "running".into();
+                            }
+                            if let Ok(mut jobs) = worker.jobs.lock() {
+                                jobs.insert(visible.id.clone(), visible.clone());
+                            }
+                            let _ = worker_app.emit("import-progress", visible);
+                        },
+                    )
+                    .map_err(error)
+                })
+                .await
+                .map_err(error)??
+            } else {
+                job.clone()
+            };
+            ocr_queue::run(
+                engine.clone(),
+                cancel.clone(),
+                imported,
+                credentials().is_ok(),
+                recognize_remote,
+                |progress| {
+                    let _ = app.emit("import-progress", progress);
+                },
+            )
+            .await
+        }
+        .await;
         if let Err(reason) = result {
-            let mut failed = job;
+            let mut failed = engine
+                .jobs
+                .lock()
+                .ok()
+                .and_then(|jobs| jobs.get(&job.id).cloned())
+                .unwrap_or(job);
             failed.state = "failed".into();
-            failed.failed = 1;
+            failed.ocr_current_file.clear();
             failed.issues.push(Issue {
                 container: String::new(),
                 member: String::new(),
                 message: reason,
             });
-            if let Ok(repo) = engine.repo.lock() {
-                let _ = repo.save_job(&failed);
-            }
-            if let Ok(mut jobs) = engine.jobs.lock() {
-                jobs.insert(failed.id.clone(), failed.clone());
-            }
-            let _ = app.emit("import-progress", failed);
-        }
-        if let Ok(mut flag) = engine.cancel.lock() {
-            *flag = None;
+            let _ = ocr_queue::publish(&engine, &failed, &mut |progress| {
+                let _ = app.emit("import-progress", progress);
+            });
         }
         drop(operation);
         let _ = app.emit("data-changed", ());
@@ -190,10 +250,19 @@ fn start_import(
     Ok(id)
 }
 
+async fn recognize_remote(input: ocr_queue::OcrInput) -> AppResult<invoice_core::ocr::OcrFields> {
+    let (api, secret) = credentials()?;
+    invoice_core::ocr::recognize(&input.bytes, &input.extension, &api, &secret, true)
+        .await
+        .map_err(error)
+}
+
 #[tauri::command]
 fn get_job(state: State<'_, Arc<Engine>>, id: String) -> AppResult<ImportJob> {
     if let Some(job) = lock(&state.jobs)?.get(&id) {
-        return Ok(job.clone());
+        if matches!(job.state.as_str(), "queued" | "running" | "recognizing") {
+            return Ok(job.clone());
+        }
     }
     lock(&state.repo)?
         .jobs()
@@ -223,6 +292,24 @@ fn retry_import(
         .ok_or("任务不存在")?;
     start_import(app, state, job.input_paths)
 }
+#[tauri::command]
+fn retry_ocr(
+    app: tauri::AppHandle,
+    state: State<'_, Arc<Engine>>,
+    id: String,
+) -> AppResult<String> {
+    let job = lock(&state.repo)?
+        .jobs()
+        .map_err(error)?
+        .into_iter()
+        .find(|job| job.id == id)
+        .ok_or("任务不存在")?;
+    if job.ocr_retry_ids.is_empty() && (!job.ocr_pending || job.invoice_ids.is_empty()) {
+        return Err("此批次没有待重试的自动识别草稿".into());
+    }
+    launch_import(app, state.inner().clone(), None, job)
+}
+
 #[tauri::command]
 fn save_invoice(state: State<'_, Arc<Engine>>, invoice: Invoice) -> AppResult<Invoice> {
     let _operation = Operation::enter(state.inner().clone())?;
@@ -413,68 +500,11 @@ async fn test_credentials() -> AppResult<()> {
 async fn recognize_invoice(state: State<'_, Arc<Engine>>, id: String) -> AppResult<Invoice> {
     let engine = state.inner().clone();
     let _operation = Operation::enter(engine.clone())?;
-    let (bytes, extension, consent) = {
-        let repo = lock(&engine.repo)?;
-        let invoice = repo.get(&id).map_err(error)?;
-        if invoice.state != "draft" {
-            return Err("仅草稿可使用 OCR".into());
-        }
-        let settings = repo.settings().map_err(error)?;
-        let month = chrono::Local::now().format("%Y-%m").to_string();
-        if settings.usage_month == month && settings.monthly_usage >= settings.monthly_quota {
-            return Err("已达到配置的本月 OCR 限额".into());
-        }
-        (
-            repo.read_invoice(&id).map_err(error)?,
-            invoice.extension,
-            settings.cloud_ocr_consent,
-        )
-    };
-    if !consent {
-        return Err("请先明确同意将当前原件上传至百度 OCR".into());
-    }
-    let (api, secret) = credentials()?;
-    let fields = invoice_core::ocr::recognize(&bytes, &extension, &api, &secret, consent)
-        .await
-        .map_err(error)?;
-    let mut repo = lock(&engine.repo)?;
-    let mut invoice = repo.get(&id).map_err(error)?;
-    let mut settings = repo.settings().map_err(error)?;
-    let month = chrono::Local::now().format("%Y-%m").to_string();
-    if settings.usage_month != month {
-        settings.usage_month = month;
-        settings.monthly_usage = 0;
-    }
-    settings.monthly_usage = settings.monthly_usage.saturating_add(1);
-    repo.save_settings(&settings).map_err(error)?;
-    invoice.purchase_date = fields.purchase_date;
-    invoice.amount_cents = fields.amount_cents;
-    invoice.invoice_number = fields.invoice_number;
-    invoice.seller_name = fields.seller_name;
-    invoice.seller_tax_id = fields.seller_tax_id;
-    invoice.ocr_item_name = fields.item_name.clone();
-    let seller = if !invoice.seller_tax_id.is_empty() {
-        &invoice.seller_tax_id
-    } else {
-        &invoice.seller_name
-    };
-    let key = format!(
-        "{}\u{1f}{}",
-        seller.trim().to_uppercase(),
-        fields.item_name.trim().to_uppercase()
-    );
-    invoice.item_name = settings
-        .item_corrections
-        .get(&key)
-        .cloned()
-        .unwrap_or(fields.item_name);
-    invoice.reviewed = false;
-    invoice
-        .warnings
-        .push("云 OCR 已完成，请核对所有字段与分类".into());
-    // OCR's immutable provenance is changed only by the backend.
-    repo.update_ocr(&invoice).map_err(error)?;
-    Ok(invoice)
+    let cancel = Arc::new(AtomicBool::new(false));
+    *lock(&engine.cancel)? = Some(cancel.clone());
+    let input = ocr_queue::prepare_input(&engine, &id, false)?;
+    let fields = ocr_queue::request(recognize_remote(input), cancel).await?;
+    ocr_queue::commit_fields(&engine, &id, fields, false)
 }
 
 #[tauri::command]
@@ -557,6 +587,19 @@ fn restart_after_update(app: tauri::AppHandle, state: State<'_, Arc<Engine>>) ->
 
 pub fn run() {
     let context = tauri::generate_context!();
+    #[cfg(debug_assertions)]
+    let context = {
+        let mut context = context;
+        // Isolate the entire QA WebView runtime from a running installed app.
+        // The invoice repository continues to use the explicit QA root below.
+        if let Ok(directory) = std::env::var("LABINVOICE_DATA_DIR") {
+            context.config_mut().app.app_directories_override =
+                Some(tauri::utils::config::AppDirectoriesOverride::Root(
+                    PathBuf::from(directory).join("runtime"),
+                ));
+        }
+        context
+    };
     #[cfg(windows)]
     let context = {
         let mut context = context;
@@ -601,6 +644,7 @@ pub fn run() {
             get_job,
             cancel_operation,
             retry_import,
+            retry_ocr,
             save_invoice,
             archive_invoices,
             classify_invoices,

@@ -2,6 +2,31 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main-workbench",
   "description": "Local invoice workbench; no generic frontend file-system access",
-  "windows": ["main"],
-  "permissions": ["core:default", "core:window:allow-close", "core:window:allow-destroy", "dialog:allow-open", "dialog:allow-save", "updater:default", {"identifier":"opener:allow-open-url","allow":[{"url":"https://github.com/MIGO-OvO/*"},{"url":"https://migo-ovo.github.io/LabInvoiceSystem/*"}]}]
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
+    "core:window:allow-set-size",
+    "core:window:allow-unminimize",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "updater:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://github.com/MIGO-OvO/*"
+        },
+        {
+          "url": "https://migo-ovo.github.io/LabInvoiceSystem/*"
+        }
+      ]
+    }
+  ]
 }

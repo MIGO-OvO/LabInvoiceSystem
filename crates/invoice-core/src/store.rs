@@ -29,7 +29,7 @@ impl Repository {
         let repo = Self { root, db };
         // A process crash never makes an unfinished import look successful.
         for mut job in repo.jobs()? {
-            if job.state == "running" || job.state == "queued" {
+            if matches!(job.state.as_str(), "running" | "queued" | "recognizing") {
                 job.state = "interrupted".into();
                 job.issues.push(Issue {
                     container: String::new(),
@@ -255,11 +255,15 @@ impl Repository {
         Ok(current)
     }
     pub fn update_ocr(&mut self, invoice: &Invoice) -> Result<()> {
+        self.record_ocr(invoice, &self.settings()?)
+    }
+    pub fn record_ocr(&mut self, invoice: &Invoice, settings: &Settings) -> Result<()> {
         ensure!(self.get(&invoice.id)?.state == "draft", "仅草稿可更新 OCR");
         self.snapshot("ocr")?;
         self.db.execute_batch("BEGIN IMMEDIATE")?;
         let result = (|| {
             self.put(invoice)?;
+            self.save_settings(settings)?;
             self.audit("ocr", &invoice.id)?;
             Ok(())
         })();

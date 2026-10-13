@@ -763,6 +763,8 @@ pub fn import_paths(
     }
     job.state = if cancel.load(std::sync::atomic::Ordering::Acquire) {
         "cancelled"
+    } else if job.ocr_pending {
+        "recognizing"
     } else if job.failed > 0 {
         "completedWithErrors"
     } else {
@@ -918,6 +920,7 @@ pub fn import_legacy_settings(repo: &Repository, path: &Path) -> Result<Settings
         .unwrap_or("")
         .into();
     settings.cloud_ocr_consent = false;
+    settings.automatic_ocr_consent = false;
     settings.monthly_usage = data
         .get("BaiduMonthlyUsage")
         .and_then(|v| v.as_u64())
