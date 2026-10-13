@@ -4,12 +4,13 @@ import {spawn} from 'node:child_process';
 import {mkdir,copyFile,writeFile,readFile,access,rename} from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import {collectWebviewDiagnostics,webviewArguments} from './webview-diagnostics.mjs';
 
 // Uses an actual older application and the REAL current public Release.
 // No test update server, fake manifest or alternate signature key.
 assert.equal(process.platform,'win32');
 const {version}=JSON.parse(await readFile('package.json','utf8'));
-const installer=path.resolve(process.argv[2]);const bootstrap=path.resolve(process.argv[3]??'.cache/updater-bootstrap/lab-invoice-system.exe');
+const installer=path.resolve(process.argv[2]);const bootstrapArgument=process.argv[3]??'.cache/updater-bootstrap/lab-invoice-system.exe';const bootstrap=bootstrapArgument==='installed'?null:path.resolve(bootstrapArgument);
 const bootstrapVersion=process.argv[4]??'3.0.0-qa.0';
 const directory=path.resolve('.cache/windows-upgrade-acceptance'),output=path.resolve('test-results/windows-upgrade');
 await mkdir(directory,{recursive:true});await mkdir(output,{recursive:true});
@@ -21,8 +22,8 @@ const executable=path.join(directory,'lab-invoice-system.exe');let app,browser,p
 const invoke=(command,args={})=>page.evaluate(({command,args})=>window.__TAURI_INTERNALS__.invoke(command,args),{command,args});
 async function connect(){browser=await until(()=>chromium.connectOverCDP('http://127.0.0.1:9225').catch(()=>null));page=await until(()=>browser.contexts().flatMap(c=>c.pages()).find(p=>/tauri\.localhost|tauri:\/\//.test(p.url())));await page.getByRole('heading',{name:'发票录入',exact:true}).waitFor();}
 try{
-  await access(bootstrap);await run(installer,['/S',`/D=${directory}`]);await copyFile(bootstrap,executable);
-  app=spawn(executable,[],{windowsHide:true,env:{...process.env,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:'--remote-debugging-port=9225'}});await connect();
+  if(bootstrap)await access(bootstrap);await run(installer,['/S',`/D=${directory}`]);await access(executable);await access(path.join(directory,'uninstall.exe'));if(bootstrap)await copyFile(bootstrap,executable);
+  app=spawn(executable,[],{windowsHide:true,env:{...process.env,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:webviewArguments(9225,output)}});await connect();
   const initial=await invoke('get_snapshot');assert.equal(initial.version,bootstrapVersion);assert.equal(initial.invoices.length,0,'Upgrade QA must never use existing user invoices');dataRoot=initial.dataDirectory;
   const expectedRoot=path.resolve(process.env.APPDATA,'dev.migo.labinvoicesystem');assert.equal(path.resolve(dataRoot),expectedRoot,'Unexpected data location');
   const pdf=await PDFDocument.create();const font=await pdf.embedFont(StandardFonts.Helvetica);pdf.addPage().drawText('SYNTHETIC UPDATE QA - NO REAL INVOICE',{x:40,y:730,font,size:18});const original=path.join(directory,'synthetic-update.pdf');await writeFile(original,await pdf.save());
@@ -50,5 +51,5 @@ try{
   // Only the dataset proven empty before this test, populated by this test, is moved.
   const archiveRoot=path.resolve('../.labinvoice-backups/20261013-v3');const destination=path.resolve(archiveRoot,`windows-upgrade-generated-data-${Date.now()}`);assert.ok(destination.startsWith(archiveRoot+path.sep));await rename(dataRoot,destination);
   report.result='passed';
-}catch(error){report.result='failed';report.error=error.stack??String(error);console.error(report.error);process.exitCode=1;}
+}catch(error){report.result='failed';report.error=error.stack??String(error);await collectWebviewDiagnostics(output,app);if(page)await page.screenshot({path:path.join(output,'failure.png')}).catch(()=>{});console.error(report.error);process.exitCode=1;}
 finally{await browser?.close().catch(()=>{});app?.kill();report.finishedAt=new Date().toISOString();await writeFile(path.join(output,'report.json'),JSON.stringify(report,null,2)+'\n');console.log(`Windows public update: ${report.result}, ${report.cases.length} checks`);}
