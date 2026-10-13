@@ -1,4 +1,4 @@
-# LabInvoiceSystem 3.0
+# LabInvoiceSystem 3.1
 
 面向实验室成员与报账人员的本地发票工作台。Rust + Tauri 2 + React + TypeScript；Windows x64、macOS Intel 与 Apple Silicon。
 
@@ -21,8 +21,8 @@
 - 兼容旧八字段 Excel ZIP、PascalCase JSON 和 `archive_data`。先备份再复制迁移，可撤销批次，原目录可继续供 Legacy 使用。
 - SQLite WAL/FULL 事务、整数分金额、SHA-256 不可变原件、软删除恢复。
 - 多 ZIP 独立处理，实际进度、失败明细、取消和重试；跨包/批次/归档去重，人工处理冲突。
-- 云 OCR 按需明确授权，凭据在 Windows Credential Manager / macOS Keychain；未授权不上传。
-- 本地 PDF.js 高 DPI 预览，深浅与系统主题，分类和支付汇总、购买日期热力图。
+- 导入后自动 OCR 默认开启，可在设置中关闭；批量上传明确授权，完整元数据优先保留，失败和取消可重试。凭据在 Windows Credential Manager / macOS Keychain，未授权不上传。
+- 自定义标题栏、按内容宽度重排的核对区、隐藏滚动条与短时反馈动画；本地 PDF.js 高 DPI 预览，深浅与系统主题，分类和支付汇总、购买日期热力图。
 - 官方 Tauri Updater 校验签名及签名中的版本，安装前排空操作与快照，失败可继续使用。
 
 ## 本地开发
