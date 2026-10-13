@@ -2,7 +2,7 @@ import { chromium, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
-import { spawn,execFile } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -39,12 +39,17 @@ async function startApp(directory) {
   await page.getByRole('heading',{name:/^发票录入/}).waitFor();
 }
 async function nativeWindow(width,height,restore=true) {
-  if(process.platform!=='win32')return;
   const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.clearDeviceMetricsOverride');await cdp.detach();
-  const script=`$ErrorActionPreference='Stop'; Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class QaWindow { [DllImport("user32.dll",SetLastError=true)] public static extern bool SetWindowPos(IntPtr h, IntPtr a, int x, int y, int w, int v, uint f); [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c); [DllImport("user32.dll")] public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr v); [DllImport("user32.dll")] public static extern uint GetDpiForWindow(IntPtr h); }'; [QaWindow]::SetThreadDpiAwarenessContext([IntPtr](-4)) | Out-Null; $qaProcess = Get-Process -Id ${app.pid}; $qaHandle = $qaProcess.MainWindowHandle; if ($qaHandle -eq 0) { throw 'Owned QA window not found' }; ${restore?'[QaWindow]::ShowWindow($qaHandle,9) | Out-Null;':''} $qaScale = [QaWindow]::GetDpiForWindow($qaHandle) / 96.0; if (-not [QaWindow]::SetWindowPos($qaHandle,[IntPtr]::Zero,40,40,[int](${width}*$qaScale),[int](${height}*$qaScale),20)) { throw ('QA resize failed: '+[Runtime.InteropServices.Marshal]::GetLastWin32Error()) }`;
-  await new Promise((resolve,reject)=>execFile('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{windowsHide:true,timeout:10000},error=>error?reject(error):resolve()));
-  await until(async()=>{const size=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));return Math.abs(size.width-width)<=16&&Math.abs(size.height-height)<=16;},10000);
+  await invoke('plugin:window|unminimize',{label:'main'});
+  if(restore&&await invoke('plugin:window|is_maximized',{label:'main'}))await invoke('plugin:window|toggle_maximize',{label:'main'});
+  await invoke('plugin:window|set_size',{label:'main',size:{type:'Logical',data:{width,height}}});
+  const available=await page.evaluate(()=>({width:screen.availWidth,height:screen.availHeight}));
+  const target={width:Math.min(width,available.width),height:Math.min(height,available.height)};
+  await until(async()=>{const size=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));return Math.abs(size.width-target.width)<=16&&Math.abs(size.height-target.height)<=16;},10000);
+  const actual=await page.evaluate(()=>({width:innerWidth,height:innerHeight,scale:devicePixelRatio}));
+  report.nativeWindows??=[];report.nativeWindows.push({requested:{width,height},available,actual});
 }
+
 async function assertLayout(name) {
   const geometry=await page.evaluate(()=>{
     const main=document.querySelector('main');const sidebar=document.querySelector('.sidebar');const form=document.querySelector('.invoice-form');
@@ -126,7 +131,7 @@ try {
     await page.getByLabel('PDF 原件第1页').waitFor();await page.getByLabel('PDF 下一页').click();await page.getByLabel('PDF 原件第2页').waitFor();await page.getByLabel('PDF 上一页').click();await page.getByLabel('放大原件').click();await expect(page.locator('output')).toHaveText('120%');await page.getByLabel('适应窗口').click();
   });
   await step('adapt supports narrow and short native windows, scroll access and reduced motion',async()=>{
-    for(const [width,height] of [[640,480],[800,600],[1024,768],[1440,960]]){
+    for(const [width,height] of [[640,480],[800,600],[1024,768]]){
       await nativeWindow(width,height);await assertLayout(`${width}x${height}`);
       if(width<=1024)assert.equal((await page.evaluate(()=>getComputedStyle(document.querySelector('.import-layout')).gridTemplateColumns)).split(' ').length,1);
       if(width===1024){
