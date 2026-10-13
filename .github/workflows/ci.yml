@@ -42,7 +42,9 @@ jobs:
         if: always()
         with:
           name: windows-desktop-acceptance
-          path: test-results/
+          path: |
+            test-results/
+            portal/assets/desktop-*.png
   bundles:
     if: ${{ !inputs.quality_only }}
     strategy:

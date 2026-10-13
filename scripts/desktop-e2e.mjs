@@ -2,7 +2,7 @@ import { chromium, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
-import { spawn } from 'node:child_process';
+import { spawn,execFile } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -38,11 +38,29 @@ async function startApp(directory) {
   await page.waitForFunction(()=>!!window.__TAURI_INTERNALS__?.invoke);
   await page.getByRole('heading',{name:'发票录入',exact:true}).waitFor();
 }
+async function nativeWindow(width,height,restore=true) {
+  if(process.platform!=='win32')return;
+  const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.clearDeviceMetricsOverride');await cdp.detach();
+  const scale=await page.evaluate(()=>devicePixelRatio);
+  const script=`Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class QaWindow { [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr a, int x, int y, int w, int v, uint f); [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c); }'; $qaProcess = Get-Process -Id ${app.pid}; $qaHandle = $qaProcess.MainWindowHandle; if ($qaHandle -eq 0) { throw 'Owned QA window not found' }; ${restore?'[QaWindow]::ShowWindow($qaHandle,9) | Out-Null;':''} [QaWindow]::SetWindowPos($qaHandle,[IntPtr]::Zero,40,40,${Math.round(width*scale)},${Math.round(height*scale)},20) | Out-Null`;
+  await new Promise((resolve,reject)=>execFile('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{windowsHide:true,timeout:10000},error=>error?reject(error):resolve()));
+  await pause(200);
+}
+async function assertLayout(name) {
+  const geometry=await page.evaluate(()=>{
+    const main=document.querySelector('main');const sidebar=document.querySelector('.sidebar');const form=document.querySelector('.invoice-form');
+    return {width:innerWidth,height:innerHeight,pageOverflow:document.documentElement.scrollWidth>innerWidth,mainOverflow:main.scrollWidth>main.clientWidth,scrollbars:getComputedStyle(main).scrollbarWidth,sidebarScrollbars:getComputedStyle(sidebar).scrollbarWidth,columns:getComputedStyle(document.querySelector('.import-layout')??main).gridTemplateColumns,formColumns:form?getComputedStyle(form.querySelector('.form-grid')).gridTemplateColumns:null};
+  });
+  assert.equal(geometry.pageOverflow,false,`${name}: page overflow`);assert.equal(geometry.mainOverflow,false,`${name}: workspace overflow`);
+  assert.equal(geometry.scrollbars,'none');assert.equal(geometry.sidebarScrollbars,'none');
+  report.layout??=[];report.layout.push({name,...geometry});
+}
+
 const invoke = (command,args={}) => page.evaluate(({command,args})=>window.__TAURI_INTERNALS__.invoke(command,args),{command,args});
 const snapshot = () => invoke('get_snapshot');
 async function completedImport(paths) {
   const id = await invoke('start_import',{paths});
-  const job = await until(async()=>{const job=await invoke('get_job',{id});return ['queued','running'].includes(job.state)?null:job;});
+  const job = await until(async()=>{const job=await invoke('get_job',{id});return ['queued','running','recognizing'].includes(job.state)?null:job;});
   await until(async()=>!(await snapshot()).busy);
   return job;
 }
@@ -77,6 +95,29 @@ try {
     await writeFile(file.replace(/\.pdf$/,'.json'),JSON.stringify({EntryDate:'2026-10-12',InvoiceDate:`2026-10-${String(5+i).padStart(2,'0')}`,Amount:100+i*23.5,ItemName:names[i],PaymentMethod:i%2?'微信':'公务卡',InvoiceNumber:`QA-${String(i+1).padStart(4,'0')}`,SellerName:'合成验收销售方',SellerTaxId:'QA-NO-REAL-TAX-ID'}));
   }
   const personal=path.join(qa,'personal');await startApp(personal);
+  await step('custom titlebar maximizes, restores and minimizes the actual native window',async()=>{
+    await expect(page.getByLabel('应用标题栏')).toBeVisible();
+    if(process.platform==='win32'){
+      await page.getByLabel('最大化窗口',{exact:true}).click();await page.getByLabel('还原窗口',{exact:true}).waitFor();
+      await page.getByLabel('还原窗口',{exact:true}).click();await page.getByLabel('最大化窗口',{exact:true}).waitFor();
+      await page.locator('.titlebar-drag').dblclick();await page.getByLabel('还原窗口',{exact:true}).waitFor();
+      await page.locator('.titlebar-drag').dblclick();await page.getByLabel('最大化窗口',{exact:true}).waitFor();
+      await page.getByLabel('最小化窗口',{exact:true}).click();await until(()=>invoke('plugin:window|is_minimized',{label:'main'}));
+      await nativeWindow(1280,850);
+    }
+  });
+  await step('automatic OCR defaults on; settings switch persists and leaves batch consent explicit',async()=>{
+    assert.equal((await snapshot()).settings.automaticOcr,true);assert.equal((await snapshot()).settings.automaticOcrConsent,false);
+    await page.getByRole('button',{name:'设置与辅助操作',exact:true}).click();
+    const control=page.getByRole('switch',{name:/导入后自动 OCR/});await expect(control).toHaveAttribute('aria-checked','true');
+    await control.click();await until(async()=>!(await snapshot()).settings.automaticOcr);await expect(control).toBeEnabled();
+    await startApp(personal);assert.equal((await snapshot()).settings.automaticOcr,false);
+    await page.getByRole('button',{name:'设置与辅助操作',exact:true}).click();await page.getByRole('switch',{name:/导入后自动 OCR/}).click();
+    await until(async()=>(await snapshot()).settings.automaticOcr);await accessibility('settings-dark');
+    await page.getByLabel('切换明暗主题').click();await expect(page.locator('html')).toHaveAttribute('data-theme','light');await accessibility('settings-light');
+    await page.getByLabel('切换明暗主题').click();await expect(page.getByLabel('切换明暗主题')).toBeEnabled();
+    await page.getByRole('button',{name:'发票录入',exact:true}).click();
+  });
   await step('legacy JSON import retains dates and historical category',async()=>{
     const job=await completedImport(files);assert.equal(job.success,6);const data=await snapshot();assert.equal(data.invoices.length,6);assert.ok(data.invoices.every(i=>i.category==='uncategorized'&&i.entryDate==='2026-10-12'&&!i.reviewed));
   });
@@ -86,6 +127,20 @@ try {
   await step('local PDF preview, pagination and zoom use real original',async()=>{
     const item=page.getByRole('button').filter({hasText:names[0]}).first();await item.click();
     await page.getByLabel('PDF 原件第1页').waitFor();await page.getByLabel('PDF 下一页').click();await page.getByLabel('PDF 原件第2页').waitFor();await page.getByLabel('PDF 上一页').click();await page.getByLabel('放大原件').click();await expect(page.locator('output')).toHaveText('120%');await page.getByLabel('适应窗口').click();
+  });
+  await step('adapt supports narrow and short native windows, scroll access and reduced motion',async()=>{
+    for(const [width,height] of [[640,480],[800,600],[1024,768],[1440,960]]){
+      await nativeWindow(width,height);await assertLayout(`${width}x${height}`);
+      if(width<=1024)assert.equal((await page.evaluate(()=>getComputedStyle(document.querySelector('.import-layout')).gridTemplateColumns)).split(' ').length,1);
+      await page.getByLabel('业务分类').scrollIntoViewIfNeeded();await expect(page.getByLabel('业务分类')).toBeVisible();
+      await page.getByRole('button',{name:'归档这张',exact:true}).scrollIntoViewIfNeeded();await expect(page.getByRole('button',{name:'归档这张',exact:true})).toBeInViewport();
+    }
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.getByRole('button',{name:'设置与辅助操作',exact:true}).click();
+    assert.equal(await page.locator('.page-content').evaluate(element=>getComputedStyle(element).animationName),'none');
+    await page.getByRole('button',{name:'发票录入',exact:true}).click();await page.emulateMedia({reducedMotion:'no-preference'});
+    await nativeWindow(1280,850);
+    await page.getByLabel('业务分类').scrollIntoViewIfNeeded();
   });
   await step('manual field editing, explicit review, validation and archive',async()=>{
     await page.getByLabel('业务分类').selectOption('labSupplies');
@@ -135,7 +190,7 @@ try {
   await step('multiple submission ZIPs: exact roundtrip, independent corrupt ZIP failure',async()=>{
     // Emit a real native drop event, then confirm the UI preview; no backend substitution.
     await dropSources();const dialog=page.getByRole('dialog');await dialog.getByRole('heading',{name:'ZIP 导入前预览 · 3 个来源',exact:true}).waitFor();await dialog.getByRole('button',{name:'确认导入',exact:true}).click();
-    const job=await until(async()=>{const data=await snapshot();return data.jobs.find(job=>!['queued','running'].includes(job.state));});await until(async()=>!(await snapshot()).busy);
+    const job=await until(async()=>{const data=await snapshot();return data.jobs.find(job=>!['queued','running','recognizing'].includes(job.state));});await until(async()=>!(await snapshot()).busy);
     assert.equal(job.success,6);assert.equal(job.failed,1);const received=(await snapshot()).invoices;
     for(const original of all){const invoice=received.find(i=>i.blobHash===original.blobHash);for(const field of ['fileName','entryDate','purchaseDate','amountCents','category','itemName','paymentMethod','invoiceNumber','sellerName','sellerTaxId'])assert.equal(invoice[field],original[field],field);assert.ok(invoice.sources.length>original.sources.length);assert.equal(await invoke('read_invoice_bytes',{id:invoice.id}),await readFile(files[Number(original.invoiceNumber.slice(-4))-1]).then(b=>b.toString('base64')));}
     await screenshot('import');await accessibility('import-dark');
@@ -144,12 +199,30 @@ try {
   await step('update preparation cancels an active import and preserves committed data',async()=>{
     const before=(await snapshot()).invoices.map(i=>i.blobHash).sort();
     const id=await invoke('start_import',{paths:Array(128).fill(labZip)});
-    const active=await invoke('get_job',{id});assert.ok(['queued','running'].includes(active.state),'The import must actually be active before update preparation');
+    const active=await invoke('get_job',{id});assert.ok(['queued','running','recognizing'].includes(active.state),'The import must actually be active before update preparation');
     const backup=await invoke('prepare_for_update');assert.ok((await readFile(backup)).byteLength>0);
     const finished=await invoke('get_job',{id});assert.equal(finished.state,'cancelled');
     await invoke('cancel_update_preparation');await invoke('verify_archive');
     assert.deepEqual((await snapshot()).invoices.map(i=>i.blobHash).sort(),before);
     const retry=await completedImport([labZip]);assert.equal(retry.duplicates,4);
+  });
+  await step('automatic OCR disabled and missing consent keep actual imported originals local',async()=>{
+    const local=path.join(qa,'automatic-local');await startApp(local);
+    const raw=path.join(qa,'automatic-local.pdf');await writeFile(raw,await readFile(files[0]));
+    let settings=(await snapshot()).settings;await invoke('save_settings',{settings:{...settings,automaticOcr:false}});
+    const off=await completedImport([raw]);assert.equal(off.ocrSuccess,0);assert.match(off.ocrMessage,/已关闭/);
+    settings=(await snapshot()).settings;await invoke('save_settings',{settings:{...settings,automaticOcr:true}});
+    const id=await invoke('retry_ocr',{id:off.id});await until(async()=>!(await snapshot()).busy);
+    const pending=await invoke('get_job',{id});assert.equal(pending.ocrSuccess,0);assert.match(pending.ocrMessage,/尚未授权/);
+    assert.equal((await snapshot()).settings.monthlyUsage,0);await invoke('verify_archive');
+    await startApp(receiver);
+  });
+  await step('custom close preserves active import and uses the existing safe cancellation dialog',async()=>{
+    await invoke('start_import',{paths:Array(128).fill(labZip)});
+    await page.getByLabel('关闭窗口',{exact:true}).click();
+    const dialog=page.getByRole('dialog');await dialog.getByRole('heading',{name:'发票操作正在执行',exact:true}).waitFor();
+    await dialog.getByRole('button',{name:'取消当前操作',exact:true}).click();await until(async()=>!(await snapshot()).busy);
+    await invoke('verify_archive');assert.equal((await snapshot()).invoices.length,6);
   });
   const significant=report.accessibility.flatMap(a=>a.violations.filter(v=>['critical','serious'].includes(v.impact)));
   assert.deepEqual(significant,[],'Desktop WCAG AA violations');

@@ -1,0 +1,19 @@
+{
+  "app": {
+    "windows": [{
+      "label": "main",
+      "title": "LabInvoiceSystem",
+      "width": 1280,
+      "height": 850,
+      "minWidth": 640,
+      "minHeight": 480,
+      "center": true,
+      "resizable": true,
+      "decorations": true,
+      "titleBarStyle": "Overlay",
+      "hiddenTitle": true,
+      "trafficLightPosition": {"x": 14, "y": 14},
+      "backgroundColor": "#0f172a"
+    }]
+  }
+}

@@ -14,6 +14,79 @@ pub struct OcrFields {
     pub seller_name: String,
     pub seller_tax_id: String,
 }
+pub const OCR_REVIEW_WARNING: &str = "云 OCR 已完成，请核对所有字段与分类";
+
+pub fn has_structured_metadata(invoice: &Invoice) -> bool {
+    invoice.sources.iter().any(|source| {
+        matches!(
+            source.metadata_kind.as_str(),
+            "manifest-v1" | "legacy-json" | "legacy-excel" | "legacy-migration" | "manual-excel"
+        )
+    })
+}
+
+pub fn needs_automatic_ocr(invoice: &Invoice) -> bool {
+    invoice.state == "draft"
+        && !invoice.reviewed
+        && invoice.duplicate_of.is_none()
+        && !invoice
+            .warnings
+            .iter()
+            .any(|warning| warning == OCR_REVIEW_WARNING)
+        && !(has_structured_metadata(invoice) && invoice.validate().is_ok())
+}
+
+pub fn apply_fields(
+    invoice: &mut Invoice,
+    fields: OcrFields,
+    settings: &Settings,
+    automatic: bool,
+) {
+    // Partial structured metadata is authoritative too. Automatic OCR fills its gaps.
+    let fill_only = automatic && has_structured_metadata(invoice);
+    let seller = if fields.seller_tax_id.is_empty() {
+        &fields.seller_name
+    } else {
+        &fields.seller_tax_id
+    };
+    let key = format!(
+        "{}\u{1f}{}",
+        seller.trim().to_uppercase(),
+        fields.item_name.trim().to_uppercase()
+    );
+    let corrected = settings
+        .item_corrections
+        .get(&key)
+        .cloned()
+        .unwrap_or(fields.item_name.clone());
+    if !fill_only || invoice.purchase_date.is_empty() {
+        invoice.purchase_date = fields.purchase_date;
+    }
+    if !fill_only || invoice.amount_cents == 0 {
+        invoice.amount_cents = fields.amount_cents;
+    }
+    if !fill_only || invoice.invoice_number.is_empty() {
+        invoice.invoice_number = fields.invoice_number;
+    }
+    if !fill_only || invoice.seller_name.is_empty() {
+        invoice.seller_name = fields.seller_name;
+    }
+    if !fill_only || invoice.seller_tax_id.is_empty() {
+        invoice.seller_tax_id = fields.seller_tax_id;
+    }
+    if !fill_only || invoice.item_name.is_empty() {
+        invoice.item_name = corrected;
+    }
+    invoice.ocr_item_name = fields.item_name;
+    invoice.reviewed = false;
+    if !invoice
+        .warnings
+        .iter()
+        .any(|warning| warning == OCR_REVIEW_WARNING)
+    {
+        invoice.warnings.push(OCR_REVIEW_WARNING.into());
+    }
+}
 fn words(value: &Value) -> Vec<String> {
     match value {
         Value::String(s) => vec![s.clone()],
