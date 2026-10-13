@@ -73,6 +73,8 @@
 
 [新增回归报告](evidence/3.1.0/portal-download-refresh.json)共 14 项通过：原有六种视口/主题、文字放大、三平台真实下载链接，以及旧缓存刷新、禁用 JavaScript、旧网络响应和清单刷新失败四个下载场景。六种视口的 axe AA 零违规，实际安装包 URL 均返回 200。旧清单与 503 响应仅用于针对缓存和错误恢复的浏览器测试，生产下载仍直接使用 GitHub 公开 Release 资产。
 
+修复通过 [PR #4](https://github.com/MIGO-OvO/LabInvoiceSystem/pull/4) 合并，[Pages 回归与部署](https://github.com/MIGO-OvO/LabInvoiceSystem/actions/runs/38360719158)通过。重新加载正式门户后，实际浏览器显示 3.1.0，三个按钮的地址与下载响应文件名均为 3.1.0；正式页面已使用带内容哈希的新版脚本。
+
 ## 验收边界
 
 - 用户已反馈百度 OCR 测试正常。本轮 Agent 自动化只用合成资料验证业务、队列和明确授权边界，未上传用户真实发票；网络成功/失败的队列单元测试使用注入响应，不替代用户的实际百度服务测试。
