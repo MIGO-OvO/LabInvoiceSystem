@@ -79,6 +79,20 @@ fn partial_metadata_is_filled_without_overwriting_known_values() {
 }
 
 #[test]
+fn automatic_corrections_use_the_preserved_structured_seller() {
+    let mut invoice = complete_invoice("manifest-v1");
+    invoice.item_name.clear();
+    invoice.seller_tax_id = "KNOWN-QA-TAX".into();
+    let mut settings = Settings::default();
+    settings
+        .item_corrections
+        .insert("KNOWN-QA-TAX\u{1f}OCR 项目".into(), "已记忆的项目".into());
+    apply_fields(&mut invoice, fields(), &settings, true);
+    assert_eq!(invoice.seller_tax_id, "KNOWN-QA-TAX");
+    assert_eq!(invoice.item_name, "已记忆的项目");
+}
+
+#[test]
 fn manual_retry_refreshes_values_and_applies_correction_memory() {
     let mut invoice = complete_invoice("legacy-json");
     let mut settings = Settings::default();

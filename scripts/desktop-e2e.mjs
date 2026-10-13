@@ -42,7 +42,7 @@ async function nativeWindow(width,height,restore=true) {
   const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.clearDeviceMetricsOverride');await cdp.detach();
   await invoke('plugin:window|unminimize',{label:'main'});
   if(restore&&await invoke('plugin:window|is_maximized',{label:'main'}))await invoke('plugin:window|toggle_maximize',{label:'main'});
-  await invoke('plugin:window|set_size',{label:'main',size:{type:'Logical',data:{width,height}}});
+  await invoke('plugin:window|set_size',{label:'main',value:{type:'Logical',data:{width,height}}});
   const available=await page.evaluate(()=>({width:screen.availWidth,height:screen.availHeight}));
   const target={width:Math.min(width,available.width),height:Math.min(height,available.height)};
   await until(async()=>{const size=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));return Math.abs(size.width-target.width)<=16&&Math.abs(size.height-target.height)<=16;},10000);

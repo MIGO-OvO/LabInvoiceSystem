@@ -44,21 +44,6 @@ pub fn apply_fields(
 ) {
     // Partial structured metadata is authoritative too. Automatic OCR fills its gaps.
     let fill_only = automatic && has_structured_metadata(invoice);
-    let seller = if fields.seller_tax_id.is_empty() {
-        &fields.seller_name
-    } else {
-        &fields.seller_tax_id
-    };
-    let key = format!(
-        "{}\u{1f}{}",
-        seller.trim().to_uppercase(),
-        fields.item_name.trim().to_uppercase()
-    );
-    let corrected = settings
-        .item_corrections
-        .get(&key)
-        .cloned()
-        .unwrap_or(fields.item_name.clone());
     if !fill_only || invoice.purchase_date.is_empty() {
         invoice.purchase_date = fields.purchase_date;
     }
@@ -74,6 +59,21 @@ pub fn apply_fields(
     if !fill_only || invoice.seller_tax_id.is_empty() {
         invoice.seller_tax_id = fields.seller_tax_id;
     }
+    let seller = if invoice.seller_tax_id.is_empty() {
+        &invoice.seller_name
+    } else {
+        &invoice.seller_tax_id
+    };
+    let key = format!(
+        "{}\u{1f}{}",
+        seller.trim().to_uppercase(),
+        fields.item_name.trim().to_uppercase()
+    );
+    let corrected = settings
+        .item_corrections
+        .get(&key)
+        .cloned()
+        .unwrap_or(fields.item_name.clone());
     if !fill_only || invoice.item_name.is_empty() {
         invoice.item_name = corrected;
     }
