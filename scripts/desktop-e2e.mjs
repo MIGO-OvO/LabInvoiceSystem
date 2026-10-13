@@ -153,11 +153,14 @@ try {
       }
       await page.getByLabel('业务分类').scrollIntoViewIfNeeded();await expect(page.getByLabel('业务分类')).toBeVisible();
       await page.getByRole('button',{name:'归档这张',exact:true}).scrollIntoViewIfNeeded();await expect(page.getByRole('button',{name:'归档这张',exact:true})).toBeInViewport();
+      await page.screenshot({path:path.join(output,`adapt-${width}x${height}.png`)});
     }
     await page.emulateMedia({reducedMotion:'reduce'});
     await page.getByRole('button',{name:'设置与辅助操作',exact:true}).click();
     assert.equal(await page.locator('.page-content').evaluate(element=>getComputedStyle(element).animationName),'none');
     await page.getByRole('button',{name:/^发票录入/}).click();await page.emulateMedia({reducedMotion:'no-preference'});
+    // Settings clears the editor selection; returning to import requires a row selection.
+    await page.getByRole('button').filter({hasText:names[0]}).first().click();
     await nativeWindow(1280,850);
     await page.getByLabel('业务分类').scrollIntoViewIfNeeded();
   });
