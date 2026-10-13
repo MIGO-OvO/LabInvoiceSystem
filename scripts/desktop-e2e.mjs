@@ -218,7 +218,7 @@ try {
     const job=await until(async()=>{const data=await snapshot();return data.jobs.find(job=>!['queued','running','recognizing'].includes(job.state));});await until(async()=>!(await snapshot()).busy);
     assert.equal(job.success,6);assert.equal(job.failed,1);const received=(await snapshot()).invoices;
     for(const original of all){const invoice=received.find(i=>i.blobHash===original.blobHash);for(const field of ['fileName','entryDate','purchaseDate','amountCents','category','itemName','paymentMethod','invoiceNumber','sellerName','sellerTaxId'])assert.equal(invoice[field],original[field],field);assert.ok(invoice.sources.length>original.sources.length);assert.equal(await invoke('read_invoice_bytes',{id:invoice.id}),await readFile(files[Number(original.invoiceNumber.slice(-4))-1]).then(b=>b.toString('base64')));}
-    await screenshot('import');await accessibility('import-dark');
+    await nativeWindow(1280,850);await screenshot('import');await accessibility('import-dark');
   });
   await step('cross-batch duplicates, retry and persistent provenance',async()=>{const job=await completedImport([labZip,officeZip]);assert.equal(job.success,0);assert.equal(job.duplicates,6);await invoke('verify_archive');await startApp(receiver);assert.equal((await snapshot()).invoices.length,6);});
   await step('update preparation cancels an active import and preserves committed data',async()=>{
